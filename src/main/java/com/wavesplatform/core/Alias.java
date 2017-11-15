@@ -13,12 +13,12 @@ public class Alias implements AddressOrAlias {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] getBytes() {
         return alias.getBytes();
     }
 
     @Override
-    public String repr() {
+    public String toString() {
         return alias;
     }
 }

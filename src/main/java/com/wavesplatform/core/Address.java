@@ -7,8 +7,12 @@ import java.util.Arrays;
 public class Address implements AddressOrAlias {
     private final byte[] bytes;
 
+    public Address(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
     public Address(String addr) {
-        bytes = Base58.decode(addr);
+        this(Base58.decode(addr));
     }
 
     @Override
@@ -17,12 +21,12 @@ public class Address implements AddressOrAlias {
     }
 
     @Override
-    public byte[] toBytes() {
+    public byte[] getBytes() {
         return Arrays.copyOf(bytes, bytes.length);
     }
 
     @Override
-    public String repr() {
+    public String toString() {
         return Base58.encode(bytes);
     }
 }
