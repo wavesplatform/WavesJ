@@ -174,6 +174,7 @@ public class BlockchainTransaction extends Transaction {
         long timestamp = System.currentTimeMillis();
         int aliaslen = alias.length();
         ByteBuffer buf = ByteBuffer.allocate(115 + aliaslen);
+        ///write Alias object here
         buf.put(ALIAS).put(account.getPublicKey())
                 .putShort((short) alias.length()).put(alias.getBytes()).putLong(fee).putLong(timestamp);
         String signature = sign(account, buf, 0, 51 + aliaslen, 51 + aliaslen);
