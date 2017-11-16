@@ -45,8 +45,8 @@ public class BlockchainTransaction extends Transaction {
         long timestamp = System.currentTimeMillis();
         int desclen = description == null ? 0 : description.length();
         ByteBuffer buf = ByteBuffer.allocate(128 + name.length() + desclen);
-        buf.put(ISSUE).put(65, ISSUE)
-                .put(account.getPublicKey())
+        buf.put(ISSUE).position(65);
+        buf.put(ISSUE).put(account.getPublicKey())
                 .putShort((short) name.length()).put(name.getBytes())
                 .putShort((short) desclen);
         if (desclen > 0) {
@@ -75,8 +75,8 @@ public class BlockchainTransaction extends Transaction {
     {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(155);
-        buf.put(REISSUE).put(65, REISSUE)
-                .put(account.getPublicKey()).put(assetId).putLong(quantity)
+        buf.put(REISSUE).position(65);
+        buf.put(REISSUE).put(account.getPublicKey()).put(assetId).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
         String signature = sign(account, buf, 65, -1, 1);
@@ -100,7 +100,8 @@ public class BlockchainTransaction extends Transaction {
         long timestamp = System.currentTimeMillis();
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(TRANSFER).put(65, TRANSFER).put(account.getPublicKey());
+        buf.put(TRANSFER).position(65);
+        buf.put(TRANSFER).put(account.getPublicKey());
         if (assetId == null) {
             buf.put((byte) 0);
         } else {
