@@ -1,4 +1,4 @@
-package com.wavesplatform.core;
+package com.wavesplatform.wavesj;
 
 public class Alias implements AddressOrAlias {
     private final String alias;

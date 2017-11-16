@@ -1,4 +1,4 @@
-package com.wavesplatform.core;
+package com.wavesplatform.wavesj;
 
 interface Sequence {
     int length();

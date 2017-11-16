@@ -1,4 +1,4 @@
-package com.wavesplatform.core;
+package com.wavesplatform.wavesj;
 
 import com.google.common.io.BaseEncoding;
 import org.bitcoinj.core.Base58;
@@ -97,7 +97,7 @@ public class BlockchainTransaction extends Transaction {
         int datalen = (assetId == null ? 0 : 32) +
                 (feeAssetId == null ? 0 : 32) +
                 126 + address.length() + message.length();
-        long timestamp = System.currentTimeMillis();/// /1000?
+        long timestamp = System.currentTimeMillis();
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
         buf.put(TRANSFER).put(65, TRANSFER).put(account.getPublicKey());

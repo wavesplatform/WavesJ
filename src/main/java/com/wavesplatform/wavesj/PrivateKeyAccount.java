@@ -1,4 +1,4 @@
-package com.wavesplatform.core;
+package com.wavesplatform.wavesj;
 
 import org.bitcoinj.core.Base58;
 import org.whispersystems.curve25519.java.curve_sigs;
