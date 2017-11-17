@@ -6,8 +6,7 @@ import org.bitcoinj.core.Base58;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-/// talk to node
-/// node GETs: block height, balances etc
+/// merge w/ Tx class
 public class BlockchainTransaction extends Transaction {
     private static final byte ISSUE         = 0x03;
     private static final byte TRANSFER      = 0x04;
@@ -40,7 +39,7 @@ public class BlockchainTransaction extends Transaction {
     }
 
     public static BlockchainTransaction makeIssueTx(PrivateKeyAccount account,
-                                                    String name, String description, long quantity, int decimals, boolean reissuable, long fee)
+            String name, String description, long quantity, int decimals, boolean reissuable, long fee)
     {
         long timestamp = System.currentTimeMillis();
         int desclen = description == null ? 0 : description.length();
@@ -71,32 +70,32 @@ public class BlockchainTransaction extends Transaction {
     }
 
     public static BlockchainTransaction makeReissueTx(PrivateKeyAccount account,
-                                                      byte[] assetId, long quantity, boolean reissuable, long fee)
+            String assetId, long quantity, boolean reissuable, long fee)
     {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(155);
         buf.put(REISSUE).position(65);
-        buf.put(REISSUE).put(account.getPublicKey()).put(assetId).putLong(quantity)
+        buf.put(REISSUE).put(account.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
         String signature = sign(account, buf, 65, -1, 1);
         return new BlockchainTransaction(buf,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "assetId", Base58.encode(assetId),
+                "assetId", assetId,
                 "quantity", quantity,
                 "reissuable", reissuable,
                 "fee", fee,
                 "timestamp", timestamp);
     }
 
-    public static BlockchainTransaction makeTransferTx(PrivateKeyAccount account,
-                                                       AddressOrAlias address, long amount, byte[] assetId, long fee, byte[] feeAssetId, String message)
+    public static BlockchainTransaction makeTransferTx(PrivateKeyAccount account, String toAddress,
+            long amount, String assetId, long fee, String feeAssetId, String message)
     {
-        if (message == null) message = "";
+        if (message == null) message = "";///invalid.attachment when message != ""
         int datalen = (assetId == null ? 0 : 32) +
                 (feeAssetId == null ? 0 : 32) +
-                126 + address.length() + message.length();
+                126 + toAddress.length() + message.length();
         long timestamp = System.currentTimeMillis();
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
@@ -105,72 +104,71 @@ public class BlockchainTransaction extends Transaction {
         if (assetId == null) {
             buf.put((byte) 0);
         } else {
-            buf.put((byte) 1).put(assetId);
+            buf.put((byte) 1).put(Base58.decode(assetId));
         }
         if (feeAssetId == null) {
             buf.put((byte) 0);
         } else {
-            buf.put((byte) 1).put(feeAssetId);
+            buf.put((byte) 1).put(Base58.decode(feeAssetId));
         }
-        buf.putLong(timestamp).putLong(amount).putLong(fee).put(address.getBytes())
+        buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress))
                 .putShort((short) message.length()).put(message.getBytes());
 
         String signature = sign(account, buf, 65, -1, 1);
         return new BlockchainTransaction(buf,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "recipient", address.toString(),
+                "recipient", toAddress,
                 "amount", amount,
                 "fee", fee,
                 "timestamp", timestamp,
                 "attachment", message);
     }
 
-    public static BlockchainTransaction makeBurnTx(PrivateKeyAccount account, byte[] assetId, long amount, long fee) {
+    public static BlockchainTransaction makeBurnTx(PrivateKeyAccount account, String assetId, long amount, long fee) {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(153);
-        buf.put(BURN).put(account.getPublicKey()).put(assetId)
+        buf.put(BURN).put(account.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         String signature = sign(account, buf, 0, 89, 89);
         return new BlockchainTransaction(buf,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "assetId", Base58.encode(assetId),
+                "assetId", assetId,
                 "amount", amount,
                 "fee", fee,
                 "timestamp", timestamp);
     }
 
-    public static BlockchainTransaction makeLeaseTx(PrivateKeyAccount account, AddressOrAlias recipient, long amount, long fee) {
+    public static BlockchainTransaction makeLeaseTx(PrivateKeyAccount account, String toAddress, long amount, long fee) {
         long timestamp = System.currentTimeMillis();
-        int addrlen = recipient.length();
-        ByteBuffer buf = ByteBuffer.allocate(121 + addrlen);
-        buf.put(LEASE).put(account.getPublicKey()).put(recipient.getBytes())
+        ByteBuffer buf = ByteBuffer.allocate(147);
+        buf.put(LEASE).put(account.getPublicKey()).put(Base58.decode(toAddress))
                 .putLong(amount).putLong(fee).putLong(timestamp);
-        String signature = sign(account, buf, 0, 57 + addrlen, 57 + addrlen);
+        String signature = sign(account, buf, 0, 83, 83);
         return new BlockchainTransaction(buf,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "recipient", recipient.toString(),
+                "recipient", toAddress,
                 "amount", amount,
                 "fee", fee,
                 "timestamp", timestamp);
     }
 
-    public static BlockchainTransaction makeLeaseCancelTx(PrivateKeyAccount account, byte[] txId, long fee) {
+    public static BlockchainTransaction makeLeaseCancelTx(PrivateKeyAccount account, String txId, long fee) {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(145);
-        buf.put(LEASE_CANCEL).put(account.getPublicKey()).putLong(fee).putLong(timestamp).put(txId);
+        buf.put(LEASE_CANCEL).put(account.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(txId));
         String signature = sign(account, buf, 0, 81, 81);
         return new BlockchainTransaction(buf,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "leaseId", Base58.encode(txId),
+                "leaseId", txId,
                 "fee", fee,
                 "timestamp", timestamp);
     }
 
-    public static BlockchainTransaction makeAliasTx(PrivateKeyAccount account, Alias alias, long fee) {
+    public static BlockchainTransaction makeAliasTx(PrivateKeyAccount account, String alias, long fee) {
         long timestamp = System.currentTimeMillis();
         int aliaslen = alias.length();
         ByteBuffer buf = ByteBuffer.allocate(115 + aliaslen);
@@ -181,7 +179,7 @@ public class BlockchainTransaction extends Transaction {
         return new BlockchainTransaction(buf,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "alias", alias.toString(),
+                "alias", alias,
                 "fee", fee,
                 "timestamp", timestamp);
     }

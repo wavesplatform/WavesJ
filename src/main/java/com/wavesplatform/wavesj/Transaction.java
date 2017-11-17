@@ -1,5 +1,7 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bitcoinj.core.Base58;
 import org.whispersystems.curve25519.Curve25519;
 
@@ -14,17 +16,27 @@ public class Transaction {
     private final Map<String, Object> data;
 
     Transaction(Object... items) {
-        data = new HashMap<>();
+        HashMap<String, Object> map = new HashMap<>();
         for (int i=0; i<items.length; i+=2) {
             Object value = items[i+1];
             if (value != null) {
-                data.put((String) items[i], value);
+                map.put((String) items[i], value);
             }
         }
+        data = Collections.unmodifiableMap(map);
     }
 
     public Map<String, Object> getData() {
-        return Collections.unmodifiableMap(data);
+        return data;
+    }
+
+    public String getJson() {
+        try {
+            return new ObjectMapper().writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            // not expected to ever happen
+            return null;
+        }
     }
 
     static byte[] sign(PrivateKeyAccount account, ByteBuffer buffer, int pos, int len) {
@@ -42,7 +54,7 @@ public class Transaction {
     }
 
     public static Transaction makeLimitOrderTx(PrivateKeyAccount sender, PublicKeyAccount matcher,
-                                               byte[] spendAssetId, byte[] receiveAssetId, long price, long amount, long expirationTime, long matcherFee)
+            byte[] spendAssetId, byte[] receiveAssetId, long price, long amount, long expirationTime, long matcherFee)
     {
         int datalen = 96 +
                 (spendAssetId == null ? 0 : 32) +
@@ -87,7 +99,7 @@ public class Transaction {
     }
 
     public static Transaction makeOrderCancelTx(PrivateKeyAccount sender,
-                                                byte[] spendAssetId, byte[] receiveAssetId, byte[] orderId, long fee)
+            byte[] spendAssetId, byte[] receiveAssetId, byte[] orderId, long fee)
     {
         long timestamp = System.currentTimeMillis();
         int datalen = 96 +

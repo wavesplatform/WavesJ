@@ -15,6 +15,6 @@ public class AccountTest {
         PrivateKeyAccount acc = new PrivateKeyAccount(sk, 'T');
         assertArrayEquals(Base58.decode(sk), acc.getPrivateKey());
         assertArrayEquals(Base58.decode(pk), acc.getPublicKey());
-        assertEquals(addr, acc.getAddress().toString());
+        assertEquals(addr, acc.getAddress());
     }
 }

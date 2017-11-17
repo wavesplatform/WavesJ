@@ -9,12 +9,12 @@ public class BlockchainTxTest {
     @Test
     public void smokeTest() {
         PrivateKeyAccount acc = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", 'T');
-        Address recipient = new Address("3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA");
-        byte[] assetId = "AssetIDAssetIDAssetIDAssetIDAsse".getBytes();
-        byte[] txId = "TxIDTxIDTxIDTxIDTxIDTxIDTxIDTxID".getBytes();
+        String recipient = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
+        String assetId = "AssetAssetAssetAssetAssetAssetAs";
+        String txId = "TransactionTransactionTransactio";
 
         dump("alias",
-                BlockchainTransaction.makeAliasTx(acc, new Alias("daphnie"), FEE));
+                BlockchainTransaction.makeAliasTx(acc, "daphnie", FEE));
         dump("burn",
                 BlockchainTransaction.makeBurnTx(acc, assetId, AMOUNT, FEE));
         dump("issue",
@@ -31,8 +31,8 @@ public class BlockchainTxTest {
 
     private void dump(String header, BlockchainTransaction tx) {
         System.out.println("*** " + header + " ***");
-        tx.getData().forEach((k, v) -> System.out.printf("%s: %s\n", k, v));
-        System.out.println("Encoded: " + tx.getEncodedBytes());
+        System.out.println("Tx data: " + tx.getJson());
+        System.out.println("Encoded bytes: " + tx.getEncodedBytes());
         System.out.println();
     }
 }
