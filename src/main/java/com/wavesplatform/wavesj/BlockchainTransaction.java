@@ -90,12 +90,12 @@ public class BlockchainTransaction extends Transaction {
     }
 
     public static BlockchainTransaction makeTransferTx(PrivateKeyAccount account, String toAddress,
-            long amount, String assetId, long fee, String feeAssetId, String message)
+            long amount, String assetId, long fee, String feeAssetId, String attachment)
     {
-        if (message == null) message = "";///invalid.attachment when message != ""
+        byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
         int datalen = (assetId == null ? 0 : 32) +
                 (feeAssetId == null ? 0 : 32) +
-                126 + toAddress.length() + message.length();
+                attachmentBytes.length + 152;
         long timestamp = System.currentTimeMillis();
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
@@ -112,7 +112,7 @@ public class BlockchainTransaction extends Transaction {
             buf.put((byte) 1).put(Base58.decode(feeAssetId));
         }
         buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress))
-                .putShort((short) message.length()).put(message.getBytes());
+                .putShort((short) attachmentBytes.length).put(attachmentBytes);
 
         String signature = sign(account, buf, 65, -1, 1);
         return new BlockchainTransaction(buf,
@@ -122,7 +122,7 @@ public class BlockchainTransaction extends Transaction {
                 "amount", amount,
                 "fee", fee,
                 "timestamp", timestamp,
-                "attachment", message);
+                "attachment", Base58.encode(attachmentBytes));
     }
 
     public static BlockchainTransaction makeBurnTx(PrivateKeyAccount account, String assetId, long amount, long fee) {
