@@ -88,10 +88,22 @@ public class Node {
         return send(tx, "/alias/broadcast/create");
     }
 
-
     private <T> T send(String path, String key, Class<T> type) throws IOException {
         HttpGet request = new HttpGet(url + path);
         return exec(request, key, type);
+    }
+
+    private String send(Transaction tx, String path) throws IOException {
+        String json = new ObjectMapper().writeValueAsString(tx.getData());
+        return send(json, path);
+    }
+
+    private String send(String txAsJson, String path) throws IOException {
+        HttpPost request = new HttpPost(url + path);
+        request.setEntity(new StringEntity(txAsJson));
+        request.setHeader("Content-Type", "application/json");
+        request.setHeader("Accept", "application/json");
+        return exec(request, "id", String.class);
     }
 
     private <T> T exec(HttpUriRequest request, String key, Class<T> type) throws IOException {
@@ -108,16 +120,7 @@ public class Node {
         if (type == Long.class) {
             mapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
         }
-        Object value = mapper.readValue(r.getEntity().getContent(), Map.class).get(key);
-        return type.cast(value);
-    }
-
-    public String send(Transaction tx, String path) throws IOException {
-        HttpPost request = new HttpPost(url + path);
-        String json = new ObjectMapper().writeValueAsString(tx.getData());
-        request.setEntity(new StringEntity(json));
-        request.setHeader("Content-Type", "application/json");
-        request.setHeader("Accept", "application/json");
-        return exec(request, "id", String.class);
+        Map data = mapper.readValue(r.getEntity().getContent(), Map.class);
+        return type.cast(data.get(key));
     }
 }

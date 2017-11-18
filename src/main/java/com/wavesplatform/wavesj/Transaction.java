@@ -53,6 +53,8 @@ public class Transaction {
         return bytes == null ? null : Base58.encode(bytes);
     }
 
+    /// add Node counterparts
+    /// test
     public static Transaction makeLimitOrderTx(PrivateKeyAccount sender, PublicKeyAccount matcher,
             byte[] spendAssetId, byte[] receiveAssetId, long price, long amount, long expirationTime, long matcherFee)
     {

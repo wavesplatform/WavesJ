@@ -2,7 +2,7 @@ import com.wavesplatform.wavesj.Node;
 import com.wavesplatform.wavesj.PrivateKeyAccount;
 
 import java.io.IOException;
-
+/// mv out of src/ -- gets into the jar
 public class NodeExample {
 
     static Node node = new Node("https://testnode1.wavesnodes.com");
