@@ -17,7 +17,7 @@ public class Transaction {
     private static final byte BURN         = 6;
     private static final byte LEASE        = 8;
     private static final byte LEASE_CANCEL = 9;
-    private static final byte ALIAS        = 10;///fix wiki
+    private static final byte ALIAS        = 10;
 
     private static final int MIN_BUFFER_SIZE = 120;
     private static final Curve25519 cipher = Curve25519.getInstance(Curve25519.BEST);
@@ -62,11 +62,19 @@ public class Transaction {
         return Base58.encode(signature);
     }
 
-    private static String base58(byte[] bytes) {
-        return bytes == null ? null : Base58.encode(bytes);
-    }///rm?
+    private static void putAsset(ByteBuffer buffer, String assetId) {
+        if (assetId == null || assetId.isEmpty()) {
+            buffer.put((byte) 0);
+        } else {
+            buffer.put((byte) 1).put(Base58.decode(assetId));
+        }
+    }
 
-    public static Transaction makeIssueTx(PrivateKeyAccount account,
+    static String normalizeAsset(String assetId) {
+        return assetId == null || assetId.isEmpty() ? "WAVES" : assetId;
+    }
+
+    public static Transaction makeIssueTx(PrivateKeyAccount account,///test
             String name, String description, long quantity, int decimals, boolean reissuable, long fee)
     {
         long timestamp = System.currentTimeMillis();
@@ -124,16 +132,8 @@ public class Transaction {
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
         buf.put(TRANSFER).put(account.getPublicKey());
-        if (assetId == null) {
-            buf.put((byte) 0);
-        } else {
-            buf.put((byte) 1).put(Base58.decode(assetId));
-        }
-        if (feeAssetId == null) {
-            buf.put((byte) 0);
-        } else {
-            buf.put((byte) 1).put(Base58.decode(feeAssetId));
-        }
+        putAsset(buf, assetId);
+        putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress))
                 .putShort((short) attachmentBytes.length).put(attachmentBytes);
 
@@ -143,7 +143,9 @@ public class Transaction {
                 "signature", signature,
                 "recipient", toAddress,
                 "amount", amount,
+                "assetId", assetId,
                 "fee", fee,
+                "feeAssetId", feeAssetId,
                 "timestamp", timestamp,
                 "attachment", Base58.encode(attachmentBytes));
     }
@@ -169,7 +171,7 @@ public class Transaction {
         buf.put(LEASE).put(account.getPublicKey()).put(Base58.decode(toAddress))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         String signature = sign(account, buf);
-        return new Transaction("/leasing/lease",
+        return new Transaction("/leasing/broadcast/lease",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
                 "recipient", toAddress,
@@ -183,10 +185,10 @@ public class Transaction {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE_CANCEL).put(account.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(txId));
         String signature = sign(account, buf);
-        return new Transaction("/leasing/cancel",
+        return new Transaction("/leasing/broadcast/cancel",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
-                "leaseId", txId,
+                "txId", txId,
                 "fee", fee,
                 "timestamp", timestamp);
     }
@@ -207,65 +209,55 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    /// test
-    public static Transaction makeOrderTx(PrivateKeyAccount sender, PublicKeyAccount matcher,
-            String spendAssetId, String receiveAssetId, long price, long amount, long expirationTime, long matcherFee)
+    public static Transaction makeOrderTx(PrivateKeyAccount sender, String matcherKey, Order.Type orderType,
+            String amountAssetId, String priceAssetId, long price, long amount, long expiration, long matcherFee)
     {
+        long timestamp = System.currentTimeMillis();
         int datalen = MIN_BUFFER_SIZE +
-                (spendAssetId == null ? 0 : 32) +
-                (receiveAssetId == null ? 0 : 32);
+                (amountAssetId == null ? 0 : 32) +
+                (priceAssetId == null ? 0 : 32);
         if (datalen == MIN_BUFFER_SIZE) {
             throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
         }
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(sender.getPublicKey()).put(matcher.getPublicKey());
-        if (spendAssetId != null) {
-            buf.put(Base58.decode(spendAssetId));
-        }
-        if (receiveAssetId != null) {
-            buf.put(Base58.decode(receiveAssetId));
-        }
-        buf.putLong(price).putLong(amount).putLong(expirationTime).putLong(matcherFee);
+        buf.put(sender.getPublicKey()).put(Base58.decode(matcherKey));
+        putAsset(buf, amountAssetId);
+        putAsset(buf, priceAssetId);
+        buf.put((byte) orderType.ordinal()).putLong(price).putLong(amount)
+                .putLong(timestamp).putLong(expiration).putLong(matcherFee);
         String signature = sign(sender, buf);
-        return new Transaction("/matcher/orders/place",
-                "sender", base58(sender.getPublicKey()),
-                "matcher", base58(matcher.getPublicKey()),
-                "spendAssetId", spendAssetId,
-                "receiveAssetId", receiveAssetId,
+
+        return new Transaction("/matcher/orderbook",
+                "senderPublicKey", Base58.encode(sender.getPublicKey()),
+                "matcherPublicKey", matcherKey,
+                "assetPair", assetPair(amountAssetId, priceAssetId),
+                "orderType", orderType.json,
                 "price", price,
                 "amount", amount,
-                "maxTimestamp", expirationTime,
+                "timestamp", timestamp,
+                "expiration", expiration,
                 "matcherFee", matcherFee,
                 "signature", signature);
     }
 
+    private static Map<String, String> assetPair(String amountAssetId, String priceAssetId) {
+        Map<String, String> assetPair = new HashMap<>();
+        assetPair.put("amountAsset", amountAssetId);
+        assetPair.put("priceAsset", priceAssetId);
+        return assetPair;
+    }
+
     public static Transaction makeOrderCancelTx(PrivateKeyAccount sender,
-            String spendAssetId, String receiveAssetId, String orderId, long fee)
+            String amountAssetId, String priceAssetId, String orderId, long fee)
     {
-        long timestamp = System.currentTimeMillis();
-        int datalen = MIN_BUFFER_SIZE +
-                (spendAssetId == null ? 0 : 32) +
-                (receiveAssetId == null ? 0 : 32);
-        if (datalen == MIN_BUFFER_SIZE) {
-            throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
-        }
-        ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(sender.getPublicKey());
-        if (spendAssetId != null) {
-            buf.put(Base58.decode(spendAssetId));
-        }
-        if (receiveAssetId != null) {
-            buf.put(Base58.decode(receiveAssetId));
-        }
-        buf.put(Base58.decode(orderId)).putLong(fee).putLong(timestamp);
+        ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
+        buf.put(sender.getPublicKey()).put(Base58.decode(orderId));
         String signature = sign(sender, buf);
-        return new Transaction("/matcher/orders/cancel",
+        amountAssetId = normalizeAsset(amountAssetId);
+        priceAssetId = normalizeAsset(priceAssetId);
+        return new Transaction("/matcher/orderbook/" + amountAssetId + '/' + priceAssetId + '/' + "cancel",
                 "sender", Base58.encode(sender.getPublicKey()),
-                        "spendAssetId", spendAssetId,
-                        "receiveAssetId", receiveAssetId,
-                        "orderId", orderId,
-                        "fee", fee,
-                        "timestamp", timestamp,
-                        "signature", signature);
+                "orderId", orderId,
+                "signature", signature);
     }
 }

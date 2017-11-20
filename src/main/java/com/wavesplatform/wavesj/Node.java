@@ -1,5 +1,7 @@
 package com.wavesplatform.wavesj;
 
+import static com.wavesplatform.wavesj.Transaction.normalizeAsset;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -7,27 +9,35 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Node {
     public static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
 
-    private final String url;
+    private final URI uri;
     private final CloseableHttpClient client = HttpClients.createDefault();
 
     public Node() {
-        this(DEFAULT_NODE);
+        try {
+            this.uri = new URI(DEFAULT_NODE);
+        } catch (URISyntaxException e) {
+            // should not happen
+            throw new RuntimeException(e);
+        }
     }
 
-    public Node(String url) {
-        this.url = url;
+    public Node(String uri) throws URISyntaxException {
+        this.uri = new URI(uri);
     }
 
     public int getHeight() throws IOException {
@@ -63,8 +73,8 @@ public class Node {
         return send(tx);
     }
 
-    public String cancelLease(PrivateKeyAccount account, String assetId, long fee) throws IOException {
-        Transaction tx = Transaction.makeLeaseCancelTx(account, assetId, fee);
+    public String cancelLease(PrivateKeyAccount account, String txId, long fee) throws IOException {
+        Transaction tx = Transaction.makeLeaseCancelTx(account, txId, fee);
         return send(tx);
     }
 
@@ -90,73 +100,87 @@ public class Node {
         return send(tx);
     }
 
-    public String createOrder(PrivateKeyAccount account, PublicKeyAccount matcher,
-            String spendAssetId, String receiveAssetId, long price, long amount, long expirationTime, long matcherFee)
-            throws IOException
+    public String createOrder(PrivateKeyAccount account, String matcherKey, String amountAssetId, String priceAssetId,
+                              Order.Type orderType, long price, long amount, long expiration, long matcherFee) throws IOException {
+        Transaction tx = Transaction.makeOrderTx(account, matcherKey, orderType,
+                amountAssetId, priceAssetId, price, amount, expiration, matcherFee);
+        Map<String, String> message = parseResponse(exec(request(tx)), "message", Map.class);
+        return message.get("id");
+    }
+
+    public void cancelOrder(PrivateKeyAccount account,
+            String amountAssetId, String priceAssetId, String orderId, long fee) throws IOException
     {
-        Transaction tx = Transaction.makeOrderTx(account, matcher, spendAssetId, receiveAssetId, price, amount, expirationTime, matcherFee);
-        return send(tx);///check json format
+        Transaction tx = Transaction.makeOrderCancelTx(account, amountAssetId, priceAssetId, orderId, fee);
+        exec(request(tx));
     }
 
-    public String cancelOrder(PrivateKeyAccount account,
-            String spendAssetId, String receiveAssetId, String orderId, long fee) throws IOException
-    {
-        Transaction tx = Transaction.makeOrderCancelTx(account, spendAssetId, receiveAssetId, orderId, fee);
-        return send(tx); ///check json
+    public OrderBook getOrderBook(String asset1, String asset2) throws IOException {
+        asset1 = normalizeAsset(asset1);
+        asset2 = normalizeAsset(asset2);
+        String path = "/matcher/orderbook/" + asset1 + '/' + asset2;///fix wiki
+        Map<String, Object> map = parseResponse(exec(request(path)), longObjectMapper());
+        return new OrderBook(
+                processOrders((List) map.get("bids")),
+                processOrders((List) map.get("asks")));
     }
 
-    public String getOrderBook(String asset1, String asset2, Integer depth) throws IOException {///return smth
-        return send("/matcher/orderBook", "pair", String.class,
-                "asset1", asset1,
-                "asset2", asset2,
-                "depth", String.valueOf(depth));
+    public String getOrderStatus(String orderId, String asset1, String asset2) throws IOException {
+        asset1 = normalizeAsset(asset1);
+        asset2 = normalizeAsset(asset2);
+        String path = "/matcher/orderbook/" + asset1 + '/' + asset2 + '/' + orderId;
+        return send(path, "status", String.class);
     }
 
-    public String getOrderStatus(String orderId, String asset1, String asset2) throws IOException { ///return {status, filledAmt}
-        return send("/matcher/orders/status/" + orderId, "status", String.class,
-                "id", orderId,
-                "asset1", asset1,
-                "asset2", asset2);
+    private List<Order> processOrders(List<Map<String, Long>> orders) {
+        return orders.stream()
+                .map(map -> new Order(map.get("price"), map.get("amount")))
+                .collect(Collectors.toList());
     }
 
-    private <T> T send(String path, String key, Class<T> type, String... params) throws IOException {
-        try {
-            URIBuilder builder = new URIBuilder(url + path);
-            for (int i = 0; i < params.length; i += 2) {
-                builder.addParameter(params[i], params[i + 1]);
-            }
-            HttpGet request = new HttpGet(builder.build());
-            return exec(request, key, type);
-        } catch (URISyntaxException e) {
-            // should never happen
-            throw new RuntimeException(e);
-        }
+    private <T> T send(String path, String key, Class<T> type) throws IOException {
+        return parseResponse(exec(request(path)), key, type);
     }
 
     private String send(Transaction tx) throws IOException {
-        String json = new ObjectMapper().writeValueAsString(tx.getData());
-        HttpPost request = new HttpPost(url + tx.getEndpoint());
+        return parseResponse(exec(request(tx)), "id", String.class);
+    }
+
+    private <T> HttpUriRequest request(String path) {
+        return new HttpGet(uri.resolve(path));
+    }
+
+    private HttpUriRequest request(Transaction tx) throws IOException {
+        HttpPost request = new HttpPost(uri + tx.getEndpoint());
+        String json = tx.getJson();///
         request.setEntity(new StringEntity(json));
         request.setHeader("Content-Type", "application/json");
         request.setHeader("Accept", "application/json");
-        return exec(request, "id", String.class);
+        return request;
     }
 
-    private <T> T exec(HttpUriRequest request, String key, Class<T> type) throws IOException {
+    private HttpResponse exec(HttpUriRequest request) throws IOException {
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             String error = parseResponse(r, "message", String.class);
             throw new IOException(error);
         }
-        return parseResponse(r, key, type);
+        return r;
+    }
+
+    private static ObjectMapper longObjectMapper() {
+        return new ObjectMapper().enable(DeserializationFeature.USE_LONG_FOR_INTS);
     }
 
     private static <T> T parseResponse(HttpResponse r, String key, Class<T> type) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        if (type == Long.class) {
-            mapper.enable(DeserializationFeature.USE_LONG_FOR_INTS);
-        }
-        Map data = mapper.readValue(r.getEntity().getContent(), Map.class);
-        return type.cast(data.get(key));
+        ObjectMapper mapper = type == Long.class ? longObjectMapper() : new ObjectMapper();
+        return type.cast(parseResponse(r, mapper).get(key));
     }
+
+    private static Map<String, Object> parseResponse(HttpResponse r, ObjectMapper mapper) throws IOException {
+        String json = EntityUtils.toString(r.getEntity());///
+        return mapper.readValue(json/*r.getEntity().getContent()*/, Map.class);
+    }
+
+    ///matcher obj = (uri, pk)
 }
