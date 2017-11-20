@@ -6,8 +6,8 @@ import org.bouncycastle.crypto.digests.Blake2bDigest;
 import org.bouncycastle.crypto.digests.KeccakDigest;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
-/// seed generation & keys-from-seed
 public class PublicKeyAccount {
     private static final Digest BLAKE2B256 = new Blake2bDigest(256);
     private static final Digest KECCAK256 = new KeccakDigest(256);
@@ -27,7 +27,7 @@ public class PublicKeyAccount {
     }
 
     public final byte[] getPublicKey() {
-        return publicKey;
+        return Arrays.copyOf(publicKey, publicKey.length);
     }
 
     public final String getAddress() {
@@ -38,7 +38,7 @@ public class PublicKeyAccount {
         return scheme;
     }
 
-    private static byte[] hash(byte[] message, int ofs, int len, Digest alg) {
+    static byte[] hash(byte[] message, int ofs, int len, Digest alg) {
         byte[] res = new byte[alg.getDigestSize()];
         alg.update(message, ofs, len);
         alg.doFinal(res, 0);
