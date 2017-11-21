@@ -15,7 +15,7 @@ public class TransactionTest {
         String txId = "TransactionTransactionTransactio";
 
         dump("alias",
-                Transaction.makeAliasTx(acc, "daphnie", FEE));
+                Transaction.makeAliasTx(acc, "daphnie", 'T', FEE));
         dump("burn",
                 Transaction.makeBurnTx(acc, assetId, AMOUNT, FEE));
         dump("issue",

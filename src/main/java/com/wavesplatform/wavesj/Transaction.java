@@ -74,7 +74,7 @@ public class Transaction {
         return assetId == null || assetId.isEmpty() ? "WAVES" : assetId;
     }
 
-    public static Transaction makeIssueTx(PrivateKeyAccount account,///test
+    public static Transaction makeIssueTx(PrivateKeyAccount account,
             String name, String description, long quantity, int decimals, boolean reissuable, long fee)
     {
         long timestamp = System.currentTimeMillis();
@@ -160,7 +160,7 @@ public class Transaction {
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "signature", signature,
                 "assetId", assetId,
-                "amount", amount,
+                "quantity", amount,
                 "fee", fee,
                 "timestamp", timestamp);
     }
@@ -193,12 +193,12 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeAliasTx(PrivateKeyAccount account, String alias, long fee) {
+    public static Transaction makeAliasTx(PrivateKeyAccount account, String alias, char scheme, long fee) {
         long timestamp = System.currentTimeMillis();
         int aliaslen = alias.length();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + aliaslen);
-        ///write Alias object here
         buf.put(ALIAS).put(account.getPublicKey())
+                .putShort((short) (alias.length() + 4)).put((byte) 0x02).put((byte) scheme)
                 .putShort((short) alias.length()).put(alias.getBytes()).putLong(fee).putLong(timestamp);
         String signature = sign(account, buf);
         return new Transaction("/alias/broadcast/create",

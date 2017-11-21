@@ -95,8 +95,8 @@ public class Node {
         return send(tx);
     }
 
-    public String alias(PrivateKeyAccount account, String alias, long fee) throws IOException {
-        Transaction tx = Transaction.makeAliasTx(account, alias, fee);
+    public String alias(PrivateKeyAccount account, String alias, char scheme, long fee) throws IOException {
+        Transaction tx = Transaction.makeAliasTx(account, alias, scheme, fee);
         return send(tx);
     }
 
@@ -118,7 +118,7 @@ public class Node {
     public OrderBook getOrderBook(String asset1, String asset2) throws IOException {
         asset1 = normalizeAsset(asset1);
         asset2 = normalizeAsset(asset2);
-        String path = "/matcher/orderbook/" + asset1 + '/' + asset2;///fix wiki
+        String path = "/matcher/orderbook/" + asset1 + '/' + asset2;
         Map<String, Object> map = parseResponse(exec(request(path)), longObjectMapper());
         return new OrderBook(
                 processOrders((List) map.get("bids")),
@@ -152,8 +152,7 @@ public class Node {
 
     private HttpUriRequest request(Transaction tx) throws IOException {
         HttpPost request = new HttpPost(uri + tx.getEndpoint());
-        String json = tx.getJson();///
-        request.setEntity(new StringEntity(json));
+        request.setEntity(new StringEntity(tx.getJson()));
         request.setHeader("Content-Type", "application/json");
         request.setHeader("Accept", "application/json");
         return request;
@@ -178,9 +177,6 @@ public class Node {
     }
 
     private static Map<String, Object> parseResponse(HttpResponse r, ObjectMapper mapper) throws IOException {
-        String json = EntityUtils.toString(r.getEntity());///
-        return mapper.readValue(json/*r.getEntity().getContent()*/, Map.class);
+        return mapper.readValue(r.getEntity().getContent(), Map.class);
     }
-
-    ///matcher obj = (uri, pk)
 }
