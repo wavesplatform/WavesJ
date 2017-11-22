@@ -1,7 +1,5 @@
 package com.wavesplatform.wavesj;
 
-import static com.wavesplatform.wavesj.Transaction.normalizeAsset;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -13,13 +11,17 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.bitcoinj.core.Base58;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.wavesplatform.wavesj.Transaction.normalizeAsset;
 
 public class Node {
     public static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
@@ -100,6 +102,14 @@ public class Node {
         return send(tx);
     }
 
+    // Matcher transactions
+
+    public String getMatcherKey() throws IOException {
+        HttpResponse r = exec(request("/matcher"));
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(r.getEntity().getContent(), String.class);
+    }
+
     public String createOrder(PrivateKeyAccount account, String matcherKey, String amountAssetId, String priceAssetId,
                               Order.Type orderType, long price, long amount, long expiration, long matcherFee) throws IOException {
         Transaction tx = Transaction.makeOrderTx(account, matcherKey, orderType,
@@ -132,6 +142,18 @@ public class Node {
         return send(path, "status", String.class);
     }
 
+    public String getOrders(PrivateKeyAccount account) throws IOException {
+        long timestamp = System.currentTimeMillis();
+        ByteBuffer buf = ByteBuffer.allocate(40);
+        buf.put(account.getPublicKey()).putLong(timestamp);
+        String signature = Transaction.sign(account, buf);
+
+        String path = "/matcher/orderbook/" + Base58.encode(account.getPublicKey());
+        HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
+        String json = EntityUtils.toString(r.getEntity());
+        return json;///finish this once API is pushed
+    }
+
     private List<Order> processOrders(List<Map<String, Long>> orders) {
         return orders.stream()
                 .map(map -> new Order(map.get("price"), map.get("amount")))
@@ -146,8 +168,12 @@ public class Node {
         return parseResponse(exec(request(tx)), "id", String.class);
     }
 
-    private <T> HttpUriRequest request(String path) {
-        return new HttpGet(uri.resolve(path));
+    private <T> HttpUriRequest request(String path, String... headers) {
+        HttpUriRequest req = new HttpGet(uri.resolve(path));
+        for (int i = 0; i < headers.length; i +=2) {
+            req.addHeader(headers[i], headers[i + 1]);
+        }
+        return req;
     }
 
     private HttpUriRequest request(Transaction tx) throws IOException {

@@ -54,7 +54,7 @@ public class Transaction {
         }
     }
 
-    private static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
+    static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
         byte[] bytesToSign = new byte[buffer.position()];
         buffer.position(0);
         buffer.get(bytesToSign);
