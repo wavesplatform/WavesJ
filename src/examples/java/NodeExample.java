@@ -38,11 +38,14 @@ public class NodeExample {
         //
         String bob = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
 
+        // Create an alias
+        String txId = node.alias(alice, "alice", 'T', FEE);
+
         // Issue an asset
         String assetId = node.issueAsset(alice, "CleanAir", "The first air-backed blockchain asset ever",
                 1_000_000 * TOKEN, 8, true, ISSUE_FEE);
         // Reissuing, making it no longer reissuable
-        String txId = node.reissueAsset(alice, assetId, 100 * TOKEN, true, ISSUE_FEE);
+        txId = node.reissueAsset(alice, assetId, 100 * TOKEN, true, ISSUE_FEE);
         // Burning some coins
         txId = node.burnAsset(alice, assetId, 20 * TOKEN, ISSUE_FEE);
 
