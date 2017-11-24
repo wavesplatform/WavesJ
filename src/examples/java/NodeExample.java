@@ -45,7 +45,7 @@ public class NodeExample {
         String assetId = node.issueAsset(alice, "CleanAir", "The first air-backed blockchain asset ever",
                 1_000_000 * TOKEN, 8, true, ISSUE_FEE);
         // Reissuing, making it no longer reissuable
-        txId = node.reissueAsset(alice, assetId, 100 * TOKEN, true, ISSUE_FEE);
+        txId = node.reissueAsset(alice, assetId, 100 * TOKEN, false, ISSUE_FEE);
         // Burning some coins
         txId = node.burnAsset(alice, assetId, 20 * TOKEN, ISSUE_FEE);
 
@@ -66,7 +66,7 @@ public class NodeExample {
         // Now send the signed transaction from an online computer
         node.send(tx);
 
-        
+
         // Matcher interaction
         //
         Node matcher = new Node("https://testnode2.wavesnodes.com");
