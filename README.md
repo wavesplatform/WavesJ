@@ -6,7 +6,8 @@ Supports node interaction, offline transaction signing, Matcher orders, and crea
 ## Basic Usage:
 Create an account from a private key ('T' for testnet):
 ```
-PrivateKeyAccount account = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", 'T');
+String seed = "health lazy lens fix dwarf salad breeze myself silly december endless rent faculty report beyond";
+PrivateKeyAccount account = new PrivateKeyAccount(seed, 0, Account.TESTNET);
 byte[] publicKey = account.getPublicKey();
 String address = account.getAddress();
 ```

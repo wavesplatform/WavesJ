@@ -6,7 +6,6 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.whispersystems.curve25519.java.curve_sigs;
 
 import java.nio.ByteBuffer;
-import java.security.SecureRandom;
 import java.util.Arrays;
 
 public class PrivateKeyAccount extends PublicKeyAccount {
@@ -19,6 +18,10 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         this.privateKey = privateKey;
     }
 
+    public PrivateKeyAccount(String seed, int nonce, char scheme) {
+        this(privateKey(seed, nonce), scheme);
+    }
+
     public PrivateKeyAccount(String privateKey, char scheme) {
         this(Base58.decode(privateKey), scheme);
     }
@@ -27,16 +30,10 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         return Arrays.copyOf(privateKey, privateKey.length);
     }
 
-    public static byte[] generateSeed() {
-        byte[] seed = new byte[64];
-        new SecureRandom().nextBytes(seed);
-        return seed;
-    }
-
-    public static PrivateKeyAccount create(byte[] seed, int nonce, char scheme) {
+    private static byte[] privateKey(String seed, int nonce) {
         // account seed from seed & nonce
-        ByteBuffer buf = ByteBuffer.allocate(seed.length + 4);
-        buf.putInt(nonce).put(seed);
+        ByteBuffer buf = ByteBuffer.allocate(seed.getBytes().length + 4);
+        buf.putInt(nonce).put(seed.getBytes());
         byte[] accountSeed = secureHash(buf.array(), 0, buf.array().length);
 
         // private key from account seed & scheme
@@ -46,7 +43,7 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         privateKey[31] &= 127;
         privateKey[31] |= 64;
 
-        return new PrivateKeyAccount(privateKey, scheme);
+        return privateKey;
     }
 
     private static byte[] publicKey(byte[] privateKey) {

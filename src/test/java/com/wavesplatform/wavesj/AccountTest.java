@@ -20,12 +20,10 @@ public class AccountTest {
 
     @Test
     public void testAccountCreation() {
-        byte[] seed = PrivateKeyAccount.generateSeed();
-        assertEquals(64, seed.length);
-
-        PrivateKeyAccount account = PrivateKeyAccount.create(seed, 0, Account.TESTNET);
-        assertEquals(32, account.getPrivateKey().length);
-        assertEquals(32, account.getPublicKey().length);
-        assertEquals(26, Base58.decode(account.getAddress()).length);
+        String seed = "health lazy lens fix dwarf salad breeze myself silly december endless rent faculty report beyond";
+        PrivateKeyAccount account = new PrivateKeyAccount(seed, 0, Account.TESTNET);
+        assertArrayEquals(Base58.decode("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t"), account.getPrivateKey());
+        assertArrayEquals(Base58.decode("8LbAU5BSrGkpk5wbjLMNjrbc9VzN9KBBYv9X8wGpmAJT"), account.getPublicKey());
+        assertEquals("3MzZCGFyuxgC4ZmtKRS7vpJTs75ZXdkbp1K", account.getAddress());
     }
 }

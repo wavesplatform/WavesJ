@@ -14,7 +14,8 @@ public class NodeExample {
         final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
 
         // Create signing testnet account
-        PrivateKeyAccount alice = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
+        String seed = "health lazy lens fix dwarf salad breeze myself silly december endless rent faculty report beyond";
+        PrivateKeyAccount alice = new PrivateKeyAccount(seed, 0, Account.TESTNET);
         // Retrieve its public key
         byte[] publicKey = alice.getPublicKey();
         // and its address
