@@ -58,6 +58,16 @@ public class Node {
         return send("/assets/balance/" + address + "/" + assetId, "balance", Long.class);
     }
 
+    /**
+     * Sends a signed transaction and returns its ID.
+     * @param tx signed transaction (as created by static methods in Transaction class)
+     * @return Transaction ID
+     * @throws IOException
+     */
+    public String send(Transaction tx) throws IOException {
+        return parseResponse(exec(request(tx)), "id", String.class);
+    }
+
     public String transfer(PrivateKeyAccount from, String toAddress, long amount, long fee, String message) throws IOException {
         Transaction tx = Transaction.makeTransferTx(from, toAddress, amount, null, fee, null, message);
         return send(tx);
@@ -162,10 +172,6 @@ public class Node {
 
     private <T> T send(String path, String key, Class<T> type) throws IOException {
         return parseResponse(exec(request(path)), key, type);
-    }
-
-    private String send(Transaction tx) throws IOException {
-        return parseResponse(exec(request(tx)), "id", String.class);
     }
 
     private <T> HttpUriRequest request(String path, String... headers) {

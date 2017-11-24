@@ -54,14 +54,19 @@ public class NodeExample {
         // Canceling a lease by tx ID
         String cancelTxId = node.cancelLease(alice, leaseTxId, FEE);
 
+
         // Offline transaction signing
+        //
         Transaction tx = Transaction.makeTransferTx(alice, bob,
                 1 * TOKEN, null, FEE, null,
                 "Here's for the coffee");
         // tx.getEndpoint() == "/assets/broadcast/transfer" is the server endpoint to send this transaction to.
         // tx.getJson() is JSON-encoded transaction data. You can use Swagger UI to send it to the network.
 
+        // Now send the signed transaction from an online computer
+        node.send(tx);
 
+        
         // Matcher interaction
         //
         Node matcher = new Node("https://testnode2.wavesnodes.com");

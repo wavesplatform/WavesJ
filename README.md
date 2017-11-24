@@ -32,6 +32,11 @@ System.out.println("JSON encoded data: " + tx.getJson());
 System.out.println("Server endpoint to send this JSON to: " + tx.getEndpoint());
 ```
 
+Now send it from an online machine:
+```
+node.send(tx);
+```
+
 Create a DEX order:
 ```
 Node matcher = new Node("https://testnode2.wavesnodes.com");
