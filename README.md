@@ -23,12 +23,12 @@ System.out.println("With 100 confirmations: " + node.getBalance(address, 100));
 Send some money to a buddy:
 ```
 String buddy = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
-String txId = node.transfer(account, buddy, 1_0000_0000, 100_000, "Here's for you");
+String txId = node.transfer(account, buddy, 1_00000000, 100_000, "Here's for you");
 ```
 
 Sign a transaction offline:
 ```
-Transaction tx = Transaction.makeTransferTx(account, buddy, 1_0000_0000, null, 100_000, null, "");
+Transaction tx = Transaction.makeTransferTx(account, buddy, 1_00000000, null, 100_000, null, "");
 System.out.println("JSON encoded data: " + tx.getJson());
 System.out.println("Server endpoint to send this JSON to: " + tx.getEndpoint());
 ```
@@ -45,7 +45,7 @@ String matcherKey = matcher.getMatcherKey();
 String wbtcId = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
 String orderId = matcher.createOrder(account, matcherKey,
                 // buy 1 WBTC for 1000 WAVES
-                wbtcId, "", Order.Type.BUY, 1000, 1_0000_0000,
+                wbtcId, "", Order.Type.BUY, 1000, 1_00000000,
                 // make order valid for 1 hour
                 System.currentTimeMillis() + 3_600_000, 300_000);
 ```
