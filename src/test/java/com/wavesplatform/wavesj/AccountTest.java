@@ -12,7 +12,7 @@ public class AccountTest {
         String sk = "CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t";
         String addr = "3MzZCGFyuxgC4ZmtKRS7vpJTs75ZXdkbp1K";
 
-        PrivateKeyAccount acc = new PrivateKeyAccount(sk, 'T');
+        PrivateKeyAccount acc = new PrivateKeyAccount(sk, Account.TESTNET);
         assertArrayEquals(Base58.decode(sk), acc.getPrivateKey());
         assertArrayEquals(Base58.decode(pk), acc.getPublicKey());
         assertEquals(addr, acc.getAddress());
@@ -23,7 +23,7 @@ public class AccountTest {
         byte[] seed = PrivateKeyAccount.generateSeed();
         assertEquals(64, seed.length);
 
-        PrivateKeyAccount account = PrivateKeyAccount.create(seed, 0, 'T');
+        PrivateKeyAccount account = PrivateKeyAccount.create(seed, 0, Account.TESTNET);
         assertEquals(32, account.getPrivateKey().length);
         assertEquals(32, account.getPublicKey().length);
         assertEquals(26, Base58.decode(account.getAddress()).length);

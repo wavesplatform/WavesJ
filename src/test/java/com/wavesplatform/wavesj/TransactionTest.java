@@ -9,13 +9,13 @@ public class TransactionTest {
     @Test
     public void smokeTest() {
         // doesn't validate transactions, just checks that all methods run to completion, no buffer overflows occur etc
-        PrivateKeyAccount acc = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", 'T');
+        PrivateKeyAccount acc = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
         String recipient = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
         String assetId = "AssetAssetAssetAssetAssetAssetAs";
         String txId = "TransactionTransactionTransactio";
 
         dump("alias",
-                Transaction.makeAliasTx(acc, "daphnie", 'T', FEE));
+                Transaction.makeAliasTx(acc, "daphnie", Account.TESTNET, FEE));
         dump("burn",
                 Transaction.makeBurnTx(acc, assetId, AMOUNT, FEE));
         dump("issue",

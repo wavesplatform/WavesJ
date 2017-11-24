@@ -8,7 +8,7 @@ import org.bouncycastle.crypto.digests.KeccakDigest;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class PublicKeyAccount {
+public class PublicKeyAccount implements Account {
     private static final Digest BLAKE2B256 = new Blake2bDigest(256);
     private static final Digest KECCAK256 = new KeccakDigest(256);
 

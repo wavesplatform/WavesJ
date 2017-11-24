@@ -14,7 +14,7 @@ public class NodeExample {
         final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
 
         // Create signing testnet account
-        PrivateKeyAccount alice = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", 'T');
+        PrivateKeyAccount alice = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
         // Retrieve its public key
         byte[] publicKey = alice.getPublicKey();
         // and its address
@@ -39,7 +39,7 @@ public class NodeExample {
         String bob = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
 
         // Create an alias
-        String txId = node.alias(alice, "alice", 'T', FEE);
+        String txId = node.alias(alice, "alice", Account.TESTNET, FEE);
 
         // Issue an asset
         String assetId = node.issueAsset(alice, "CleanAir", "The first air-backed blockchain asset ever",

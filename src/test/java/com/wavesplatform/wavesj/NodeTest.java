@@ -14,9 +14,9 @@ public class NodeTest {
     private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
 
     private static final PrivateKeyAccount alice =
-            new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", 'T');
+            new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
     private static final PrivateKeyAccount bob =
-            new PrivateKeyAccount("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", 'T');
+            new PrivateKeyAccount("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
 
     @Test
     public void testGetters() throws IOException {
@@ -47,14 +47,14 @@ public class NodeTest {
         assertNotNull(orders);
 
         String orderId = matcher.createOrder(alice, matcherKey, "", WBTC, Order.Type.SELL,
-                1, 100000000,
+                1, 1_00000000,
                 System.currentTimeMillis() + 3_600_000,
-                500000);
+                500_000);
         assertNotNull(orderId);
 
         String status = matcher.getOrderStatus(orderId, "", WBTC);
         assertEquals("Accepted", status);
 
-        matcher.cancelOrder(alice, "", WBTC, orderId, 400000);
+        matcher.cancelOrder(alice, "", WBTC, orderId, 400_000);
     }
 }
