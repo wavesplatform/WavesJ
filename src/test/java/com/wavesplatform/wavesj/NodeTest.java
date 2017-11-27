@@ -40,7 +40,7 @@ public class NodeTest {
         assertNotNull(txId);
     }
 
-    @Ignore @Test
+    @Test
     public void testMatcher() throws IOException, URISyntaxException {
         Node matcher = new Node("https://testnode2.wavesnodes.com");
         String matcherKey = "4oP8SPd7LiUo8xsokSTiyZjwg4rojdyXqWEq7NTwWsSU";
