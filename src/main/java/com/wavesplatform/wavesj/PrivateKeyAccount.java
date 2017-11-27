@@ -12,7 +12,7 @@ public class PrivateKeyAccount extends PublicKeyAccount {
 
     private final byte[] privateKey;
 
-    public PrivateKeyAccount(byte[] privateKey, char scheme) {
+    private PrivateKeyAccount(byte[] privateKey, char scheme) {
         super(publicKey(privateKey), scheme);
         this.privateKey = privateKey;
     }

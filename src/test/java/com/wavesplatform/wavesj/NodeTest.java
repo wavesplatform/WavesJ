@@ -1,6 +1,8 @@
 package com.wavesplatform.wavesj;
 
 import static org.junit.Assert.*;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ public class NodeTest {
         assertNotNull(txId);
     }
 
-    @Test
+    @Ignore @Test
     public void testMatcher() throws IOException, URISyntaxException {
         Node matcher = new Node("https://testnode2.wavesnodes.com");
         String matcherKey = "4oP8SPd7LiUo8xsokSTiyZjwg4rojdyXqWEq7NTwWsSU";
