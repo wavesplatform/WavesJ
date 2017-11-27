@@ -2,7 +2,6 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bitcoinj.core.Base58;
 import org.whispersystems.curve25519.Curve25519;
 
 import java.nio.ByteBuffer;

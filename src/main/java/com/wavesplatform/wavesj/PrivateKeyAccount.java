@@ -1,6 +1,5 @@
 package com.wavesplatform.wavesj;
 
-import org.bitcoinj.core.Base58;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.whispersystems.curve25519.java.curve_sigs;

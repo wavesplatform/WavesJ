@@ -1,6 +1,5 @@
 package com.wavesplatform.wavesj;
 
-import org.bitcoinj.core.Base58;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.Blake2bDigest;
 import org.bouncycastle.crypto.digests.KeccakDigest;
