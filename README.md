@@ -3,6 +3,8 @@ A Java library for interacting with the Waves blockchain.
 
 Supports node interaction, offline transaction signing, Matcher orders, and creating addresses and keys.
 
+[This library's page at Maven Central](https://mvnrepository.com/artifact/com.wavesplatform/wavesj)
+
 ## Basic Usage:
 Create an account from a private key ('T' for testnet):
 ```
