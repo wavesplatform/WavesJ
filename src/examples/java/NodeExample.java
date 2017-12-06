@@ -3,6 +3,8 @@ import com.wavesplatform.wavesj.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import static com.wavesplatform.wavesj.Asset.WAVES;
+
 public class NodeExample {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -59,7 +61,7 @@ public class NodeExample {
         // Offline transaction signing
         //
         Transaction tx = Transaction.makeTransferTx(alice, bob,
-                1 * TOKEN, null, FEE, null,
+                1 * TOKEN, WAVES, FEE, WAVES,
                 "Here's for the coffee");
         // tx.getEndpoint() == "/assets/broadcast/transfer" is the server endpoint to send this transaction to.
         // tx.getJson() is JSON-encoded transaction data. You can use Swagger UI to send it to the network.

@@ -52,7 +52,7 @@ String txId = node.transfer(account, buddy, 1_00000000, 100_000, "Here's for you
 
 Sign a transaction offline:
 ```
-Transaction tx = Transaction.makeTransferTx(account, buddy, 1_00000000, null, 100_000, null, "");
+Transaction tx = Transaction.makeTransferTx(account, buddy, 1_00000000, Asset.WAVES, 100_000, Asset.WAVES, "");
 System.out.println("JSON encoded data: " + tx.getJson());
 System.out.println("Server endpoint to send this JSON to: " + tx.getEndpoint());
 ```
