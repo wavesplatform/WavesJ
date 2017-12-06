@@ -25,4 +25,11 @@ public class AccountTest {
         assertArrayEquals(Base58.decode("8LbAU5BSrGkpk5wbjLMNjrbc9VzN9KBBYv9X8wGpmAJT"), account.getPublicKey());
         assertEquals("3MzZCGFyuxgC4ZmtKRS7vpJTs75ZXdkbp1K", account.getAddress());
     }
+
+    @Test
+    public void testSeedGeneration() {
+        String seed = PrivateKeyAccount.generateSeed();
+        System.out.println(seed);
+        assertEquals(15, seed.split(" ").length);
+    }
 }
