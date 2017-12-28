@@ -17,7 +17,7 @@ public class NodeExample {
 
         // Create signing testnet account
         String seed = "health lazy lens fix dwarf salad breeze myself silly december endless rent faculty report beyond";
-        PrivateKeyAccount alice = new PrivateKeyAccount(seed, 0, Account.TESTNET);
+        PrivateKeyAccount alice = PrivateKeyAccount.fromSeed(seed, 0, Account.TESTNET);
         // Retrieve its public key
         byte[] publicKey = alice.getPublicKey();
         // and its address

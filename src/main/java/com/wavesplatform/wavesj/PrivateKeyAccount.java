@@ -208,12 +208,12 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         this.privateKey = privateKey;
     }
 
-    public PrivateKeyAccount(String seed, int nonce, char scheme) {
-        this(privateKey(seed, nonce), scheme);
+    public static PrivateKeyAccount fromSeed(String seed, int nonce, char scheme) {
+        return new PrivateKeyAccount(privateKey(seed, nonce), scheme);
     }
 
-    public PrivateKeyAccount(String privateKey, char scheme) {
-        this(Base58.decode(privateKey), scheme);
+    public static PrivateKeyAccount fromPrivateKey(String privateKey, char scheme) {
+        return new PrivateKeyAccount(Base58.decode(privateKey), scheme);
     }
 
     public final byte[] getPrivateKey() {

@@ -9,7 +9,7 @@ public class TransactionTest {
     @Test
     public void smokeTest() {
         // doesn't validate transactions, just checks that all methods run to completion, no buffer overflows occur etc
-        PrivateKeyAccount acc = new PrivateKeyAccount("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
+        PrivateKeyAccount acc = PrivateKeyAccount.fromPrivateKey("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
         String recipient = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
         String assetId = "AssetAssetAssetAssetAssetAssetAs";
         String txId = "TransactionTransactionTransactio";
