@@ -7,7 +7,7 @@ import java.util.TimerTask;
 
 public class SpreadBot {
     private final PrivateKeyAccount account = PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
-    private final String nodeUrl = "https://testnode2.wavesnodes.com";
+    private final String nodeUrl = "https://testnode2.wavesnodes.com";  // http://dex-aws-ir-1.wavesnodes.com:6886/matcher for mainnet
     private final String amountAsset = Asset.WAVES;
     private final String priceAsset = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe"; // WBTC
     private final long maxOrderSize = 1 * Asset.MILLI; // in priceAsset
@@ -39,9 +39,10 @@ public class SpreadBot {
         System.out.println("Canceled order " + orderId);
     }
 
-    private void fileOrder(Order.Type type, long price, long amount) throws IOException, InterruptedException {
+    private String fileOrder(Order.Type type, long price, long amount) throws IOException, InterruptedException {
         String orderId = node.createOrder(account, matcherKey, amountAsset, priceAsset, type, price, amount, System.currentTimeMillis() + period, fee);
         System.out.printf("Filed %s order at %d\n", orderId, price);
+        return orderId;
     }
 
     private void round() throws IOException, InterruptedException {
@@ -64,17 +65,18 @@ public class SpreadBot {
             return;
         }
 
-        long amountAssetBalance = node.getBalance(account.getAddress(), amountAsset) - 2 * fee;
-        long priceAssetBalance = node.getBalance(account.getAddress(), priceAsset) - 2 * fee;
-
         long meanPrice = (book.bids.get(0).price + book.asks.get(0).price) / 2;
         long buyPrice = (long) (meanPrice * (1 - halfSpread));
         long sellPrice = (long) (meanPrice * (1 + halfSpread));
 
+        long amountAssetBalance = node.getBalance(account.getAddress(), amountAsset) - 2 * fee;
+        long priceAssetBalance = node.getBalance(account.getAddress(), priceAsset) - 2 * fee;
+
         long buyOrderSize = Math.min(priceAssetBalance, maxOrderSize) / buyPrice;
-        fileOrder(Order.Type.BUY, buyPrice, buyOrderSize);
+        buyOrderId = fileOrder(Order.Type.BUY, buyPrice, buyOrderSize);
+
         long sellOrderSize = Math.min(amountAssetBalance, maxOrderSize) / sellPrice;
-        fileOrder(Order.Type.SELL, sellPrice, sellOrderSize);
+        sellOrderId = fileOrder(Order.Type.SELL, sellPrice, sellOrderSize);
     }
 
     private class RoundTask extends TimerTask {

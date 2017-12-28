@@ -11,18 +11,18 @@ Use the codes below to add WavesJ as a dependency for your project.
 <dependency>
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 </dependency>
 ```
 
 ##### Gradle:
 ```
-compile group: 'com.wavesplatform', name: 'wavesj', version: '0.1'
+compile group: 'com.wavesplatform', name: 'wavesj', version: '0.2'
 ```
 
 ##### SBT:
 ```
-libraryDependencies += "com.wavesplatform" % "wavesj" % "0.1"
+libraryDependencies += "com.wavesplatform" % "wavesj" % "0.2"
 ```
 
 [This library's page at Maven Central](https://mvnrepository.com/artifact/com.wavesplatform/wavesj)
@@ -31,7 +31,7 @@ libraryDependencies += "com.wavesplatform" % "wavesj" % "0.1"
 Create an account from a private key ('T' for testnet):
 ```
 String seed = "health lazy lens fix dwarf salad breeze myself silly december endless rent faculty report beyond";
-PrivateKeyAccount account = new PrivateKeyAccount(seed, 0, Account.TESTNET);
+PrivateKeyAccount account = PrivateKeyAccount.fromSeed(seed, 0, Account.TESTNET);
 byte[] publicKey = account.getPublicKey();
 String address = account.getAddress();
 ```
