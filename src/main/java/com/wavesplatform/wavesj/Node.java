@@ -54,7 +54,9 @@ public class Node {
     }
 
     public long getBalance(String address, String assetId) throws IOException {
-        return send("/assets/balance/" + address + "/" + assetId, "balance", Long.class);
+        return Asset.WAVES.equals(assetId)
+                ? getBalance(address)
+                : send("/assets/balance/" + address + "/" + assetId, "balance", Long.class);
     }
 
     /**
@@ -131,7 +133,8 @@ public class Node {
             String amountAssetId, String priceAssetId, String orderId, long fee) throws IOException
     {
         Transaction tx = Transaction.makeOrderCancelTx(account, amountAssetId, priceAssetId, orderId, fee);
-        exec(request(tx));
+        HttpResponse r = exec(request(tx));
+        EntityUtils.consume(r.getEntity());
     }
 
     public OrderBook getOrderBook(String asset1, String asset2) throws IOException {
