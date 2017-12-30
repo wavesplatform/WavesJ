@@ -2,17 +2,18 @@ package com.wavesplatform.wavesj;
 
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 
 public class NodeTest {
     private static final long AMOUNT = 1_00000000L;
     private static final long FEE = 100_000;
+    private static final long MFEE = 300_000;
     private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
 
     private static final PrivateKeyAccount alice =
@@ -45,18 +46,33 @@ public class NodeTest {
         Node matcher = new Node("https://testnode2.wavesnodes.com");
         String matcherKey = "4oP8SPd7LiUo8xsokSTiyZjwg4rojdyXqWEq7NTwWsSU";
 
-        OrderBook orders = matcher.getOrderBook(null, WBTC);
-        assertNotNull(orders);
+        OrderBook orderBook = matcher.getOrderBook(Asset.WAVES, WBTC);
+        assertNotNull(orderBook);
 
+        // Cancel all existing orders, just in case
+        List<Order> orders = matcher.getOrders(alice);
+        for (Order order: orders) {
+            if (! "Cancelled".equals(order.status)) {
+                matcher.cancelOrder(alice, Asset.WAVES, WBTC, order.id, MFEE);
+            }
+        }
+
+        // Create a new one
         String orderId = matcher.createOrder(alice, matcherKey, "", WBTC, Order.Type.SELL,
                 1, 1_00000000,
-                System.currentTimeMillis() + 3_600_000,
-                500_000);
+                System.currentTimeMillis() + 65_000,
+                MFEE);
         assertNotNull(orderId);
 
+        // Check order status
         String status = matcher.getOrderStatus(orderId, "", WBTC);
         assertEquals("Accepted", status);
 
-        matcher.cancelOrder(alice, "", WBTC, orderId, 400_000);
+        // Verify the order appears in the list of orders
+        orders = matcher.getOrders(alice);
+        assertTrue(orders.stream().anyMatch(order -> order.id.equals(orderId)));
+
+        // Cancel the order
+        matcher.cancelOrder(alice, "", WBTC, orderId, MFEE);
     }
 }

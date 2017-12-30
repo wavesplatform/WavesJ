@@ -1,6 +1,8 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -19,11 +22,16 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.wavesplatform.wavesj.Transaction.normalizeAsset;
 
 public class Node {
     public static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {};
+    private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
 
     private final URI uri;
     private final CloseableHttpClient client = HttpClients.createDefault();
@@ -42,21 +50,21 @@ public class Node {
     }
 
     public int getHeight() throws IOException {
-        return send("/blocks/height", "height", Integer.class);
+        return send("/blocks/height", "height").asInt();
     }
 
     public long getBalance(String address) throws IOException {
-        return send("/addresses/balance/" + address, "balance", Long.class);
+        return send("/addresses/balance/" + address, "balance").asLong();
     }
 
     public long getBalance(String address, int confirmations) throws IOException {
-        return send("/addresses/balance/" + address + "/" + confirmations, "balance", Long.class);
+        return send("/addresses/balance/" + address + "/" + confirmations, "balance").asLong();
     }
 
     public long getBalance(String address, String assetId) throws IOException {
         return Asset.WAVES.equals(assetId)
                 ? getBalance(address)
-                : send("/assets/balance/" + address + "/" + assetId, "balance", Long.class);
+                : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
     }
 
     /**
@@ -66,7 +74,11 @@ public class Node {
      * @throws IOException
      */
     public String send(Transaction tx) throws IOException {
-        return parseResponse(exec(request(tx)), "id", String.class);
+        return parse(exec(request(tx)), "id").asText();
+    }
+
+    private JsonNode send(String path, String key) throws IOException {
+        return parse(exec(request(path)), key);
     }
 
     public String transfer(PrivateKeyAccount from, String toAddress, long amount, long fee, String message) throws IOException {
@@ -116,45 +128,38 @@ public class Node {
     // Matcher transactions
 
     public String getMatcherKey() throws IOException {
-        HttpResponse r = exec(request("/matcher"));
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(r.getEntity().getContent(), String.class);
+        return parse(exec(request("/matcher"))).asText();
     }
 
     public String createOrder(PrivateKeyAccount account, String matcherKey, String amountAssetId, String priceAssetId,
                               Order.Type orderType, long price, long amount, long expiration, long matcherFee) throws IOException {
         Transaction tx = Transaction.makeOrderTx(account, matcherKey, orderType,
                 amountAssetId, priceAssetId, price, amount, expiration, matcherFee);
-        Map<String, String> message = parseResponse(exec(request(tx)), "message", Map.class);
-        return message.get("id");
+        return parse(exec(request(tx)), "message", "id").asText();
     }
 
-    public void cancelOrder(PrivateKeyAccount account,
+    public String cancelOrder(PrivateKeyAccount account,
             String amountAssetId, String priceAssetId, String orderId, long fee) throws IOException
     {
         Transaction tx = Transaction.makeOrderCancelTx(account, amountAssetId, priceAssetId, orderId, fee);
-        HttpResponse r = exec(request(tx));
-        EntityUtils.consume(r.getEntity());
+        return parse(exec(request(tx)), "status").asText();
     }
 
     public OrderBook getOrderBook(String asset1, String asset2) throws IOException {
         asset1 = normalizeAsset(asset1);
         asset2 = normalizeAsset(asset2);
         String path = "/matcher/orderbook/" + asset1 + '/' + asset2;
-        Map<String, Object> map = parseResponse(exec(request(path)), longObjectMapper());
-        return new OrderBook(
-                processOrders((List) map.get("bids")),
-                processOrders((List) map.get("asks")));
+        return parse(exec(request(path)), ORDER_BOOK);
     }
 
     public String getOrderStatus(String orderId, String asset1, String asset2) throws IOException {
         asset1 = normalizeAsset(asset1);
         asset2 = normalizeAsset(asset2);
         String path = "/matcher/orderbook/" + asset1 + '/' + asset2 + '/' + orderId;
-        return send(path, "status", String.class);
+        return send(path, "status").asText();
     }
 
-    public String getOrders(PrivateKeyAccount account) throws IOException {
+    public List<Order> getOrders(PrivateKeyAccount account) throws IOException {///test
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
@@ -162,18 +167,7 @@ public class Node {
 
         String path = "/matcher/orderbook/" + Base58.encode(account.getPublicKey());
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
-        String json = EntityUtils.toString(r.getEntity());
-        return json;///finish this once API is pushed
-    }
-
-    private List<Order> processOrders(List<Map<String, Long>> orders) {
-        return orders.stream()
-                .map(map -> new Order(map.get("price"), map.get("amount")))
-                .collect(Collectors.toList());
-    }
-
-    private <T> T send(String path, String key, Class<T> type) throws IOException {
-        return parseResponse(exec(request(path)), key, type);
+        return parse(r, ORDER_LIST);
     }
 
     private <T> HttpUriRequest request(String path, String... headers) {
@@ -195,22 +189,21 @@ public class Node {
     private HttpResponse exec(HttpUriRequest request) throws IOException {
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            String error = parseResponse(r, "message", String.class);
+            String error = parse(r, "message").asText();
             throw new IOException(error);
         }
         return r;
     }
 
-    private static ObjectMapper longObjectMapper() {
-        return new ObjectMapper().enable(DeserializationFeature.USE_LONG_FOR_INTS);
+    private static <T> T parse(HttpResponse r, TypeReference<T> ref) throws IOException {
+        return mapper.readValue(r.getEntity().getContent(), ref);
     }
 
-    private static <T> T parseResponse(HttpResponse r, String key, Class<T> type) throws IOException {
-        ObjectMapper mapper = type == Long.class ? longObjectMapper() : new ObjectMapper();
-        return type.cast(parseResponse(r, mapper).get(key));
-    }
-
-    private static Map<String, Object> parseResponse(HttpResponse r, ObjectMapper mapper) throws IOException {
-        return mapper.readValue(r.getEntity().getContent(), Map.class);
+    private static JsonNode parse(HttpResponse r, String... keys) throws IOException {
+        JsonNode tree = mapper.readTree(r.getEntity().getContent());
+        for (String key: keys) {
+            tree = tree.get(key);
+        }
+        return tree;
     }
 }

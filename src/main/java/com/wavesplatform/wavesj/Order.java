@@ -1,27 +1,36 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
     public enum Type {
         BUY("buy"),
         SELL("sell");
 
+        @JsonValue
         final String json;
 
         Type(String json) {
             this.json = json;
         }
+
+        @JsonCreator
+        public static Type fromString(String json) {
+            return json == null ? null : Type.valueOf(json.toUpperCase());
+        }
     }
 
-    public final long price;
-    public final long amount;
+    public String id;
+    public Type type;
+    public long amount;
+    public long price;
+    public long filled;
+    public long timestamp;
+    public String status;
 
-    Order(long price, long amount) {
-        this.price = price;
-        this.amount = amount;
-    }
-
-    @Override
-    public String toString() {
-        return "Order[price=" + price + ", amount=" + amount + ']';
-    }
+    // needed for Jackson
+    private Order() {}
 }
