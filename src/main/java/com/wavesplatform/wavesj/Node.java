@@ -1,7 +1,6 @@
 package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -12,7 +11,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -20,9 +18,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.wavesplatform.wavesj.Transaction.normalizeAsset;
 
@@ -159,7 +154,7 @@ public class Node {
         return send(path, "status").asText();
     }
 
-    public List<Order> getOrders(PrivateKeyAccount account) throws IOException {///test
+    public List<Order> getOrders(PrivateKeyAccount account) throws IOException {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);

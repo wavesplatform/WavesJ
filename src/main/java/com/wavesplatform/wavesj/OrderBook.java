@@ -7,8 +7,16 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBook {
-    public List<Order> bids, asks;
+    private List<Order> bids, asks;
 
     // needed for Jackson
     private OrderBook() {}
+
+    public List<Order> getBids() {
+        return Collections.unmodifiableList(bids);
+    }
+
+    public List<Order> getAsks() {
+        return Collections.unmodifiableList(asks);
+    }
 }

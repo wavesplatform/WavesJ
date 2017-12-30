@@ -23,14 +23,42 @@ public class Order {
         }
     }
 
-    public String id;
-    public Type type;
-    public long amount;
-    public long price;
-    public long filled;
-    public long timestamp;
-    public String status;
+    private String id;
+    private Type type;
+    private long amount;
+    private long price;
+    private long filled;
+    private long timestamp;
+    private String status;
 
     // needed for Jackson
     private Order() {}
+
+    public String getId() {
+        return id;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public long getAmount() {
+        return amount;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public long getFilled() {
+        return filled;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 }

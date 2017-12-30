@@ -52,8 +52,8 @@ public class NodeTest {
         // Cancel all existing orders, just in case
         List<Order> orders = matcher.getOrders(alice);
         for (Order order: orders) {
-            if (! "Cancelled".equals(order.status)) {
-                matcher.cancelOrder(alice, Asset.WAVES, WBTC, order.id, MFEE);
+            if (! "Cancelled".equals(order.getStatus())) {
+                matcher.cancelOrder(alice, Asset.WAVES, WBTC, order.getId(), MFEE);
             }
         }
 
@@ -70,7 +70,7 @@ public class NodeTest {
 
         // Verify the order appears in the list of orders
         orders = matcher.getOrders(alice);
-        assertTrue(orders.stream().anyMatch(order -> order.id.equals(orderId)));
+        assertTrue(orders.stream().anyMatch(order -> order.getId().equals(orderId)));
 
         // Cancel the order
         matcher.cancelOrder(alice, "", WBTC, orderId, MFEE);
