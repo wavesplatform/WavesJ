@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -126,11 +127,15 @@ public class Node {
         return parse(exec(request("/matcher"))).asText();
     }
 
-    public String createOrder(PrivateKeyAccount account, String matcherKey, String amountAssetId, String priceAssetId,
+    public Order createOrder(PrivateKeyAccount account, String matcherKey, String amountAssetId, String priceAssetId,
                               Order.Type orderType, long price, long amount, long expiration, long matcherFee) throws IOException {
         Transaction tx = Transaction.makeOrderTx(account, matcherKey, orderType,
                 amountAssetId, priceAssetId, price, amount, expiration, matcherFee);
-        return parse(exec(request(tx)), "message", "id").asText();
+        JsonNode tree = parse(exec(request(tx)));
+        // fix order status
+        ObjectNode message = (ObjectNode) tree.get("message");
+        message.put("status", tree.get("status").asText());
+        return mapper.treeToValue(tree.get("message"), Order.class);
     }
 
     public String cancelOrder(PrivateKeyAccount account,

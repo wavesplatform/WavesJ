@@ -1,64 +1,71 @@
 package com.wavesplatform.wavesj;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
     public enum Type {
-        BUY("buy"),
-        SELL("sell");
+        BUY, SELL;
 
         @JsonValue
-        final String json;
-
-        Type(String json) {
-            this.json = json;
+        public String toJson() {
+            return toString().toLowerCase();
         }
 
         @JsonCreator
-        public static Type fromString(String json) {
+        static Type fromString(String json) {
             return json == null ? null : Type.valueOf(json.toUpperCase());
         }
     }
 
-    private String id;
-    private Type type;
-    private long amount;
-    private long price;
-    private long filled;
-    private long timestamp;
-    private String status;
+    public enum Status {
+        ACCEPTED, FILLED, PARTIALLY_FILLED, CANCELED, NOT_FOUND;
 
-    // needed for Jackson
-    private Order() {}
+        @JsonCreator
+        static Status fromString(String json) {
+            if (json == null) return null;
+            switch (json) {
+                case "Accepted": case "OrderAccepted": return ACCEPTED;
+                case "Filled": return FILLED;
+                case "PartiallyFilled": return PARTIALLY_FILLED;
+                case "Cancelled": return CANCELED;
+                case "NotFound": return NOT_FOUND;
+                default: throw new IllegalArgumentException("Bad status value: " + json);
+            }
+        }
 
-    public String getId() {
-        return id;
+        public boolean isActive() {
+            return this == ACCEPTED || this == PARTIALLY_FILLED;
+        }
     }
 
-    public Type getType() {
-        return type;
-    }
+    @JsonAlias({"orderType"})
+    public final Type type;
+    public final String id;
+    public final long amount;
+    public final long price;
+    public final long filled;
+    public final long timestamp;
+    public final Status status;
+    public final AssetPair assetPair;
 
-    public long getAmount() {
-        return amount;
-    }
-
-    public long getPrice() {
-        return price;
-    }
-
-    public long getFilled() {
-        return filled;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public String getStatus() {
-        return status;
+    @JsonCreator
+    private Order(
+            @JsonProperty("id") String id,
+            @JsonProperty("type") Type type,
+            @JsonProperty("assetPair") AssetPair assetPair,
+            @JsonProperty("amount") long amount,
+            @JsonProperty("price") long price,
+            @JsonProperty("timestamp") long timestamp,
+            @JsonProperty("filled") long filled,
+            @JsonProperty("status") Status status) {
+        this.id = id;
+        this.type = type;
+        this.assetPair = assetPair;
+        this.amount = amount;
+        this.price = price;
+        this.timestamp = timestamp;
+        this.status = status;
+        this.filled = filled;
     }
 }

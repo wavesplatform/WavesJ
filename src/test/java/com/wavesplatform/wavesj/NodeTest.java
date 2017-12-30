@@ -44,35 +44,46 @@ public class NodeTest {
     @Test
     public void testMatcher() throws IOException, URISyntaxException {
         Node matcher = new Node("https://testnode2.wavesnodes.com");
-        String matcherKey = "4oP8SPd7LiUo8xsokSTiyZjwg4rojdyXqWEq7NTwWsSU";
+        String matcherKey = matcher.getMatcherKey();
 
         OrderBook orderBook = matcher.getOrderBook(Asset.WAVES, WBTC);
         assertNotNull(orderBook);
 
-        // Cancel all existing orders, just in case
-        List<Order> orders = matcher.getOrders(alice);
-        for (Order order: orders) {
-            if (! "Cancelled".equals(order.getStatus())) {
-                matcher.cancelOrder(alice, Asset.WAVES, WBTC, order.getId(), MFEE);
+        // Cancel any active orders just in case
+        for (Order o: matcher.getOrders(alice)) {
+            if (o.status.isActive()) {
+                matcher.cancelOrder(alice, Asset.WAVES, WBTC, o.id, MFEE);///assetPair
             }
         }
 
-        // Create a new one
-        String orderId = matcher.createOrder(alice, matcherKey, "", WBTC, Order.Type.SELL,
-                1, 1_00000000,
+        // Create an order
+        Order order = matcher.createOrder(alice, matcherKey, Asset.WAVES, WBTC, Order.Type.SELL,
+                1, 1 * Asset.TOKEN,
                 System.currentTimeMillis() + 65_000,
                 MFEE);
-        assertNotNull(orderId);
+        assertNotNull(order.id);
+        assertEquals(Order.Type.SELL, order.type);
+        assertEquals(Order.Status.ACCEPTED, order.status);
+        assertEquals(Asset.WAVES, order.assetPair.amountAsset);
+        assertEquals(WBTC, order.assetPair.priceAsset);
+        assertEquals(1 * Asset.TOKEN, order.amount);
+        assertEquals(1, order.price);
 
         // Check order status
-        String status = matcher.getOrderStatus(orderId, "", WBTC);
+        String status = matcher.getOrderStatus(order.id, "", WBTC);
         assertEquals("Accepted", status);
 
         // Verify the order appears in the list of orders
-        orders = matcher.getOrders(alice);
-        assertTrue(orders.stream().anyMatch(order -> order.getId().equals(orderId)));
-
-        // Cancel the order
-        matcher.cancelOrder(alice, "", WBTC, orderId, MFEE);
+        List<Order> orders = matcher.getOrders(alice);
+        assertTrue(orders.stream().anyMatch(o -> o.id.equals(order.id)));
+        for (Order o: orders) {
+            assertNotNull(o.id);
+            assertNotNull(o.type);
+            assertNotNull(o.status);
+            assertNotNull(o.assetPair);
+            assertTrue(o.amount > 0);
+            assertTrue(o.price > 0);
+            assertTrue(o.timestamp > 0);
+        }
     }
 }

@@ -230,7 +230,7 @@ public class Transaction {
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "matcherPublicKey", matcherKey,
                 "assetPair", assetPair(amountAssetId, priceAssetId),
-                "orderType", orderType.json,
+                "orderType", orderType.toJson(),
                 "price", price,
                 "amount", amount,
                 "timestamp", timestamp,
