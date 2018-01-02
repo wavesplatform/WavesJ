@@ -15,6 +15,7 @@ public class NodeTest {
     private static final long FEE = 100_000;
     private static final long MFEE = 300_000;
     private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
+    private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC);
 
     private static final PrivateKeyAccount alice =
             PrivateKeyAccount.fromPrivateKey("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
@@ -36,8 +37,14 @@ public class NodeTest {
         String txId = node.transfer(alice, bob.getAddress(), AMOUNT, FEE, "Hi Bob!");
         assertNotNull(txId);
 
+        txId = node.transferAsset(alice, bob.getAddress(), AMOUNT, "", FEE, null, "One more");
+        assertNotNull(txId);
+
         // transfer back so that Alice's balance is not drained
-        txId = node.transfer(bob, alice.getAddress(), AMOUNT, FEE, "Thanks, Alice");
+        txId = node.transferAsset(bob, alice.getAddress(), AMOUNT, null, FEE, Asset.WAVES, "Thanks, Alice");
+        assertNotNull(txId);
+
+        txId = node.transferAsset(bob, alice.getAddress(), AMOUNT, Asset.WAVES, FEE, "", "Thanks again");
         assertNotNull(txId);
     }
 
@@ -46,18 +53,19 @@ public class NodeTest {
         Node matcher = new Node("https://testnode2.wavesnodes.com");
         String matcherKey = matcher.getMatcherKey();
 
-        OrderBook orderBook = matcher.getOrderBook(Asset.WAVES, WBTC);
+        OrderBook orderBook = matcher.getOrderBook(MARKET);
         assertNotNull(orderBook);
 
         // Cancel any active orders just in case
         for (Order o: matcher.getOrders(alice)) {
             if (o.status.isActive()) {
-                matcher.cancelOrder(alice, Asset.WAVES, WBTC, o.id, MFEE);///assetPair
+                matcher.cancelOrder(alice, MARKET, o.id);
             }
         }
 
         // Create an order
-        Order order = matcher.createOrder(alice, matcherKey, Asset.WAVES, WBTC, Order.Type.SELL,
+        Order order = matcher.createOrder(alice, matcherKey,
+                MARKET, Order.Type.SELL,
                 1, 1 * Asset.TOKEN,
                 System.currentTimeMillis() + 65_000,
                 MFEE);
@@ -70,7 +78,7 @@ public class NodeTest {
         assertEquals(1, order.price);
 
         // Check order status
-        String status = matcher.getOrderStatus(order.id, "", WBTC);
+        String status = matcher.getOrderStatus(order.id, MARKET);
         assertEquals("Accepted", status);
 
         // Verify the order appears in the list of orders

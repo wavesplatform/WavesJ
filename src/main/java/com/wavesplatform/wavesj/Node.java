@@ -20,8 +20,6 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import static com.wavesplatform.wavesj.Transaction.normalizeAsset;
-
 public class Node {
     public static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
 
@@ -127,10 +125,9 @@ public class Node {
         return parse(exec(request("/matcher"))).asText();
     }
 
-    public Order createOrder(PrivateKeyAccount account, String matcherKey, String amountAssetId, String priceAssetId,
-                              Order.Type orderType, long price, long amount, long expiration, long matcherFee) throws IOException {
-        Transaction tx = Transaction.makeOrderTx(account, matcherKey, orderType,
-                amountAssetId, priceAssetId, price, amount, expiration, matcherFee);
+    public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
+                             long price, long amount, long expiration, long matcherFee) throws IOException {
+        Transaction tx = Transaction.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
         JsonNode tree = parse(exec(request(tx)));
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
@@ -138,24 +135,18 @@ public class Node {
         return mapper.treeToValue(tree.get("message"), Order.class);
     }
 
-    public String cancelOrder(PrivateKeyAccount account,
-            String amountAssetId, String priceAssetId, String orderId, long fee) throws IOException
-    {
-        Transaction tx = Transaction.makeOrderCancelTx(account, amountAssetId, priceAssetId, orderId, fee);
+    public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
+        Transaction tx = Transaction.makeOrderCancelTx(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
     }
 
-    public OrderBook getOrderBook(String asset1, String asset2) throws IOException {
-        asset1 = normalizeAsset(asset1);
-        asset2 = normalizeAsset(asset2);
-        String path = "/matcher/orderbook/" + asset1 + '/' + asset2;
+    public OrderBook getOrderBook(AssetPair assetPair) throws IOException {
+        String path = "/matcher/orderbook/" + assetPair.amountAsset+ '/' + assetPair.priceAsset;
         return parse(exec(request(path)), ORDER_BOOK);
     }
 
-    public String getOrderStatus(String orderId, String asset1, String asset2) throws IOException {
-        asset1 = normalizeAsset(asset1);
-        asset2 = normalizeAsset(asset2);
-        String path = "/matcher/orderbook/" + asset1 + '/' + asset2 + '/' + orderId;
+    public String getOrderStatus(String orderId, AssetPair assetPair) throws IOException {
+        String path = "/matcher/orderbook/" + assetPair.amountAsset+ '/' + assetPair.priceAsset+ '/' + orderId;
         return send(path, "status").asText();
     }
 

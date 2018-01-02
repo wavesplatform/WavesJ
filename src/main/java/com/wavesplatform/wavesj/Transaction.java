@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.wavesplatform.wavesj.Asset.isWaves;
+
 public class Transaction {
     private static final byte ISSUE        = 3;
     private static final byte TRANSFER     = 4;
@@ -62,15 +64,11 @@ public class Transaction {
     }
 
     private static void putAsset(ByteBuffer buffer, String assetId) {
-        if (assetId == null || assetId.isEmpty()) {
+        if (isWaves(assetId)) {
             buffer.put((byte) 0);
         } else {
             buffer.put((byte) 1).put(Base58.decode(assetId));
         }
-    }
-
-    static String normalizeAsset(String assetId) {
-        return assetId == null || assetId.isEmpty() ? "WAVES" : assetId;
     }
 
     public static Transaction makeIssueTx(PrivateKeyAccount account,
@@ -104,6 +102,9 @@ public class Transaction {
     }
 
     public static Transaction makeReissueTx(PrivateKeyAccount account, String assetId, long quantity, boolean reissuable, long fee) {
+        if (isWaves(assetId)) {
+            throw new IllegalArgumentException("Cannot reissue WAVES");
+        }
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(REISSUE).put(account.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
@@ -124,8 +125,8 @@ public class Transaction {
             long amount, String assetId, long fee, String feeAssetId, String attachment)
     {
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
-        int datalen = (assetId == null ? 0 : 32) +
-                (feeAssetId == null ? 0 : 32) +
+        int datalen = (isWaves(assetId) ? 0 : 32) +
+                (isWaves(feeAssetId) ? 0 : 32) +
                 attachmentBytes.length + MIN_BUFFER_SIZE;
         long timestamp = System.currentTimeMillis();
 
@@ -142,14 +143,17 @@ public class Transaction {
                 "signature", signature,
                 "recipient", toAddress,
                 "amount", amount,
-                "assetId", assetId,
+                "assetId", Asset.toJsonObject(assetId),
                 "fee", fee,
-                "feeAssetId", feeAssetId,
+                "feeAssetId", Asset.toJsonObject(feeAssetId),
                 "timestamp", timestamp,
                 "attachment", Base58.encode(attachmentBytes));
     }
 
     public static Transaction makeBurnTx(PrivateKeyAccount account, String assetId, long amount, long fee) {
+        if (isWaves(assetId)) {
+            throw new IllegalArgumentException("Cannot burn WAVES");
+        }
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(BURN).put(account.getPublicKey()).put(Base58.decode(assetId))
@@ -209,19 +213,19 @@ public class Transaction {
     }
 
     public static Transaction makeOrderTx(PrivateKeyAccount sender, String matcherKey, Order.Type orderType,
-            String amountAssetId, String priceAssetId, long price, long amount, long expiration, long matcherFee)
+            AssetPair assetPair, long price, long amount, long expiration, long matcherFee)
     {
         long timestamp = System.currentTimeMillis();
         int datalen = MIN_BUFFER_SIZE +
-                (amountAssetId == null ? 0 : 32) +
-                (priceAssetId == null ? 0 : 32);
+                (isWaves(assetPair.amountAsset) ? 0 : 32) +
+                (isWaves(assetPair.priceAsset) ? 0 : 32);
         if (datalen == MIN_BUFFER_SIZE) {
             throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
         }
         ByteBuffer buf = ByteBuffer.allocate(datalen);
         buf.put(sender.getPublicKey()).put(Base58.decode(matcherKey));
-        putAsset(buf, amountAssetId);
-        putAsset(buf, priceAssetId);
+        putAsset(buf, assetPair.amountAsset);
+        putAsset(buf, assetPair.priceAsset);
         buf.put((byte) orderType.ordinal()).putLong(price).putLong(amount)
                 .putLong(timestamp).putLong(expiration).putLong(matcherFee);
         String signature = sign(sender, buf);
@@ -229,7 +233,7 @@ public class Transaction {
         return new Transaction("/matcher/orderbook",
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "matcherPublicKey", matcherKey,
-                "assetPair", assetPair(amountAssetId, priceAssetId),
+                "assetPair", assetPair.toJsonObject(),
                 "orderType", orderType.toJson(),
                 "price", price,
                 "amount", amount,
@@ -239,22 +243,11 @@ public class Transaction {
                 "signature", signature);
     }
 
-    private static Map<String, String> assetPair(String amountAssetId, String priceAssetId) {
-        Map<String, String> assetPair = new HashMap<>();
-        assetPair.put("amountAsset", amountAssetId);
-        assetPair.put("priceAsset", priceAssetId);
-        return assetPair;
-    }
-
-    public static Transaction makeOrderCancelTx(PrivateKeyAccount sender,
-            String amountAssetId, String priceAssetId, String orderId, long fee)
-    {
+    public static Transaction makeOrderCancelTx(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(sender.getPublicKey()).put(Base58.decode(orderId));
         String signature = sign(sender, buf);
-        amountAssetId = normalizeAsset(amountAssetId);
-        priceAssetId = normalizeAsset(priceAssetId);
-        return new Transaction("/matcher/orderbook/" + amountAssetId + '/' + priceAssetId + '/' + "cancel",
+        return new Transaction("/matcher/orderbook/" + assetPair.amountAsset + '/' + assetPair.priceAsset + '/' + "cancel",
                 "sender", Base58.encode(sender.getPublicKey()),
                 "orderId", orderId,
                 "signature", signature);

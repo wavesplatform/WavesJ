@@ -14,25 +14,12 @@ public class TransactionTest {
         String assetId = "AssetAssetAssetAssetAssetAssetAs";
         String txId = "TransactionTransactionTransactio";
 
-        dump("alias",
-                Transaction.makeAliasTx(acc, "daphnie", Account.TESTNET, FEE));
-        dump("burn",
-                Transaction.makeBurnTx(acc, assetId, AMOUNT, FEE));
-        dump("issue",
-                Transaction.makeIssueTx(acc, "Pure Gold", "Gold backed asset", AMOUNT, 8, true, FEE));
-        dump("reissue",
-                Transaction.makeReissueTx(acc, assetId, AMOUNT, false, FEE));
-        dump("lease",
-                Transaction.makeLeaseTx(acc, recipient, AMOUNT, FEE));
-        dump("lease cancel",
-                Transaction.makeLeaseCancelTx(acc, txId, FEE));
-        dump("xfer",
-                Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money"));
-    }
-
-    private void dump(String header, Transaction tx) {
-        System.out.println("*** " + header + " ***");
-        System.out.println("Tx data: " + tx.getJson());
-        System.out.println();
+        Transaction.makeAliasTx(acc, "daphnie", Account.TESTNET, FEE);
+        Transaction.makeBurnTx(acc, assetId, AMOUNT, FEE);
+        Transaction.makeIssueTx(acc, "Pure Gold", "Gold backed asset", AMOUNT, 8, true, FEE);
+        Transaction.makeReissueTx(acc, assetId, AMOUNT, false, FEE);
+        Transaction.makeLeaseTx(acc, recipient, AMOUNT, FEE);
+        Transaction.makeLeaseCancelTx(acc, txId, FEE);
+        Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money");
     }
 }
