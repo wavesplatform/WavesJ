@@ -76,16 +76,20 @@ public class NodeExample {
         String matcherKey = matcher.getMatcherKey();
 
         // Create an order
-        String orderId = matcher.createOrder(alice, matcherKey,
+        AssetPair market = new AssetPair(Asset.WAVES, WBTC);
+        Order order = matcher.createOrder(alice, matcherKey, market,
                 // buy 1 WBTC for 1000 WAVES
-                WBTC, "", Order.Type.BUY, 1000, 1 * TOKEN,
+                Order.Type.BUY, 1000, 1 * TOKEN,
                 // make order valid for 1 hour
                 System.currentTimeMillis() + 3_600_000, MATCHER_FEE);
+        String orderId = order.id;
+        System.out.printf("Filed order %s to %s %d WAVES at %.8f\n",
+                order.id, order.type, order.amount / Asset.TOKEN, (float) order.price / Asset.TOKEN);
 
         // Get order status by id
-        matcher.getOrderStatus(orderId, WBTC, "");
+        matcher.getOrderStatus(orderId, market);
 
         // Cancel order
-        matcher.cancelOrder(alice, WBTC, "", orderId, MATCHER_FEE);
+        matcher.cancelOrder(alice, market, orderId);
     }
 }

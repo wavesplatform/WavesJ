@@ -25,12 +25,19 @@ public class Order {
         static Status fromString(String json) {
             if (json == null) return null;
             switch (json) {
-                case "Accepted": case "OrderAccepted": return ACCEPTED;
-                case "Filled": return FILLED;
-                case "PartiallyFilled": return PARTIALLY_FILLED;
-                case "Cancelled": return CANCELED;
-                case "NotFound": return NOT_FOUND;
-                default: throw new IllegalArgumentException("Bad status value: " + json);
+                case "Accepted":
+                case "OrderAccepted":
+                    return ACCEPTED;
+                case "Filled":
+                    return FILLED;
+                case "PartiallyFilled":
+                    return PARTIALLY_FILLED;
+                case "Cancelled":
+                    return CANCELED;
+                case "NotFound":
+                    return NOT_FOUND;
+                default:
+                    throw new IllegalArgumentException("Bad status value: " + json);
             }
         }
 
@@ -67,5 +74,9 @@ public class Order {
         this.timestamp = timestamp;
         this.status = status;
         this.filled = filled;
+    }
+
+    public boolean isActive() {
+        return status.isActive();
     }
 }

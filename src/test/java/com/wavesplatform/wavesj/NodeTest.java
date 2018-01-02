@@ -58,7 +58,7 @@ public class NodeTest {
 
         // Cancel any active orders just in case
         for (Order o: matcher.getOrders(alice)) {
-            if (o.status.isActive()) {
+            if (o.isActive()) {
                 matcher.cancelOrder(alice, MARKET, o.id);
             }
         }

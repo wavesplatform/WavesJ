@@ -2,60 +2,73 @@ import com.wavesplatform.wavesj.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class SpreadBot {
-    private final PrivateKeyAccount account = PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
-    private final String nodeUrl = "https://testnode2.wavesnodes.com";  // http://dex-aws-ir-1.wavesnodes.com:6886/matcher for mainnet
-    private final String amountAsset = Asset.WAVES;
-    private final String priceAsset = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe"; // WBTC
     private final long maxOrderSize = 1 * Asset.MILLI; // in priceAsset
     private final double halfSpread = 0.01; // 1%
     private final long fee = 3 * Asset.MILLI; // in WAVES
     private final long period = 60_000; // 1 min
 
-    private final Node node;
+    private final PrivateKeyAccount account;
+    private final AssetPair market;
+    private final Node node, matcher;
     private final String matcherKey;
 
-    private String buyOrderId, sellOrderId;
-
-    public SpreadBot() throws IOException, URISyntaxException {
-        this.node = new Node(nodeUrl);
-        this.matcherKey = node.getMatcherKey();
+    public static SpreadBot testnetInstance() throws IOException, URISyntaxException {
+        return new SpreadBot(
+                PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET),
+                new AssetPair(Asset.WAVES, "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe"),
+                "https://testnode2.wavesnodes.com",
+                "https://testnode2.wavesnodes.com");
     }
 
-    private void waitForStatus(String orderId, String status) throws IOException, InterruptedException {
-        String s;
-        do {
-            Thread.sleep(500);
-            s = node.getOrderStatus(orderId, amountAsset, priceAsset);
-        } while (! status.equals(s));
+    public static SpreadBot mainnetInstance() throws IOException, URISyntaxException {
+        String nodeUrl = "http://dex-aws-ir-1.wavesnodes.com";
+        return new SpreadBot(
+                PrivateKeyAccount.fromSeed(
+                        "abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve",
+                        0, Account.MAINNET),
+                new AssetPair(Asset.WAVES, "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS"),
+                nodeUrl + ":6886",
+                nodeUrl);
+    }
+
+    private SpreadBot(PrivateKeyAccount account, AssetPair market, String matcherUrl, String nodeUrl) throws IOException, URISyntaxException {
+        this.account = account;
+        this.market = market;
+        this.node = new Node(nodeUrl);
+        this.matcher = new Node(matcherUrl);
+        this.matcherKey = matcher.getMatcherKey();
     }
 
     private void cancelOrder(String orderId) throws IOException, InterruptedException {
-        node.cancelOrder(account, amountAsset, priceAsset, orderId, fee);
-        waitForStatus(orderId, "OrderCanceled");
-        System.out.println("Canceled order " + orderId);
+        String status = matcher.cancelOrder(account, market, orderId);
+        System.out.printf("%s %s\n", status, orderId);
     }
 
     private String fileOrder(Order.Type type, long price, long amount) throws IOException, InterruptedException {
-        String orderId = node.createOrder(account, matcherKey, amountAsset, priceAsset, type, price, amount, System.currentTimeMillis() + period, fee);
-        System.out.printf("Filed %s order at %d\n", orderId, price);
-        return orderId;
+        long expiration = System.currentTimeMillis() + Math.max(period, 61_000); // matcher requires expiration > 1 min in the future
+        Order order = matcher.createOrder(account, matcherKey, market, type, price, amount, expiration, fee);
+        System.out.printf("Filed order %s to %s %d at %d\n", order.id, type, amount, price);
+        return order.id;
     }
 
     private void round() throws IOException, InterruptedException {
-        if (buyOrderId != null) {
-            cancelOrder(buyOrderId);
-            buyOrderId = null;
-        }
-        if (sellOrderId != null) {
-            cancelOrder(sellOrderId);
-            sellOrderId = null;
+        System.out.println();
+        System.out.println(Instant.now());
+
+        // Cancel all orders filed at our market
+        for (Order order: matcher.getOrders(account, market)) {
+            if (order.isActive()) {
+                cancelOrder(order.id);
+            }
         }
 
-        OrderBook book = node.getOrderBook(amountAsset, priceAsset);
+        // Read order book
+        OrderBook book = matcher.getOrderBook(market);
         if (book.bids.size() <= 0) {
             System.out.println("There are no bids, skipping this round");
             return;
@@ -65,18 +78,27 @@ public class SpreadBot {
             return;
         }
 
-        long meanPrice = (book.bids.get(0).price + book.asks.get(0).price) / 2;
+        // Determine buy and sell prices
+        long bestBid = book.bids.get(0).price;
+        long bestAsk = book.asks.get(0).price;
+        System.out.printf("Spread %d : %d\n", bestBid, bestAsk);
+        long meanPrice = (bestBid + bestAsk) / 2;
         long buyPrice = (long) (meanPrice * (1 - halfSpread));
         long sellPrice = (long) (meanPrice * (1 + halfSpread));
 
-        long amountAssetBalance = node.getBalance(account.getAddress(), amountAsset) - 2 * fee;
-        long priceAssetBalance = node.getBalance(account.getAddress(), priceAsset) - 2 * fee;
+        // Find out how much we want to buy, and file an order
+        long priceAssetAvail = node.getBalance(account.getAddress(), market.priceAsset) - 2 * fee;
+        if (priceAssetAvail > 0) {
+            long buyOrderSize = Math.min(priceAssetAvail, maxOrderSize) * Asset.TOKEN / buyPrice;
+            fileOrder(Order.Type.BUY, buyPrice, buyOrderSize);
+        }
 
-        long buyOrderSize = Math.min(priceAssetBalance, maxOrderSize) / buyPrice;
-        buyOrderId = fileOrder(Order.Type.BUY, buyPrice, buyOrderSize);
-
-        long sellOrderSize = Math.min(amountAssetBalance, maxOrderSize) / sellPrice;
-        sellOrderId = fileOrder(Order.Type.SELL, sellPrice, sellOrderSize);
+        // Same for sell order
+        long amountAssetAvail = node.getBalance(account.getAddress(), market.amountAsset) - 2 * fee;
+        if (amountAssetAvail > 0) {
+            long sellOrderSize = Math.min(amountAssetAvail, maxOrderSize * Asset.TOKEN / sellPrice);
+            fileOrder(Order.Type.SELL, sellPrice, sellOrderSize);
+        }
     }
 
     private class RoundTask extends TimerTask {
@@ -95,6 +117,6 @@ public class SpreadBot {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        new SpreadBot().run();
+        SpreadBot.testnetInstance().run();
     }
 }
