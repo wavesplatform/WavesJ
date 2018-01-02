@@ -81,8 +81,12 @@ public class NodeTest {
         String status = matcher.getOrderStatus(order.id, MARKET);
         assertEquals("Accepted", status);
 
-        // Verify the order appears in the list of orders
+        // Verify the order appears in the list of all orders
         List<Order> orders = matcher.getOrders(alice);
+        assertTrue(orders.stream().anyMatch(o -> o.id.equals(order.id)));
+
+        // Verify the order appears in the list of orders for this asset pair
+        orders = matcher.getOrders(alice, MARKET);
         assertTrue(orders.stream().anyMatch(o -> o.id.equals(order.id)));
         for (Order o: orders) {
             assertNotNull(o.id);

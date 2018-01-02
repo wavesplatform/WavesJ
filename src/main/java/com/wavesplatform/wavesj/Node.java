@@ -151,12 +151,19 @@ public class Node {
     }
 
     public List<Order> getOrders(PrivateKeyAccount account) throws IOException {
+        return getOrders(account, "/matcher/orderbook/" + Base58.encode(account.getPublicKey()));
+    }
+
+    public List<Order> getOrders(PrivateKeyAccount account, AssetPair market) throws IOException {
+        return getOrders(account, String.format("/matcher/orderbook/%s/%s/publicKey/%s",
+                market.amountAsset, market.priceAsset, Base58.encode(account.getPublicKey())));
+    }
+
+    private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
         String signature = Transaction.sign(account, buf);
-
-        String path = "/matcher/orderbook/" + Base58.encode(account.getPublicKey());
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
         return parse(r, ORDER_LIST);
     }
