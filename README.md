@@ -67,13 +67,15 @@ Create a DEX order:
 Node matcher = new Node("https://testnode2.wavesnodes.com");
 String matcherKey = matcher.getMatcherKey();
 String wbtcId = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
-String orderId = matcher.createOrder(account, matcherKey,
-                // buy 1 WBTC for 1000 WAVES
-                wbtcId, "", Order.Type.BUY, 1000, 1_00000000,
+Order order = matcher.createOrder(alice, matcherKey,
+                new AssetPair(Asset.WAVES, wbtcId),
+                // buy 10 WAVES at 0.00090000 WBTC each
+                Order.Type.BUY, 90_000, 10 * Asset.TOKEN,
                 // make order valid for 1 hour
-                System.currentTimeMillis() + 3_600_000, 300_000);
+                System.currentTimeMillis() + 3_600_000, MATCHER_FEE);
+System.out.printf("Filed order " + order.id);
 ```
-There's some example code under `src/examples/java`.
+There are some examples under `src/examples/java`.
 
 ## Building the library
 
