@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.wavesplatform.wavesj.Hash.hash;
+
 public class PrivateKeyAccount extends PublicKeyAccount {
     private static final Digest SHA256 = new SHA256Digest();
 

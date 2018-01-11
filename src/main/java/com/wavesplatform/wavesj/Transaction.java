@@ -23,11 +23,17 @@ public class Transaction {
     private static final int MIN_BUFFER_SIZE = 120;
     private static final Curve25519 cipher = Curve25519.getInstance(Curve25519.BEST);
 
-    private final String endpoint;
-    private final Map<String, Object> data;
+    public final String id;
+    public final String signature;
+    public final Map<String, Object> data;
+    final String endpoint;
 
-    Transaction(String endpoint, Object... items) {
+    private Transaction(PrivateKeyAccount account, ByteBuffer buffer, String endpoint, Object... items) {
+        byte[] bytes = toBytes(buffer);
+        this.id = hash(bytes);
+        this.signature = sign(account, bytes);
         this.endpoint = endpoint;
+
         HashMap<String, Object> map = new HashMap<>();
         for (int i=0; i<items.length; i+=2) {
             Object value = items[i+1];
@@ -38,29 +44,35 @@ public class Transaction {
         this.data = Collections.unmodifiableMap(map);
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
-    }
-
     public String getJson() {
+        HashMap<String, Object> toJson = new HashMap<>(data);
+        toJson.put("id", id);
+        toJson.put("signature", signature);
         try {
-            return new ObjectMapper().writeValueAsString(data);
+            return new ObjectMapper().writeValueAsString(toJson);
         } catch (JsonProcessingException e) {
             // not expected to ever happen
             return null;
         }
     }
 
-    static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
-        byte[] bytesToSign = new byte[buffer.position()];
+    private static byte[] toBytes(ByteBuffer buffer) {
+        byte[] bytes = new byte[buffer.position()];
         buffer.position(0);
-        buffer.get(bytesToSign);
-        byte[] signature = cipher.calculateSignature(account.getPrivateKey(), bytesToSign);
-        return Base58.encode(signature);
+        buffer.get(bytes);
+        return bytes;
+    }
+
+    private static String hash(byte[] bytes) {
+        return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
+    }
+
+    private static String sign(PrivateKeyAccount account, byte[] bytes) {
+        return Base58.encode(cipher.calculateSignature(account.getPrivateKey(), bytes));
+    }
+
+    static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
+        return sign(account, toBytes(buffer));
     }
 
     private static void putAsset(ByteBuffer buffer, String assetId) {
@@ -88,10 +100,8 @@ public class Transaction {
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
 
-        String signature = sign(account, buf);
-        return new Transaction("/assets/broadcast/issue",
+       return new Transaction(account, buf,"/assets/broadcast/issue",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
                 "name", name,
                 "description", description,
                 "quantity", quantity,
@@ -110,10 +120,8 @@ public class Transaction {
         buf.put(REISSUE).put(account.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
-        String signature = sign(account, buf);
-        return new Transaction("/assets/broadcast/reissue",
+        return new Transaction(account, buf, "/assets/broadcast/reissue",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
                 "assetId", assetId,
                 "quantity", quantity,
                 "reissuable", reissuable,
@@ -137,10 +145,8 @@ public class Transaction {
         buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress))
                 .putShort((short) attachmentBytes.length).put(attachmentBytes);
 
-        String signature = sign(account, buf);
-        return new Transaction("/assets/broadcast/transfer",
+        return new Transaction(account, buf,"/assets/broadcast/transfer",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
                 "recipient", toAddress,
                 "amount", amount,
                 "assetId", Asset.toJsonObject(assetId),
@@ -158,10 +164,8 @@ public class Transaction {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(BURN).put(account.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
-        String signature = sign(account, buf);
-        return new Transaction("/assets/broadcast/burn",
+        return new Transaction(account, buf,"/assets/broadcast/burn",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
                 "assetId", assetId,
                 "quantity", amount,
                 "fee", fee,
@@ -173,10 +177,8 @@ public class Transaction {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE).put(account.getPublicKey()).put(Base58.decode(toAddress))
                 .putLong(amount).putLong(fee).putLong(timestamp);
-        String signature = sign(account, buf);
-        return new Transaction("/leasing/broadcast/lease",
+        return new Transaction(account, buf,"/leasing/broadcast/lease",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
                 "recipient", toAddress,
                 "amount", amount,
                 "fee", fee,
@@ -187,10 +189,8 @@ public class Transaction {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE_CANCEL).put(account.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(txId));
-        String signature = sign(account, buf);
-        return new Transaction("/leasing/broadcast/cancel",
+        return new Transaction(account, buf,"/leasing/broadcast/cancel",
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
                 "txId", txId,
                 "fee", fee,
                 "timestamp", timestamp);
@@ -203,16 +203,13 @@ public class Transaction {
         buf.put(ALIAS).put(account.getPublicKey())
                 .putShort((short) (alias.length() + 4)).put((byte) 0x02).put((byte) scheme)
                 .putShort((short) alias.length()).put(alias.getBytes()).putLong(fee).putLong(timestamp);
-        String signature = sign(account, buf);
-        return new Transaction("/alias/broadcast/create",
-                "senderPublicKey", Base58.encode(account.getPublicKey()),
-                "signature", signature,
-                "alias", alias,
+        return new Transaction(account, buf,"/alias/broadcast/create",
+                "senderPublicKey", Base58.encode(account.getPublicKey()), "alias", alias,
                 "fee", fee,
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeOrderTx(PrivateKeyAccount sender, String matcherKey, Order.Type orderType,
+    public static Transaction makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
             AssetPair assetPair, long price, long amount, long expiration, long matcherFee)
     {
         long timestamp = System.currentTimeMillis();
@@ -223,15 +220,14 @@ public class Transaction {
             throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
         }
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(sender.getPublicKey()).put(Base58.decode(matcherKey));
+        buf.put(account.getPublicKey()).put(Base58.decode(matcherKey));
         putAsset(buf, assetPair.amountAsset);
         putAsset(buf, assetPair.priceAsset);
         buf.put((byte) orderType.ordinal()).putLong(price).putLong(amount)
                 .putLong(timestamp).putLong(expiration).putLong(matcherFee);
-        String signature = sign(sender, buf);
 
-        return new Transaction("/matcher/orderbook",
-                "senderPublicKey", Base58.encode(sender.getPublicKey()),
+        return new Transaction(account, buf,"/matcher/orderbook",
+                "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "matcherPublicKey", matcherKey,
                 "assetPair", assetPair.toJsonObject(),
                 "orderType", orderType.toJson(),
@@ -239,17 +235,14 @@ public class Transaction {
                 "amount", amount,
                 "timestamp", timestamp,
                 "expiration", expiration,
-                "matcherFee", matcherFee,
-                "signature", signature);
+                "matcherFee", matcherFee);
     }
 
-    public static Transaction makeOrderCancelTx(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
+    public static Transaction makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
-        buf.put(sender.getPublicKey()).put(Base58.decode(orderId));
-        String signature = sign(sender, buf);
-        return new Transaction("/matcher/orderbook/" + assetPair.amountAsset + '/' + assetPair.priceAsset + '/' + "cancel",
-                "sender", Base58.encode(sender.getPublicKey()),
-                "orderId", orderId,
-                "signature", signature);
+        buf.put(account.getPublicKey()).put(Base58.decode(orderId));
+        return new Transaction(account, buf,"/matcher/orderbook/" + assetPair.amountAsset + '/' + assetPair.priceAsset + '/' + "cancel",
+                "sender", Base58.encode(account.getPublicKey()),
+                "orderId", orderId);
     }
 }

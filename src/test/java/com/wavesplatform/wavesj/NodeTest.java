@@ -11,7 +11,7 @@ import java.util.List;
 import static org.junit.Assert.assertNotNull;
 
 public class NodeTest {
-    private static final long AMOUNT = 1_00000000L;
+    private static final long AMOUNT = 1 * Asset.TOKEN;
     private static final long FEE = 100_000;
     private static final long MFEE = 300_000;
     private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
@@ -46,6 +46,21 @@ public class NodeTest {
 
         txId = node.transferAsset(bob, alice.getAddress(), AMOUNT, Asset.WAVES, FEE, "", "Thanks again");
         assertNotNull(txId);
+    }
+
+    @Test
+    public void testSendTransaction() throws IOException {
+        Node node = new Node();
+
+        Transaction tx1 = Transaction.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
+        String id1 = node.send(tx1);
+        assertNotNull(id1);
+        assertEquals(id1, tx1.id);
+
+        Transaction tx2 = Transaction.makeTransferTx(bob, alice.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "Back to Alice");
+        String id2 = node.send(tx2);
+        assertNotNull(id2);
+        assertEquals(id2, tx2.id);
     }
 
     @Test

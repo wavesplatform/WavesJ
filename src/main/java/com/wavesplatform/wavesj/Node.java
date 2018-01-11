@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -177,7 +178,7 @@ public class Node {
     }
 
     private HttpUriRequest request(Transaction tx) throws IOException {
-        HttpPost request = new HttpPost(uri + tx.getEndpoint());
+        HttpPost request = new HttpPost(uri + tx.endpoint);
         request.setEntity(new StringEntity(tx.getJson()));
         request.setHeader("Content-Type", "application/json");
         request.setHeader("Accept", "application/json");
@@ -187,8 +188,12 @@ public class Node {
     private HttpResponse exec(HttpUriRequest request) throws IOException {
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            String error = parse(r, "message").asText();
-            throw new IOException(error);
+            try {
+                String error = parse(r, "message").asText();
+                throw new IOException(error);
+            } catch (JsonParseException e) {
+                throw new RuntimeException("Server error " + r.getStatusLine().getStatusCode());
+            }
         }
         return r;
     }
