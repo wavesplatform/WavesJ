@@ -12,8 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -29,7 +28,7 @@ public class Node {
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
 
     private final URI uri;
-    private final CloseableHttpClient client = HttpClients.createDefault();
+    private final CloseableHttpClient client = HttpClientBuilder.create().disableCookieManagement().build();
 
     public Node() {
         try {

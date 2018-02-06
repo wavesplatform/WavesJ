@@ -65,7 +65,7 @@ public class NodeTest {
 
     @Test
     public void testMatcher() throws IOException, URISyntaxException {
-        Node matcher = new Node("https://testnode2.wavesnodes.com");
+        Node matcher = new Node("https://testnode1.wavesnodes.com");
         String matcherKey = matcher.getMatcherKey();
 
         OrderBook orderBook = matcher.getOrderBook(MARKET);
