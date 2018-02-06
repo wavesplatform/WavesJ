@@ -26,9 +26,16 @@ public class NodeTest {
     public void testGetters() throws IOException {
         Node node = new Node();
         assertTrue(node.getHeight() > 0);
-        assertTrue(node.getBalance(bob.getAddress()) >= 0);
-        assertTrue(node.getBalance(bob.getAddress(), 100) >= 0);
-        assertTrue(node.getBalance(bob.getAddress(), WBTC) >= 0);
+
+        String address = bob.getAddress();
+        assertTrue(node.getBalance(address, 100) >= 0);
+        assertTrue(node.getBalance(address, WBTC) >= 0);
+
+        long wavesBalance = node.getBalance(address);
+        assertTrue(wavesBalance >= 0);
+        assertEquals(wavesBalance, node.getBalance(address, null));
+        assertEquals(wavesBalance, node.getBalance(address, ""));
+        assertEquals(wavesBalance, node.getBalance(address, Asset.WAVES));
     }
 
     @Test

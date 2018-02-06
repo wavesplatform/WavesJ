@@ -56,7 +56,7 @@ public class Node {
     }
 
     public long getBalance(String address, String assetId) throws IOException {
-        return Asset.WAVES.equals(assetId)
+        return Asset.isWaves(assetId)
                 ? getBalance(address)
                 : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
     }
