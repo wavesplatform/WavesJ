@@ -14,8 +14,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -32,8 +31,7 @@ public class Node {
 
     private final URI uri;
     private final CloseableHttpClient client = HttpClients.custom()
-            .setDefaultRequestConfig(RequestConfig.custom()
-                    .setCookieSpec(CookieSpecs.STANDARD).build())
+            .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
             .build();
 
     public Node() {
@@ -62,7 +60,7 @@ public class Node {
     }
 
     public long getBalance(String address, String assetId) throws IOException {
-        return Asset.WAVES.equals(assetId)
+        return Asset.isWaves(assetId)
                 ? getBalance(address)
                 : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
     }
