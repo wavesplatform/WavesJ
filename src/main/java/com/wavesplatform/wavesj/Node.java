@@ -14,7 +14,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,7 +31,8 @@ public class Node {
 
     private final URI uri;
     private final CloseableHttpClient client = HttpClients.custom()
-            .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+            .setDefaultRequestConfig(
+                    RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
             .build();
 
     public Node() {
