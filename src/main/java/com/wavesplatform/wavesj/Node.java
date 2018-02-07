@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -28,7 +30,9 @@ public class Node {
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
 
     private final URI uri;
-    private final CloseableHttpClient client = HttpClientBuilder.create().disableCookieManagement().build();
+    private final CloseableHttpClient client = HttpClients.custom()
+            .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+            .build();
 
     public Node() {
         try {
