@@ -120,4 +120,19 @@ public class NodeTest {
             assertTrue(o.timestamp > 0);
         }
     }
+    @Test
+    public void testValidator() throws IOException {
+        String addr = "3MzZCGFyuxgC4ZmtKRS7vpJTs75ZXdkbp1K";
+        Node node = new Node();
+        assertTrue(node.validateAddresses(addr));
+        String nonAddr = "3Mbrokennonadddr";
+        assertFalse(node.validateAddresses(nonAddr));
+    }
+    @Test
+    public void testAliasGet() throws IOException, URISyntaxException {
+        String addr = "3PA1KvFfq9VuJjg45p2ytGgaNjrgnLSgf4r";
+        String alias = "blackturtle";
+        Node node = new Node("https://nodes.wavesnodes.com/");
+        assertEquals(node.getAddrByAlias(alias),addr);
+    }
 }
