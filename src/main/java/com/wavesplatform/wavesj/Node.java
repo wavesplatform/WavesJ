@@ -60,6 +60,14 @@ public class Node {
         return send("/addresses/balance/" + address + "/" + confirmations, "balance").asLong();
     }
 
+    public boolean validateAddresses(String address) throws IOException {
+        return send("/addresses/validate/" + address, "valid").asBoolean();
+    }
+
+    public String getAddrByAlias(String alias) throws IOException {
+        return send("/alias/by-alias/" + alias, "address").textValue();
+    }
+
     public long getBalance(String address, String assetId) throws IOException {
         return Asset.isWaves(assetId)
                 ? getBalance(address)
