@@ -245,4 +245,12 @@ public class Transaction {
                 "sender", Base58.encode(account.getPublicKey()),
                 "orderId", orderId);
     }
+
+    public static Transaction makeDeleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
+        ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
+        buf.put(account.getPublicKey()).put(Base58.decode(orderId));
+        return new Transaction(account, buf,"/matcher/orderbook/" + assetPair.amountAsset + '/' + assetPair.priceAsset + '/' + "delete",
+                "sender", Base58.encode(account.getPublicKey()),
+                "orderId", orderId);
+    }
 }

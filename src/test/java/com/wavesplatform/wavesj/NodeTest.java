@@ -72,7 +72,7 @@ public class NodeTest {
 
     @Test
     public void testMatcher() throws IOException, URISyntaxException {
-        Node matcher = new Node("https://testnode1.wavesnodes.com");
+        Node matcher = new Node("https://1.testnet.wavesnodes.com");
         String matcherKey = matcher.getMatcherKey();
 
         OrderBook orderBook = matcher.getOrderBook(MARKET);
@@ -100,7 +100,7 @@ public class NodeTest {
         assertEquals(1, order.price);
 
         // Check order status
-        String status = matcher.getOrderStatus(order.id, MARKET);
+        String status = matcher.getOrderStatusInfo(order.id, MARKET).status.toString();
         assertEquals("Accepted", status);
 
         // Verify the order appears in the list of all orders

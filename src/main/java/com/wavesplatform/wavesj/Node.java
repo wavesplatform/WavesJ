@@ -23,11 +23,12 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class Node {
-    public static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
+    public static final String DEFAULT_NODE = "https://1.testnet.wavesnodes.com";
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {};
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
+    private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {};
 
     private final URI uri;
     private final CloseableHttpClient client = HttpClients.custom()
@@ -153,14 +154,23 @@ public class Node {
         return parse(exec(request(tx)), "status").asText();
     }
 
+    public String deleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
+        Transaction tx = Transaction.makeDeleteOrder(account, assetPair, orderId);
+        return parse(exec(request(tx)), "status").asText();
+    }
+
     public OrderBook getOrderBook(AssetPair assetPair) throws IOException {
         String path = "/matcher/orderbook/" + assetPair.amountAsset+ '/' + assetPair.priceAsset;
         return parse(exec(request(path)), ORDER_BOOK);
     }
 
-    public String getOrderStatus(String orderId, AssetPair assetPair) throws IOException {
+    public OrderStatusInfo getOrderStatusInfo(String orderId, AssetPair assetPair) throws IOException {
         String path = "/matcher/orderbook/" + assetPair.amountAsset+ '/' + assetPair.priceAsset+ '/' + orderId;
-        return send(path, "status").asText();
+        return parse(exec(request(path)), ORDER_STATUS);
+    }
+
+    public String getOrderStatus(String orderId, AssetPair assetPair) throws IOException {
+        return getOrderStatusInfo(orderId, assetPair).status.toString();
     }
 
     public List<Order> getOrders(PrivateKeyAccount account) throws IOException {
