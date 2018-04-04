@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -72,7 +73,7 @@ public class NodeTest {
 
     @Test
     public void testMatcher() throws IOException, URISyntaxException {
-        Node matcher = new Node("https://1.testnet.wavesnodes.com");
+        Node matcher = new Node();
         String matcherKey = matcher.getMatcherKey();
 
         OrderBook orderBook = matcher.getOrderBook(MARKET);
@@ -100,7 +101,7 @@ public class NodeTest {
         assertEquals(1, order.price);
 
         // Check order status
-        String status = matcher.getOrderStatusInfo(order.id, MARKET).status.toString();
+        String status = matcher.getOrderStatus(order.id, MARKET).status.toString();
         assertEquals("Accepted", status);
 
         // Verify the order appears in the list of all orders
@@ -119,7 +120,16 @@ public class NodeTest {
             assertTrue(o.price > 0);
             assertTrue(o.timestamp > 0);
         }
+
+        // Cancel order
+        String canceled = matcher.cancelOrder(alice, MARKET, order.id);
+        System.out.println(canceled);
+
+        // Delete order from history
+        String deleted = matcher.deleteOrder(alice, MARKET, order.id);
+        System.out.println(deleted);
     }
+
     @Test
     public void testValidator() throws IOException {
         String addr = "3MzZCGFyuxgC4ZmtKRS7vpJTs75ZXdkbp1K";
@@ -128,6 +138,7 @@ public class NodeTest {
         String nonAddr = "3Mbrokennonadddr";
         assertFalse(node.validateAddresses(nonAddr));
     }
+
     @Test
     public void testAliasGet() throws IOException, URISyntaxException {
         String addr = "3PA1KvFfq9VuJjg45p2ytGgaNjrgnLSgf4r";
