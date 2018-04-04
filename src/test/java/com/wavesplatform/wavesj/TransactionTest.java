@@ -1,6 +1,10 @@
 package com.wavesplatform.wavesj;
 
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class TransactionTest {
@@ -16,12 +20,21 @@ public class TransactionTest {
         String txId = "TransactionTransactionTransactio";
 
         check(Transaction.makeAliasTx(acc, "daphnie", Account.TESTNET, FEE));
-        Transaction.makeBurnTx(acc, assetId, AMOUNT, FEE);
-        Transaction.makeIssueTx(acc, "Pure Gold", "Gold backed asset", AMOUNT, 8, true, FEE);
-        Transaction.makeReissueTx(acc, assetId, AMOUNT, false, FEE);
-        Transaction.makeLeaseTx(acc, recipient, AMOUNT, FEE);
-        Transaction.makeLeaseCancelTx(acc, txId, FEE);
-        Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money");
+        check(Transaction.makeBurnTx(acc, assetId, AMOUNT, FEE));
+        check(Transaction.makeIssueTx(acc, "Pure Gold", "Gold backed asset", AMOUNT, 8, true, FEE));
+        check(Transaction.makeReissueTx(acc, assetId, AMOUNT, false, FEE));
+        check(Transaction.makeLeaseTx(acc, recipient, AMOUNT, FEE));
+        check(Transaction.makeLeaseCancelTx(acc, txId, FEE));
+        check(Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money"));
+
+        List<Transfer> transfers = Arrays.asList(new Transfer(acc.getAddress(), AMOUNT), new Transfer(recipient, AMOUNT));
+        check(Transaction.makeMassTransferTx(acc, Asset.WAVES, transfers, FEE, "mass transfer"));
+
+        List<DataEntry<?>> data = Arrays.asList(
+                new DataEntry.BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false),
+                new DataEntry.BinaryEntry("blob", new byte[] { 7, 127, -33, 100, -40}),
+                new DataEntry.LongEntry("Wave, wave your hand!", -721010468593883L));
+        check(Transaction.makeDataTx(acc, data, FEE));
     }
 
     private void check(Transaction tx) {

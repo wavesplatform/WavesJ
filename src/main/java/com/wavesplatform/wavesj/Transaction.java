@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.whispersystems.curve25519.Curve25519;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,14 +13,17 @@ import java.util.Map;
 import static com.wavesplatform.wavesj.Asset.isWaves;
 
 public class Transaction {
-    private static final byte ISSUE        = 3;
-    private static final byte TRANSFER     = 4;
-    private static final byte REISSUE      = 5;
-    private static final byte BURN         = 6;
-    private static final byte LEASE        = 8;
-    private static final byte LEASE_CANCEL = 9;
-    private static final byte ALIAS        = 10;
+    private static final byte ISSUE         = 3;
+    private static final byte TRANSFER      = 4;
+    private static final byte REISSUE       = 5;
+    private static final byte BURN          = 6;
+    private static final byte LEASE         = 8;
+    private static final byte LEASE_CANCEL  = 9;
+    private static final byte ALIAS         = 10;
+    private static final byte MASS_TRANSFER = 11;
+    private static final byte DATA          = 12;
 
+    private static final byte DEFAULT_VERSION = 1;
     private static final int MIN_BUFFER_SIZE = 120;
     private static final Curve25519 cipher = Curve25519.getInstance(Curve25519.BEST);
 
@@ -48,6 +52,7 @@ public class Transaction {
         HashMap<String, Object> toJson = new HashMap<>(data);
         toJson.put("id", id);
         toJson.put("signature", signature);
+        toJson.put("proofs", new String[] {signature});
         try {
             return new ObjectMapper().writeValueAsString(toJson);
         } catch (JsonProcessingException e) {
@@ -204,7 +209,57 @@ public class Transaction {
                 .putShort((short) (alias.length() + 4)).put((byte) 0x02).put((byte) scheme)
                 .putShort((short) alias.length()).put(alias.getBytes()).putLong(fee).putLong(timestamp);
         return new Transaction(account, buf,"/alias/broadcast/create",
-                "senderPublicKey", Base58.encode(account.getPublicKey()), "alias", alias,
+                "senderPublicKey", Base58.encode(account.getPublicKey()),
+                "alias", alias,
+                "fee", fee,
+                "timestamp", timestamp);
+    }
+
+    public static Transaction makeMassTransferTx(PrivateKeyAccount account, String assetId, Collection<Transfer> transfers, long fee, String attachment) {
+        long timestamp = System.currentTimeMillis();
+        byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
+        int datalen = (isWaves(assetId) ? 0 : 32) +
+                34 * transfers.size() +
+                attachmentBytes.length + MIN_BUFFER_SIZE;
+
+        ByteBuffer buf = ByteBuffer.allocate(datalen);
+        buf.put(MASS_TRANSFER).put(DEFAULT_VERSION).put(account.getPublicKey());
+        putAsset(buf, assetId);
+        buf.putShort((short) transfers.size());
+        for (Transfer t: transfers) {
+            buf.put(Base58.decode(t.recipient)).putLong(t.amount);
+        }
+        buf.putLong(timestamp).putLong(fee)
+                .putShort((short) attachmentBytes.length).put(attachmentBytes);
+
+        return new Transaction(account, buf,"/transactions/broadcast",
+                "type", MASS_TRANSFER,
+                "version", DEFAULT_VERSION,
+                "senderPublicKey", Base58.encode(account.getPublicKey()),
+                "assetId", Asset.toJsonObject(assetId),
+                "transfers", transfers,
+                "fee", fee,
+                "timestamp", timestamp,
+                "attachment", Base58.encode(attachmentBytes));
+    }
+
+    public static Transaction makeDataTx(PrivateKeyAccount account, Collection<DataEntry<?>> data, long fee) {
+        long timestamp = System.currentTimeMillis();
+        int datalen = data.stream().mapToInt(DataEntry::size).sum() + MIN_BUFFER_SIZE;
+
+        ByteBuffer buf = ByteBuffer.allocate(datalen);
+        buf.put(DATA).put(DEFAULT_VERSION).put(account.getPublicKey());
+        buf.putShort((short) data.size());
+        for (DataEntry<?> e: data) {
+            e.write(buf);
+        }
+        buf.putLong(timestamp).putLong(fee);
+
+        return new Transaction(account, buf,"/transactions/broadcast",
+                "type", DATA,
+                "version", DEFAULT_VERSION,
+                "senderPublicKey", Base58.encode(account.getPublicKey()),
+                "data", data,
                 "fee", fee,
                 "timestamp", timestamp);
     }

@@ -12,6 +12,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 
 public class Node {
@@ -94,8 +96,8 @@ public class Node {
         return send(tx);
     }
 
-    public String transferAsset(PrivateKeyAccount from, String toAddress,
-            long amount, String assetId, long fee, String feeAssetId, String message) throws IOException
+    public String transfer(PrivateKeyAccount from, String assetId, String toAddress,
+            long amount, long fee, String feeAssetId, String message) throws IOException
     {
         Transaction tx = Transaction.makeTransferTx(from, toAddress, amount, assetId, fee, feeAssetId, message);
         return send(tx);
@@ -130,6 +132,16 @@ public class Node {
 
     public String alias(PrivateKeyAccount account, String alias, char scheme, long fee) throws IOException {
         Transaction tx = Transaction.makeAliasTx(account, alias, scheme, fee);
+        return send(tx);
+    }
+
+    public String massTransfer(PrivateKeyAccount from, String assetId, Collection<Transfer> transfers, long fee, String message) throws IOException {
+        Transaction tx = Transaction.makeMassTransferTx(from, assetId, transfers, fee, message);
+        return send(tx);
+    }
+
+    public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
+        Transaction tx = Transaction.makeDataTx(from, data, fee);
         return send(tx);
     }
 
@@ -195,11 +207,9 @@ public class Node {
         return req;
     }
 
-    private HttpUriRequest request(Transaction tx) throws IOException {
+    private HttpUriRequest request(Transaction tx) {
         HttpPost request = new HttpPost(uri + tx.endpoint);
-        request.setEntity(new StringEntity(tx.getJson()));
-        request.setHeader("Content-Type", "application/json");
-        request.setHeader("Accept", "application/json");
+        request.setEntity(new StringEntity(tx.getJson(), ContentType.APPLICATION_JSON));
         return request;
     }
 

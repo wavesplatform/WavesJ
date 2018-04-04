@@ -1,15 +1,14 @@
 package com.wavesplatform.wavesj;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
+import static com.wavesplatform.wavesj.DataEntry.*;
+import static org.junit.Assert.*;
 
 public class NodeTest {
     private static final long AMOUNT = 1 * Asset.TOKEN;
@@ -45,16 +44,41 @@ public class NodeTest {
         String txId = node.transfer(alice, bob.getAddress(), AMOUNT, FEE, "Hi Bob!");
         assertNotNull(txId);
 
-        txId = node.transferAsset(alice, bob.getAddress(), AMOUNT, "", FEE, null, "One more");
+        txId = node.transfer(alice, "", bob.getAddress(), AMOUNT, FEE, null, "One more");
         assertNotNull(txId);
 
         // transfer back so that Alice's balance is not drained
-        txId = node.transferAsset(bob, alice.getAddress(), AMOUNT, null, FEE, Asset.WAVES, "Thanks, Alice");
+        txId = node.transfer(bob, null, alice.getAddress(), AMOUNT, FEE, Asset.WAVES, "Thanks, Alice");
         assertNotNull(txId);
 
-        txId = node.transferAsset(bob, alice.getAddress(), AMOUNT, Asset.WAVES, FEE, "", "Thanks again");
+        txId = node.transfer(bob, Asset.WAVES, alice.getAddress(), AMOUNT, FEE, "", "Thanks again");
         assertNotNull(txId);
     }
+
+    @Test
+    public void testMassTransfer() throws IOException {
+        Node node = new Node();
+        List<Transfer> transfers = Arrays.asList(new Transfer(alice.getAddress(), AMOUNT), new Transfer(bob.getAddress(), AMOUNT));
+        String txId = node.massTransfer(alice, Asset.WAVES, transfers, FEE * 2, "sharedrop");
+        assertNotNull(txId);
+
+        txId = node.massTransfer(bob, null, transfers, FEE * 2, "same thing");
+        assertNotNull(txId);
+    }
+
+    /// uncomment once DataTx is activated on testnet
+//    @Test
+//    public void testDataTransaction() throws IOException {
+//        Node node = new Node();
+//
+//        BinaryEntry bin = new BinaryEntry("This data was proudly published using WavesJ (https://github.com/wavesplatform/wavesj)",
+//                Base58.decode("WavesJrocks"));
+//        BooleanEntry bool = new BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false);
+//        LongEntry integer = new LongEntry("\u0414\u043B\u0438\u043D\u0430 \u0437\u0438\u043C\u044B \u0432 \u041C\u043E\u0441\u043A\u0432\u0435", 160L);
+//
+//        String txId = node.data(alice, Arrays.asList(bin, bool, integer), FEE);
+//        assertNotNull(txId);
+//    }
 
     @Test
     public void testSendTransaction() throws IOException {
@@ -102,7 +126,7 @@ public class NodeTest {
 
         // Check order status
         String status = matcher.getOrderStatus(order.id, MARKET).status.toString();
-        assertEquals("Accepted", status);
+        assertEquals("ACCEPTED", status);
 
         // Verify the order appears in the list of all orders
         List<Order> orders = matcher.getOrders(alice);
@@ -123,11 +147,11 @@ public class NodeTest {
 
         // Cancel order
         String canceled = matcher.cancelOrder(alice, MARKET, order.id);
-        System.out.println(canceled);
+        assertEquals("OrderCanceled", canceled);
 
         // Delete order from history
         String deleted = matcher.deleteOrder(alice, MARKET, order.id);
-        System.out.println(deleted);
+        assertEquals("OrderDeleted", deleted);
     }
 
     @Test
