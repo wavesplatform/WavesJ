@@ -25,6 +25,7 @@ public class NodeTest {
     @Test
     public void testGetters() throws IOException {
         Node node = new Node();
+        assertNotNull(node.getVersion());
         assertTrue(node.getHeight() > 0);
 
         String address = bob.getAddress();
@@ -66,19 +67,18 @@ public class NodeTest {
         assertNotNull(txId);
     }
 
-    /// uncomment once DataTx is activated on testnet
-//    @Test
-//    public void testDataTransaction() throws IOException {
-//        Node node = new Node();
-//
-//        BinaryEntry bin = new BinaryEntry("This data was proudly published using WavesJ (https://github.com/wavesplatform/wavesj)",
-//                Base58.decode("WavesJrocks"));
-//        BooleanEntry bool = new BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false);
-//        LongEntry integer = new LongEntry("\u0414\u043B\u0438\u043D\u0430 \u0437\u0438\u043C\u044B \u0432 \u041C\u043E\u0441\u043A\u0432\u0435", 160L);
-//
-//        String txId = node.data(alice, Arrays.asList(bin, bool, integer), FEE);
-//        assertNotNull(txId);
-//    }
+    @Test
+    public void testDataTransaction() throws IOException {
+        Node node = new Node();
+
+        BinaryEntry bin = new BinaryEntry("This data was proudly published using WavesJ (https://github.com/wavesplatform/wavesj)",
+                Base58.decode("WavesJrocks"));
+        BooleanEntry bool = new BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false);
+        LongEntry integer = new LongEntry("\u0414\u043B\u0438\u043D\u0430 \u0437\u0438\u043C\u044B \u0432 \u041C\u043E\u0441\u043A\u0432\u0435", 160L);
+
+        String txId = node.data(alice, Arrays.asList(bin, bool, integer), FEE);
+        assertNotNull(txId);
+    }
 
     @Test
     public void testSendTransaction() throws IOException {

@@ -51,6 +51,10 @@ public class Node {
         this.uri = new URI(uri);
     }
 
+    public String getVersion() throws IOException {
+        return send("/node/version", "version").asText();
+    }
+
     public int getHeight() throws IOException {
         return send("/blocks/height", "height").asInt();
     }
