@@ -245,7 +245,10 @@ public class Transaction {
 
     public static Transaction makeDataTx(PrivateKeyAccount account, Collection<DataEntry<?>> data, long fee) {
         long timestamp = System.currentTimeMillis();
-        int datalen = data.stream().mapToInt(DataEntry::size).sum() + MIN_BUFFER_SIZE;
+        int datalen = MIN_BUFFER_SIZE;
+        for (DataEntry e: data) {
+            datalen += e.size();
+        }
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
         buf.put(DATA).put(DEFAULT_VERSION).put(account.getPublicKey());

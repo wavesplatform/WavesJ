@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -30,10 +31,10 @@ public class TransactionTest {
         List<Transfer> transfers = Arrays.asList(new Transfer(acc.getAddress(), AMOUNT), new Transfer(recipient, AMOUNT));
         check(Transaction.makeMassTransferTx(acc, Asset.WAVES, transfers, FEE, "mass transfer"));
 
-        List<DataEntry<?>> data = Arrays.asList(
-                new DataEntry.BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false),
-                new DataEntry.BinaryEntry("blob", new byte[] { 7, 127, -33, 100, -40}),
-                new DataEntry.LongEntry("Wave, wave your hand!", -721010468593883L));
+        List<DataEntry<?>> data = new LinkedList<DataEntry<?>>();
+        data.add(new DataEntry.BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false));
+        data.add(new DataEntry.BinaryEntry("blob", new byte[] { 7, 127, -33, 100, -40}));
+        data.add(new DataEntry.LongEntry("Wave, wave your hand!", -721010468593883L));
         check(Transaction.makeDataTx(acc, data, FEE));
     }
 

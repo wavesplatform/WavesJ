@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.DataEntry.*;
@@ -76,7 +77,11 @@ public class NodeTest {
         BooleanEntry bool = new BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false);
         LongEntry integer = new LongEntry("\u0414\u043B\u0438\u043D\u0430 \u0437\u0438\u043C\u044B \u0432 \u041C\u043E\u0441\u043A\u0432\u0435", 160L);
 
-        String txId = node.data(alice, Arrays.asList(bin, bool, integer), FEE);
+        List<DataEntry<?>> data = new LinkedList<DataEntry<?>>();
+        data.add(bin);
+        data.add(bool);
+        data.add(integer);
+        String txId = node.data(alice, data, FEE);
         assertNotNull(txId);
     }
 
@@ -130,11 +135,24 @@ public class NodeTest {
 
         // Verify the order appears in the list of all orders
         List<Order> orders = matcher.getOrders(alice);
-        assertTrue(orders.stream().anyMatch(o -> o.id.equals(order.id)));
+        boolean found = false;
+        for (Order o: orders) {
+            if (o.id.equals(order.id)) {
+                found = true;
+            }
+        }
+        assertTrue(found);
 
         // Verify the order appears in the list of orders for this asset pair
         orders = matcher.getOrders(alice, MARKET);
-        assertTrue(orders.stream().anyMatch(o -> o.id.equals(order.id)));
+        found = false;
+        for (Order o: orders) {
+            if (o.id.equals(order.id)) {
+                found = true;
+            }
+        }
+        assertTrue(found);
+
         for (Order o: orders) {
             assertNotNull(o.id);
             assertNotNull(o.type);
