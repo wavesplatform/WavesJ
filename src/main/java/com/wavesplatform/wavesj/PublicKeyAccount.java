@@ -1,15 +1,11 @@
 package com.wavesplatform.wavesj;
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.KeccakDigest;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static com.wavesplatform.wavesj.Hash.hash;
+import static com.wavesplatform.wavesj.Hash.secureHash;
 
 public class PublicKeyAccount implements Account {
-    private static final Digest KECCAK256 = new KeccakDigest(256);
 
     private final char scheme;
     private final byte[] publicKey;
@@ -35,11 +31,6 @@ public class PublicKeyAccount implements Account {
 
     public final char getScheme() {
         return scheme;
-    }
-
-    static byte[] secureHash(byte[] message, int ofs, int len) {
-        byte[] blake2b = hash(message, ofs, len, Hash.BLAKE2B256);
-        return hash(blake2b, 0, blake2b.length, KECCAK256);
     }
 
     private static byte[] address(byte[] publicKey, char scheme) {

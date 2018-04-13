@@ -1,18 +1,17 @@
 package com.wavesplatform.wavesj;
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.whispersystems.curve25519.java.curve_sigs;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static com.wavesplatform.wavesj.Hash.hash;
+import static com.wavesplatform.wavesj.Hash.*;
 
 public class PrivateKeyAccount extends PublicKeyAccount {
-    private static final Digest SHA256 = new SHA256Digest();
 
     private static final String[] SEED_WORDS = {
             "abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse", "access",
