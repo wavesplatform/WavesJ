@@ -38,7 +38,7 @@ public class Transaction {
         this.signature = sign(account, bytes);
         this.endpoint = endpoint;
 
-        HashMap<String, Object> map = new HashMap<>();
+        HashMap<String, Object> map = new HashMap<String, Object>();
         for (int i=0; i<items.length; i+=2) {
             Object value = items[i+1];
             if (value != null) {
@@ -49,7 +49,7 @@ public class Transaction {
     }
 
     public String getJson() {
-        HashMap<String, Object> toJson = new HashMap<>(data);
+        HashMap<String, Object> toJson = new HashMap<String, Object>(data);
         toJson.put("id", id);
         toJson.put("signature", signature);
         toJson.put("proofs", new String[] {signature});
@@ -246,7 +246,7 @@ public class Transaction {
     public static Transaction makeDataTx(PrivateKeyAccount account, Collection<DataEntry<?>> data, long fee) {
         long timestamp = System.currentTimeMillis();
         int datalen = MIN_BUFFER_SIZE;
-        for (DataEntry e: data) {
+        for (DataEntry<?> e: data) {
             datalen += e.size();
         }
 

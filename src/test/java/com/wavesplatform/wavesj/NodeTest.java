@@ -13,8 +13,8 @@ import static org.junit.Assert.*;
 
 public class NodeTest {
     private static final long AMOUNT = 1 * Asset.TOKEN;
-    private static final long FEE = 100_000;
-    private static final long MFEE = 300_000;
+    private static final long FEE = 100000;
+    private static final long MFEE = 300000;
     private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
     private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC);
 
@@ -119,7 +119,7 @@ public class NodeTest {
         Order order = matcher.createOrder(alice, matcherKey,
                 MARKET, Order.Type.SELL,
                 1, 1 * Asset.TOKEN,
-                System.currentTimeMillis() + 65_000,
+                System.currentTimeMillis() + 65000,
                 MFEE);
         assertNotNull(order.id);
         assertEquals(Order.Type.SELL, order.type);

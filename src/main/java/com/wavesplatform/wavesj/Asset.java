@@ -6,9 +6,9 @@ public abstract class Asset {
      */
     public static final String WAVES = "WAVES";
 
-    public static final long TOKEN = 100_000_000L;
+    public static final long TOKEN = 100000000L;
 
-    public static final long MILLI = 100_000L;
+    public static final long MILLI = 100000L;
 
     static String normalize(String assetId) {
         return assetId == null || assetId.isEmpty() ? Asset.WAVES : assetId;

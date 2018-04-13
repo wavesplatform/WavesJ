@@ -2,16 +2,16 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 public abstract class DataEntry<T> {
+    private final static Charset UTF8 = Charset.forName("UTF-8");
     private final static byte INTEGER = 0;
     private final static byte BOOLEAN = 1;
     private final static byte BINARY  = 2;
@@ -29,11 +29,11 @@ public abstract class DataEntry<T> {
     }
 
     int size() {
-        return key.getBytes(StandardCharsets.UTF_8).length + 2;
+        return key.getBytes(UTF8).length + 2;
     }
 
     void write(ByteBuffer buf) {
-        byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = key.getBytes(UTF8);
         buf.putShort((short) bytes.length).put(bytes);
     }
 
@@ -83,6 +83,7 @@ public abstract class DataEntry<T> {
             buf.put(BINARY).putShort((short) value.length).put(value);
         }
 
+        @SuppressWarnings("serial")
         static class Serializer extends StdSerializer<BinaryEntry> {
 
             public Serializer() {

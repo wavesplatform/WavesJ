@@ -24,20 +24,19 @@ public class Order {
         @JsonCreator
         static Status fromString(String json) {
             if (json == null) return null;
-            switch (json) {
-                case "Accepted":
-                case "OrderAccepted":
-                    return ACCEPTED;
-                case "Filled":
-                    return FILLED;
-                case "PartiallyFilled":
-                    return PARTIALLY_FILLED;
-                case "Cancelled":
-                    return CANCELED;
-                case "NotFound":
-                    return NOT_FOUND;
-                default:
-                    throw new IllegalArgumentException("Bad status value: " + json);
+            json = json.intern();
+            if (json == "Accepted" || json == "OrderAccepted") {
+                return ACCEPTED;
+            } else if (json == "Filled") {
+                return FILLED;
+            } else if (json == "PartiallyFilled") {
+                return PARTIALLY_FILLED;
+            } else if (json ==  "Cancelled") {
+                return CANCELED;
+            } else if (json ==  "NotFound") {
+                return NOT_FOUND;
+            } else {
+                throw new IllegalArgumentException("Bad status value: " + json);
             }
         }
 

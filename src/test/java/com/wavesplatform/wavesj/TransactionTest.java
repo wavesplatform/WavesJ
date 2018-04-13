@@ -9,8 +9,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class TransactionTest {
-    private static final long AMOUNT = 1_00000000L;
-    private static final long FEE = 100_000;
+    private static final long AMOUNT = 100000000L;
+    private static final long FEE = 100000;
 
     @Test
     public void test() {
