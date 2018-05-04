@@ -22,6 +22,8 @@ public class Transaction {
     private static final byte ALIAS         = 10;
     private static final byte MASS_TRANSFER = 11;
     private static final byte DATA          = 12;
+    private static final byte SET_SCRIPT    = 13;
+    private static final byte SPONSOR       = 14;
 
     private static final byte DEFAULT_VERSION = 1;
     private static final int MIN_BUFFER_SIZE = 120;
@@ -177,6 +179,28 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
+    public static Transaction makeSponsorTx(PrivateKeyAccount account, String assetId, long minAssetFee, long fee) {
+        if (isWaves(assetId)) {
+            throw new IllegalArgumentException("Cannot burn WAVES");
+        }
+        if (minAssetFee < 0) {
+            throw new IllegalArgumentException("minAssetFee must be positive or zero");
+        }
+        long timestamp = System.currentTimeMillis();
+        ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
+        buf.put(SPONSOR).put(account.getPublicKey()).put(Base58.decode(assetId))
+                .putLong(minAssetFee).putLong(fee).putLong(timestamp);
+
+        return new Transaction(account, buf,"/transactions/broadcast",
+                "type", SPONSOR,
+                "version", DEFAULT_VERSION,
+                "senderPublicKey", Base58.encode(account.getPublicKey()),
+                "assetId", assetId,
+                "minSponsoredAssetFee", minAssetFee == 0L ? null : minAssetFee,
+                "fee", fee,
+                "timestamp", timestamp);
+    }
+
     public static Transaction makeLeaseTx(PrivateKeyAccount account, String toAddress, long amount, long fee) {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
@@ -263,6 +287,30 @@ public class Transaction {
                 "version", DEFAULT_VERSION,
                 "senderPublicKey", Base58.encode(account.getPublicKey()),
                 "data", data,
+                "fee", fee,
+                "timestamp", timestamp);
+    }
+
+    public static Transaction makeScriptTx(PrivateKeyAccount account, String script, char scheme, long fee) {
+        if (scheme > Byte.MAX_VALUE) {
+            throw new IllegalArgumentException("Scheme should be between 0 and 127");
+        }
+        long timestamp = System.currentTimeMillis();
+        byte[] rawScript = script == null ? new byte[0] : Base58.decode(script);
+        ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + rawScript.length);
+        buf.put(SET_SCRIPT).put(DEFAULT_VERSION).put((byte) scheme).put(account.getPublicKey());
+        if (rawScript.length > 0) {
+            buf.put((byte) 1).putShort((short) rawScript.length).put(rawScript);
+        } else {
+            buf.put((byte) 0);
+        }
+        buf.putLong(fee).putLong(timestamp);
+
+        return new Transaction(account, buf,"/transactions/broadcast",
+                "type", SET_SCRIPT,
+                "version", DEFAULT_VERSION,
+                "senderPublicKey", Base58.encode(account.getPublicKey()),
+                "script", script,
                 "fee", fee,
                 "timestamp", timestamp);
     }

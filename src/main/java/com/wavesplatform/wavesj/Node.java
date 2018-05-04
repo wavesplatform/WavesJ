@@ -134,6 +134,11 @@ public class Node {
         return send(tx);
     }
 
+    public String sponsorAsset(PrivateKeyAccount account, String assetId, long minAssetFee, long fee) throws IOException {
+        Transaction tx = Transaction.makeSponsorTx(account, assetId, minAssetFee, fee);
+        return send(tx);
+    }
+
     public String alias(PrivateKeyAccount account, String alias, char scheme, long fee) throws IOException {
         Transaction tx = Transaction.makeAliasTx(account, alias, scheme, fee);
         return send(tx);
@@ -146,6 +151,11 @@ public class Node {
 
     public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
         Transaction tx = Transaction.makeDataTx(from, data, fee);
+        return send(tx);
+    }
+
+    public String setScript(PrivateKeyAccount from, String script, char scheme, long fee) throws IOException {
+        Transaction tx = Transaction.makeScriptTx(from, script, scheme, fee);
         return send(tx);
     }
 
