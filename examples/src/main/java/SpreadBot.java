@@ -2,7 +2,6 @@ import com.wavesplatform.wavesj.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.Instant;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,7 +9,7 @@ public class SpreadBot {
     private final long maxOrderSize = 1 * Asset.MILLI; // in priceAsset
     private final double halfSpread = 0.01; // 1%
     private final long fee = 3 * Asset.MILLI; // in WAVES
-    private final long period = 60_000; // 1 min
+    private final long period = 60000; // 1 min
 
     private final PrivateKeyAccount account;
     private final AssetPair market;
@@ -50,7 +49,7 @@ public class SpreadBot {
     }
 
     private String fileOrder(Order.Type type, long price, long amount) throws IOException, InterruptedException {
-        long expiration = System.currentTimeMillis() + Math.max(period, 61_000); // matcher requires expiration > 1 min in the future
+        long expiration = System.currentTimeMillis() + Math.max(period, 61000); // matcher requires expiration > 1 min in the future
         Order order = matcher.createOrder(account, matcherKey, market, type, price, amount, expiration, fee);
         System.out.printf("Filed order %s to %s %d at %d\n", order.id, type, amount, price);
         return order.id;
@@ -58,7 +57,6 @@ public class SpreadBot {
 
     private void round() throws IOException, InterruptedException {
         System.out.println();
-        System.out.println(Instant.now());
 
         // Cancel all orders filed at our market
         for (Order order: matcher.getOrders(account, market)) {

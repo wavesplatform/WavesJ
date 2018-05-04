@@ -8,9 +8,9 @@ import static com.wavesplatform.wavesj.Asset.WAVES;
 public class NodeExample {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        final long FEE = 100_000;
+        final long FEE = 100000;
         final long ISSUE_FEE = 1 * Asset.TOKEN;
-        final long MATCHER_FEE = 300_000;
+        final long MATCHER_FEE = 300000;
 
         final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
 
@@ -45,7 +45,7 @@ public class NodeExample {
 
         // Issue an asset
         String assetId = node.issueAsset(alice, "CleanAir", "The first air-backed blockchain asset ever",
-                1_000_000 * Asset.TOKEN, 8, true, ISSUE_FEE);
+                1000000 * Asset.TOKEN, 8, true, ISSUE_FEE);
         // Reissuing, making it no longer reissuable
         txId = node.reissueAsset(alice, assetId, 100 * Asset.TOKEN, false, ISSUE_FEE);
         // Burning some coins
@@ -78,9 +78,9 @@ public class NodeExample {
         AssetPair market = new AssetPair(Asset.WAVES, WBTC);
         Order order = matcher.createOrder(alice, matcherKey, market,
                 // buy 10 WAVES at 0.00090000 WBTC each
-                Order.Type.BUY, 90_000, 10 * Asset.TOKEN,
+                Order.Type.BUY, 90000, 10 * Asset.TOKEN,
                 // make order valid for 1 hour
-                System.currentTimeMillis() + 3_600_000, MATCHER_FEE);
+                System.currentTimeMillis() + 3600000, MATCHER_FEE);
         String orderId = order.id;
         System.out.printf("Filed order %s to %s %d WAVES at %.8f\n",
                 order.id, order.type, order.amount / Asset.TOKEN, ((float) order.price) / Asset.TOKEN);
