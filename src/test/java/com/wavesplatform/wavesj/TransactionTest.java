@@ -27,7 +27,7 @@ public class TransactionTest {
         check(Transaction.makeLeaseTx(acc, recipient, AMOUNT, FEE));
         check(Transaction.makeLeaseCancelTx(acc, txId, FEE));
         check(Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money"));
-
+/// new types
         List<Transfer> transfers = Arrays.asList(new Transfer(acc.getAddress(), AMOUNT), new Transfer(recipient, AMOUNT));
         check(Transaction.makeMassTransferTx(acc, Asset.WAVES, transfers, FEE, "mass transfer"));
 
@@ -42,10 +42,36 @@ public class TransactionTest {
         assertNotNull(tx.id);
         assertFalse(tx.id.isEmpty());
 
-        assertNotNull(tx.signature);
-        assertFalse(tx.signature.isEmpty());
+        assertEquals(1, tx.proofs.size());
+        assertFalse(tx.proofs.get(0).isEmpty());
 
         assertNotNull(tx.endpoint);
         assertFalse(tx.endpoint.isEmpty());
+    }
+
+    @Test
+    public void multiSigTest() {
+        PublicKeyAccount sender = new PublicKeyAccount("8LbAU5BSrGkpk5wbjLMNjrbc9VzN9KBBYv9X8wGpmAJT", Account.TESTNET);
+        PrivateKeyAccount signer1 = PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
+        PrivateKeyAccount signer2 = PrivateKeyAccount.fromPrivateKey("4n6L7rZYL2LAmwheLBketwXCCC4JZF3mHYEskySxeNqm", Account.TESTNET);
+
+        Transaction tx = Transaction.makeLeaseTx(sender, signer1.getAddress(), Asset.TOKEN, Asset.MILLI, signer2, signer1);
+        assertEquals(2, tx.proofs.size());
+
+        tx = Transaction.makeLeaseTx(sender, signer1.getAddress(), Asset.TOKEN, Asset.MILLI);
+        assertTrue(tx.proofs.isEmpty());
+
+        Transaction provenTx = tx.addProofs("proof of work", "some other proof");
+        assertEquals(2, provenTx.proofs.size());
+
+        Transaction signedTx = provenTx.sign(signer1, signer2);
+        assertEquals(4, signedTx.proofs.size());
+
+        try {
+            signedTx.addProofs("a", "b", "e", "zyx", "bah!");
+            fail("Was able to add 9 proofs to a transaction");
+        } catch (IllegalStateException ex) {
+            // okay
+        }
     }
 }

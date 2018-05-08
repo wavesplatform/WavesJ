@@ -19,9 +19,9 @@ public class NodeTest {
     private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC);
 
     private static final PrivateKeyAccount alice =
-            PrivateKeyAccount.fromPrivateKey("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
-    private static final PrivateKeyAccount bob =
             PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
+    private static final PrivateKeyAccount bob =
+            PrivateKeyAccount.fromPrivateKey("4n6L7rZYL2LAmwheLBketwXCCC4JZF3mHYEskySxeNqm", Account.TESTNET);
 
     @Test
     public void testGetters() throws IOException {
