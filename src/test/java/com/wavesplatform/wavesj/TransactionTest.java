@@ -26,8 +26,12 @@ public class TransactionTest {
         check(Transaction.makeReissueTx(acc, assetId, AMOUNT, false, FEE));
         check(Transaction.makeLeaseTx(acc, recipient, AMOUNT, FEE));
         check(Transaction.makeLeaseCancelTx(acc, txId, FEE));
+        check(Transaction.makeSponsorTx(acc, assetId, FEE, FEE));
         check(Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money"));
-/// new types
+        check(Transaction.makeMassTransferTx(acc, assetId, new LinkedList<Transfer>(), FEE, null));
+        check(Transaction.makeDataTx(acc, new LinkedList<DataEntry<?>>(), FEE));
+        check(Transaction.makeScriptTx(acc, "Base58", 'T', FEE));
+
         List<Transfer> transfers = Arrays.asList(new Transfer(acc.getAddress(), AMOUNT), new Transfer(recipient, AMOUNT));
         check(Transaction.makeMassTransferTx(acc, Asset.WAVES, transfers, FEE, "mass transfer"));
 

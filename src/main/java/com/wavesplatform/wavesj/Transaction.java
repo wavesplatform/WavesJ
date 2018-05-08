@@ -10,7 +10,30 @@ import java.util.*;
 import static com.wavesplatform.wavesj.Asset.isWaves;
 
 /**
- * This class represents a Waves transaction.
+ * This class represents a Waves transaction. Instances are immutable, with data accessible through public final fields.
+ * They are obtained using static factory methods defined in this class.
+ *
+ * <h2>Proofs and Signers</h2>
+ * <p>Each transaction has a number of proofs associated with it that are used to validate the transaction. For non-scripted
+ * accounts, the only proof needed is a signature made with the private key of the transaction sender. For scripted
+ * accounts, the number and order of proofs are dictated by the account script. E.g. a 2-of-3 multisig account would
+ * require 2 to 3 signatures made by holders of certain public keys.
+ *
+ * <p>Each proof is a byte array of 64 bytes max. There's a limit of 8 proofs per transaction.
+ *
+ * <p>There are several ways to sign a transaction:
+ * <ul>
+ *     <li>Factory methods accept an array of signers. When non-empty, a signature is generated for each signer in order
+ *     and added as a proof.
+ *     <li>When no signers are specified, but the {@code sender} parameter is an instance of {@link PrivateKeyAccount},
+ *     it is used to sign the transaction, and the signature is set as the only proof. This is needed for non-scripted
+ *     accounts and for backward compatibility with older versions of the library.
+ *     <li>It is possible to add proofs to any transaction as long as the total number of proofs does not exceed 8.
+ *     Methods {@link #addProof(String)} and {@link #addProofs(String...)} add one or several Base58-encoded proofs.
+ *     There's also shortcut method {@link #sign(PrivateKeyAccount...)} that generates a number of signatures and adds
+ *     them as proofs. Note that all these methods do not modify transactions they are called on, but rather return
+ *     new transactions.
+ * </ul>
  */
 public class Transaction {
     public static final int MAX_PROOF_COUNT = 8;
@@ -51,12 +74,7 @@ public class Transaction {
         this.bytes = toBytes(buffer);
         this.id = hash(bytes);
         this.endpoint = endpoint;
-
-        String[] signatures = new String[signers.length];
-        for (int i=0; i<signers.length; i++) {
-            signatures[i] = sign(signers[i], bytes);
-        }
-        this.proofs = Arrays.asList(signatures);
+        this.proofs = Arrays.asList(sign(bytes, signers));
 
         HashMap<String, Object> map = new HashMap<String, Object>();
         for (int i=0; i<items.length; i+=2) {
@@ -79,6 +97,10 @@ public class Transaction {
         this.proofs = Collections.unmodifiableList(p);
     }
 
+    /**
+     * Returns JSON-encoded transaction data.
+     * @return a JSON string
+     */
     public String getJson() {
         HashMap<String, Object> toJson = new HashMap<String, Object>(data);
         toJson.put("id", id);
@@ -126,8 +148,8 @@ public class Transaction {
      * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease transaction:
      * <code>
      *     PublicKeyAccount leaser = ...
-     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);
-     *     tx = tx.sign(signer1, signer2);
+     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned transaction
+     *     tx = tx.sign(signer1, signer2);  // adds 2 signatures to the list of proofs
      *     node.send(tx);
      * </code>
      * @param signers accounts used to sign
@@ -135,10 +157,7 @@ public class Transaction {
      * @throws IllegalStateException if the resulting number of proofs exceeds maximum (currently 8)
      */
     public Transaction sign(PrivateKeyAccount... signers) {
-        String[] signatures = new String[signers.length];
-        for (int i=0; i<signers.length; i++) {
-            signatures[i] = sign(signers[i], bytes);
-        }
+        String[] signatures = sign(bytes, signers);
         return addProofs(signatures);
     }
 
@@ -153,12 +172,16 @@ public class Transaction {
         return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
     }
 
-    private static String sign(PrivateKeyAccount account, byte[] bytes) {
-        return Base58.encode(cipher.calculateSignature(account.getPrivateKey(), bytes));
+    private static String[] sign(byte[] bytes, PrivateKeyAccount... signers) {
+        String[] signatures = new String[signers.length];
+        for (int i=0; i<signers.length; i++) {
+            signatures[i] = Base58.encode(cipher.calculateSignature(signers[i].getPrivateKey(), bytes));
+        }
+        return signatures;
     }
 
     static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
-        return sign(account, toBytes(buffer));
+        return sign(toBytes(buffer), account)[0];
     }
 
     private static void putAsset(ByteBuffer buffer, String assetId) {
@@ -197,6 +220,7 @@ public class Transaction {
                 .putLong(fee).putLong(timestamp);
 
        return new Transaction(getSigners(sender, signers), buf,"/assets/broadcast/issue",
+                "type", ISSUE,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "name", name,
                 "description", description,
@@ -219,6 +243,7 @@ public class Transaction {
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
         return new Transaction(getSigners(sender, signers), buf, "/assets/broadcast/reissue",
+                "type", REISSUE,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", assetId,
                 "quantity", quantity,
@@ -244,6 +269,7 @@ public class Transaction {
                 .putShort((short) attachmentBytes.length).put(attachmentBytes);
 
         return new Transaction(getSigners(sender, signers), buf,"/assets/broadcast/transfer",
+                "type", TRANSFER,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "recipient", toAddress,
                 "amount", amount,
@@ -263,6 +289,7 @@ public class Transaction {
         buf.put(BURN).put(sender.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         return new Transaction(getSigners(sender, signers), buf,"/assets/broadcast/burn",
+                "type", BURN,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", assetId,
                 "quantity", amount,
@@ -298,6 +325,7 @@ public class Transaction {
         buf.put(LEASE).put(sender.getPublicKey()).put(Base58.decode(toAddress))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         return new Transaction(getSigners(sender, signers), buf,"/leasing/broadcast/lease",
+                "type", LEASE,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "recipient", toAddress,
                 "amount", amount,
@@ -310,6 +338,7 @@ public class Transaction {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE_CANCEL).put(sender.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(txId));
         return new Transaction(getSigners(sender, signers), buf,"/leasing/broadcast/cancel",
+                "type", LEASE_CANCEL,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "txId", txId,
                 "fee", fee,
@@ -324,6 +353,7 @@ public class Transaction {
                 .putShort((short) (alias.length() + 4)).put((byte) 0x02).put((byte) scheme)
                 .putShort((short) alias.length()).put(alias.getBytes()).putLong(fee).putLong(timestamp);
         return new Transaction(getSigners(sender, signers), buf,"/alias/broadcast/create",
+                "type", ALIAS,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "alias", alias,
                 "fee", fee,
