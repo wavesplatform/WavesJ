@@ -59,22 +59,25 @@ public class TransactionTest {
         PrivateKeyAccount signer1 = PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
         PrivateKeyAccount signer2 = PrivateKeyAccount.fromPrivateKey("4n6L7rZYL2LAmwheLBketwXCCC4JZF3mHYEskySxeNqm", Account.TESTNET);
 
-        Transaction tx = Transaction.makeLeaseTx(sender, signer1.getAddress(), Asset.TOKEN, Asset.MILLI, signer2, signer1);
-        assertEquals(2, tx.proofs.size());
+        Transaction tx = Transaction.makeLeaseTx(sender, signer1.getAddress(), Asset.TOKEN, Asset.MILLI);
+        assertEquals(0, tx.proofs.size());
 
-        tx = Transaction.makeLeaseTx(sender, signer1.getAddress(), Asset.TOKEN, Asset.MILLI);
-        assertTrue(tx.proofs.isEmpty());
-
-        Transaction provenTx = tx.addProofs("proof of work", "some other proof");
+        String proof = "some proof";
+        Transaction provenTx = tx.setProof(1, proof);
         assertEquals(2, provenTx.proofs.size());
+        assertEquals("", provenTx.proofs.get(0));
+        assertEquals(proof, provenTx.proofs.get(1));
 
-        Transaction signedTx = provenTx.sign(signer1, signer2);
-        assertEquals(4, signedTx.proofs.size());
+        String signature = signer1.sign(provenTx);
+        Transaction signedTx = provenTx.setProof(0, signature);
+        assertEquals(2, signedTx.proofs.size());
+        assertEquals(signature, signedTx.proofs.get(0));
+        assertEquals(proof, signedTx.proofs.get(1));
 
         try {
-            signedTx.addProofs("a", "b", "e", "zyx", "bah!");
+            signedTx.setProof(8, "bah!");
             fail("Was able to add 9 proofs to a transaction");
-        } catch (IllegalStateException ex) {
+        } catch (IllegalArgumentException ex) {
             // okay
         }
     }

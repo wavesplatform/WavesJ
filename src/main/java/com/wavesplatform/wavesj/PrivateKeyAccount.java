@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj;
 
+import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.java.curve_sigs;
 
 import java.math.BigInteger;
@@ -10,6 +11,8 @@ import java.util.Arrays;
 import static com.wavesplatform.wavesj.Hash.*;
 
 public class PrivateKeyAccount extends PublicKeyAccount {
+
+    private static final Curve25519 cipher = Curve25519.getInstance(Curve25519.BEST);
 
     private static final String[] SEED_WORDS = {
             "abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse", "access",
@@ -215,6 +218,27 @@ public class PrivateKeyAccount extends PublicKeyAccount {
 
     public final byte[] getPrivateKey() {
         return Arrays.copyOf(privateKey, privateKey.length);
+    }
+
+    /**
+     * Signs a transaction and returns Base58-encoded signature.
+     * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease transaction:
+     * <code>
+     *     PublicKeyAccount leaser = ...
+     *     PrivateKeyAccount signer = ...
+     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned transaction
+     *     tx = tx.setProof(0, signer.sign(tx));  // sets the signature as proof 0
+     *     node.send(tx);
+     * </code>
+     * @param tx transaction to sign
+     * @return Base58-encoded signature
+     */
+    public String sign(Transaction tx) {
+        return sign(tx.bytes);
+    }
+
+    String sign(byte[] bytes) {
+        return Base58.encode(cipher.calculateSignature(getPrivateKey(), bytes));
     }
 
     /**

@@ -2,7 +2,6 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.whispersystems.curve25519.Curve25519;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -21,18 +20,14 @@ import static com.wavesplatform.wavesj.Asset.isWaves;
  *
  * <p>Each proof is a byte array of 64 bytes max. There's a limit of 8 proofs per transaction.
  *
- * <p>There are several ways to sign a transaction:
+ * <p>There are two ways to sign a transaction:
  * <ul>
- *     <li>Factory methods accept an array of signers. When non-empty, a signature is generated for each signer in order
- *     and added as a proof.
- *     <li>When no signers are specified, but the {@code sender} parameter is an instance of {@link PrivateKeyAccount},
- *     it is used to sign the transaction, and the signature is set as the only proof. This is needed for non-scripted
- *     accounts and for backward compatibility with older versions of the library.
- *     <li>It is possible to add proofs to any transaction as long as the total number of proofs does not exceed 8.
- *     Methods {@link #addProof(String)} and {@link #addProofs(String...)} add one or several Base58-encoded proofs.
- *     There's also shortcut method {@link #sign(PrivateKeyAccount...)} that generates a number of signatures and adds
- *     them as proofs. Note that all these methods do not modify transactions they are called on, but rather return
- *     new transactions.
+ *     <li>When an instance of {@link PrivateKeyAccount} is passed as the {@code sender} parameter to any of the factory
+ *     methods, it is used to sign the transaction, and the signature is set as the proof number 0. This is needed for
+ *     non-scripted accounts and for backward compatibility with older versions of the library.
+ *     <li>It is possible to add up to 8 proofs to any transaction. The {@link #setProof(int, String)} method can be used
+ *     to set arbitrary Base58-encoded proofs at arbitrary positions. Note that this method does not modify
+ *     {@code Transaction} it is called on, but rather returns a new instance.
  * </ul>
  */
 public class Transaction {
@@ -52,7 +47,6 @@ public class Transaction {
 
     private static final byte DEFAULT_VERSION = 1;
     private static final int MIN_BUFFER_SIZE = 120;
-    private static final Curve25519 cipher = Curve25519.getInstance(Curve25519.BEST);
 
     /** Transaction ID. */
     public final String id;
@@ -64,17 +58,18 @@ public class Transaction {
      */
     public final List<String> proofs;
     final String endpoint;
-    private final byte[] bytes;
+    final byte[] bytes;
 
-    private Transaction(PrivateKeyAccount signer, ByteBuffer buffer, String endpoint, Object... items) {
-        this(new PrivateKeyAccount[] { signer }, buffer, endpoint, items);
-    }
-
-    private Transaction(PrivateKeyAccount[] signers, ByteBuffer buffer, String endpoint, Object... items) {
+    private Transaction(PublicKeyAccount signer, ByteBuffer buffer, String endpoint, Object... items) {
         this.bytes = toBytes(buffer);
         this.id = hash(bytes);
         this.endpoint = endpoint;
-        this.proofs = Arrays.asList(sign(bytes, signers));
+
+        if (signer instanceof PrivateKeyAccount) {
+            this.proofs = Collections.singletonList(((PrivateKeyAccount) signer).sign(bytes));
+        } else {
+            this.proofs = Collections.emptyList();
+        }
 
         HashMap<String, Object> map = new HashMap<String, Object>();
         for (int i=0; i<items.length; i+=2) {
@@ -86,15 +81,12 @@ public class Transaction {
         this.data = Collections.unmodifiableMap(map);
     }
 
-    private Transaction(Transaction tx, String... proofs) {
+    private Transaction(Transaction tx, List<String> proofs) {
         this.id = tx.id;
         this.data = tx.data;
         this.endpoint = tx.endpoint;
         this.bytes = tx.bytes;
-
-        List<String> p = new ArrayList<String>(tx.proofs);
-        p.addAll(Arrays.asList(proofs));
-        this.proofs = Collections.unmodifiableList(p);
+        this.proofs = Collections.unmodifiableList(proofs);
     }
 
     /**
@@ -121,44 +113,18 @@ public class Transaction {
      * Adds a new proof to the transaction.
      * @param proof a Base58-encoded proof
      * @return new {@code Transaction} object with the proof added
-     * @throws IllegalStateException if the transaction already has maximum number of proofs (currently 8)
+     * @throws IllegalArgumentException if index is not between 0 and 7
      */
-    public Transaction addProof(String proof) {
-        if (proofs.size() >= MAX_PROOF_COUNT) {
-            throw new IllegalStateException(String.format("Maximum number of proofs (%d) has been reached", MAX_PROOF_COUNT));
+    public Transaction setProof(int index, String proof) {
+        if (index < 0 || index >= MAX_PROOF_COUNT) {
+            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
         }
-        return new Transaction(this, proof);
-    }
-
-    /**
-     * Adds new proofs to the transaction.
-     * @param newProofs a Base58-encoded proof
-     * @return new {@code Transaction} object with the new proofs added
-     * @throws IllegalStateException if the resulting number of proofs exceeds maximum (currently 8)
-     */
-    public Transaction addProofs(String... newProofs) {
-        if (proofs.size() + newProofs.length > MAX_PROOF_COUNT) {
-            throw new IllegalStateException(String.format("Maximum number of proofs (%d) has been reached", MAX_PROOF_COUNT));
+        List<String> newProofs = new LinkedList<String>(proofs);
+        for (int i = proofs.size(); i <= index; i++) {
+            newProofs.add("");
         }
+        newProofs.set(index, proof);
         return new Transaction(this, newProofs);
-    }
-
-    /**
-     * Signs the transaction using one or several accounts and adds the signatures as new proofs.
-     * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease transaction:
-     * <code>
-     *     PublicKeyAccount leaser = ...
-     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned transaction
-     *     tx = tx.sign(signer1, signer2);  // adds 2 signatures to the list of proofs
-     *     node.send(tx);
-     * </code>
-     * @param signers accounts used to sign
-     * @return new {@code Transaction} object with the signatures added
-     * @throws IllegalStateException if the resulting number of proofs exceeds maximum (currently 8)
-     */
-    public Transaction sign(PrivateKeyAccount... signers) {
-        String[] signatures = sign(bytes, signers);
-        return addProofs(signatures);
     }
 
     private static byte[] toBytes(ByteBuffer buffer) {
@@ -166,22 +132,6 @@ public class Transaction {
         buffer.position(0);
         buffer.get(bytes);
         return bytes;
-    }
-
-    private static String hash(byte[] bytes) {
-        return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
-    }
-
-    private static String[] sign(byte[] bytes, PrivateKeyAccount... signers) {
-        String[] signatures = new String[signers.length];
-        for (int i=0; i<signers.length; i++) {
-            signatures[i] = Base58.encode(cipher.calculateSignature(signers[i].getPrivateKey(), bytes));
-        }
-        return signatures;
-    }
-
-    static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
-        return sign(toBytes(buffer), account)[0];
     }
 
     private static void putAsset(ByteBuffer buffer, String assetId) {
@@ -192,18 +142,16 @@ public class Transaction {
         }
     }
 
-    private static PrivateKeyAccount[] getSigners(PublicKeyAccount sender, PrivateKeyAccount[] signers) {
-        if (signers.length > 0) {
-            return signers;
-        } else if (sender instanceof PrivateKeyAccount) {
-            return new PrivateKeyAccount[] { (PrivateKeyAccount) sender };
-        } else {
-            return new PrivateKeyAccount[0];
-        }
+    private static String hash(byte[] bytes) {
+        return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
+    }
+
+    static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
+        return account.sign(toBytes(buffer));
     }
 
     public static Transaction makeIssueTx(PublicKeyAccount sender, String name, String description, long quantity,
-                                          int decimals, boolean reissuable, long fee, PrivateKeyAccount... signers)
+                                          int decimals, boolean reissuable, long fee)
     {
         long timestamp = System.currentTimeMillis();
         int desclen = description == null ? 0 : description.length();
@@ -219,7 +167,7 @@ public class Transaction {
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
 
-       return new Transaction(getSigners(sender, signers), buf,"/assets/broadcast/issue",
+       return new Transaction(sender, buf,"/assets/broadcast/issue",
                 "type", ISSUE,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "name", name,
@@ -231,8 +179,7 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeReissueTx(PublicKeyAccount sender, String assetId, long quantity, boolean reissuable,
-                                            long fee, PrivateKeyAccount... signers)
+    public static Transaction makeReissueTx(PublicKeyAccount sender, String assetId, long quantity, boolean reissuable, long fee)
     {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot reissue WAVES");
@@ -242,7 +189,7 @@ public class Transaction {
         buf.put(REISSUE).put(sender.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
-        return new Transaction(getSigners(sender, signers), buf, "/assets/broadcast/reissue",
+        return new Transaction(sender, buf, "/assets/broadcast/reissue",
                 "type", REISSUE,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", assetId,
@@ -253,7 +200,7 @@ public class Transaction {
     }
 
     public static Transaction makeTransferTx(PublicKeyAccount sender, String toAddress, long amount, String assetId,
-                                             long fee, String feeAssetId, String attachment, PrivateKeyAccount... signers)
+                                             long fee, String feeAssetId, String attachment)
     {
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
         int datalen = (isWaves(assetId) ? 0 : 32) +
@@ -268,7 +215,7 @@ public class Transaction {
         buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress))
                 .putShort((short) attachmentBytes.length).put(attachmentBytes);
 
-        return new Transaction(getSigners(sender, signers), buf,"/assets/broadcast/transfer",
+        return new Transaction(sender, buf,"/assets/broadcast/transfer",
                 "type", TRANSFER,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "recipient", toAddress,
@@ -280,7 +227,7 @@ public class Transaction {
                 "attachment", Base58.encode(attachmentBytes));
     }
 
-    public static Transaction makeBurnTx(PublicKeyAccount sender, String assetId, long amount, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeBurnTx(PublicKeyAccount sender, String assetId, long amount, long fee) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot burn WAVES");
         }
@@ -288,7 +235,7 @@ public class Transaction {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(BURN).put(sender.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
-        return new Transaction(getSigners(sender, signers), buf,"/assets/broadcast/burn",
+        return new Transaction(sender, buf,"/assets/broadcast/burn",
                 "type", BURN,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", assetId,
@@ -297,7 +244,7 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeSponsorTx(PublicKeyAccount sender, String assetId, long minAssetFee, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeSponsorTx(PublicKeyAccount sender, String assetId, long minAssetFee, long fee) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot burn WAVES");
         }
@@ -309,7 +256,7 @@ public class Transaction {
         buf.put(SPONSOR).put(sender.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(minAssetFee).putLong(fee).putLong(timestamp);
 
-        return new Transaction(getSigners(sender, signers), buf,"/transactions/broadcast",
+        return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", SPONSOR,
                 "version", DEFAULT_VERSION,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
@@ -319,12 +266,12 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee) {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE).put(sender.getPublicKey()).put(Base58.decode(toAddress))
                 .putLong(amount).putLong(fee).putLong(timestamp);
-        return new Transaction(getSigners(sender, signers), buf,"/leasing/broadcast/lease",
+        return new Transaction(sender, buf,"/leasing/broadcast/lease",
                 "type", LEASE,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "recipient", toAddress,
@@ -333,11 +280,11 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeLeaseCancelTx(PublicKeyAccount sender, String txId, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeLeaseCancelTx(PublicKeyAccount sender, String txId, long fee) {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE_CANCEL).put(sender.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(txId));
-        return new Transaction(getSigners(sender, signers), buf,"/leasing/broadcast/cancel",
+        return new Transaction(sender, buf,"/leasing/broadcast/cancel",
                 "type", LEASE_CANCEL,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "txId", txId,
@@ -345,14 +292,14 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeAliasTx(PublicKeyAccount sender, String alias, char scheme, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeAliasTx(PublicKeyAccount sender, String alias, char scheme, long fee) {
         long timestamp = System.currentTimeMillis();
         int aliaslen = alias.length();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + aliaslen);
         buf.put(ALIAS).put(sender.getPublicKey())
                 .putShort((short) (alias.length() + 4)).put((byte) 0x02).put((byte) scheme)
                 .putShort((short) alias.length()).put(alias.getBytes()).putLong(fee).putLong(timestamp);
-        return new Transaction(getSigners(sender, signers), buf,"/alias/broadcast/create",
+        return new Transaction(sender, buf,"/alias/broadcast/create",
                 "type", ALIAS,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "alias", alias,
@@ -361,7 +308,7 @@ public class Transaction {
     }
 
     public static Transaction makeMassTransferTx(PublicKeyAccount sender, String assetId, Collection<Transfer> transfers,
-                                                 long fee, String attachment, PrivateKeyAccount... signers) {
+                                                 long fee, String attachment) {
         long timestamp = System.currentTimeMillis();
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
         int datalen = (isWaves(assetId) ? 0 : 32) +
@@ -378,7 +325,7 @@ public class Transaction {
         buf.putLong(timestamp).putLong(fee)
                 .putShort((short) attachmentBytes.length).put(attachmentBytes);
 
-        return new Transaction(getSigners(sender, signers), buf,"/transactions/broadcast",
+        return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", MASS_TRANSFER,
                 "version", DEFAULT_VERSION,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
@@ -389,7 +336,7 @@ public class Transaction {
                 "attachment", Base58.encode(attachmentBytes));
     }
 
-    public static Transaction makeDataTx(PrivateKeyAccount sender, Collection<DataEntry<?>> data, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeDataTx(PrivateKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
         long timestamp = System.currentTimeMillis();
         int datalen = MIN_BUFFER_SIZE;
         for (DataEntry<?> e: data) {
@@ -404,7 +351,7 @@ public class Transaction {
         }
         buf.putLong(timestamp).putLong(fee);
 
-        return new Transaction(getSigners(sender, signers), buf,"/transactions/broadcast",
+        return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", DATA,
                 "version", DEFAULT_VERSION,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
@@ -413,7 +360,7 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeScriptTx(PublicKeyAccount sender, String script, char scheme, long fee, PrivateKeyAccount... signers) {
+    public static Transaction makeScriptTx(PublicKeyAccount sender, String script, char scheme, long fee) {
         if (scheme > Byte.MAX_VALUE) {
             throw new IllegalArgumentException("Scheme should be between 0 and 127");
         }
@@ -428,7 +375,7 @@ public class Transaction {
         }
         buf.putLong(fee).putLong(timestamp);
 
-        return new Transaction(getSigners(sender, signers), buf,"/transactions/broadcast",
+        return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", SET_SCRIPT,
                 "version", DEFAULT_VERSION,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
