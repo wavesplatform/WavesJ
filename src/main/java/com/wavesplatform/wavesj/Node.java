@@ -154,12 +154,29 @@ public class Node {
         return send(tx);
     }
 
+    /**
+     * Sets a validating script for an account.
+     * @param from the account
+     * @param script script text
+     * @param scheme network byte
+     * @param fee transaction fee
+     * @return transaction ID
+     * @throws IOException if an error occurs
+     * @see Account#MAINNET
+     * @see Account#TESTNET
+     */
     public String setScript(PrivateKeyAccount from, String script, char scheme, long fee) throws IOException {
         Transaction tx = Transaction.makeScriptTx(from, compileScript(script), scheme, fee);
         return send(tx);
     }
 
-    private String compileScript(String script) throws IOException {
+    /**
+     * Compiles a script.
+     * @param script the script to compile
+     * @return compiled script, base58 encoded
+     * @throws IOException if the script is not well formed or some other error occurs
+     */
+    public String compileScript(String script) throws IOException {
         if (script == null || script.isEmpty()) {
             return null;
         }

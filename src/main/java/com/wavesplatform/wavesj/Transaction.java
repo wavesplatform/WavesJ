@@ -336,7 +336,7 @@ public class Transaction {
                 "attachment", Base58.encode(attachmentBytes));
     }
 
-    public static Transaction makeDataTx(PrivateKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
+    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
         long timestamp = System.currentTimeMillis();
         int datalen = MIN_BUFFER_SIZE;
         for (DataEntry<?> e: data) {
@@ -360,6 +360,16 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
+    /**
+     * Creates a signed SetScript transaction.
+     * @param sender the account to set the script for
+     * @param script compiled script, base58 encoded
+     * @param scheme network byte
+     * @param fee transaction fee
+     * @return transaction object
+     * @see Account#MAINNET
+     * @see Account#TESTNET
+     */
     public static Transaction makeScriptTx(PublicKeyAccount sender, String script, char scheme, long fee) {
         if (scheme > Byte.MAX_VALUE) {
             throw new IllegalArgumentException("Scheme should be between 0 and 127");
