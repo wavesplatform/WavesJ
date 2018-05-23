@@ -10,6 +10,7 @@ public class NodeExample {
     public static void main(String[] args) throws IOException, URISyntaxException {
         final long FEE = 100000;
         final long ISSUE_FEE = 1 * Asset.TOKEN;
+        final long SCRIPT_FEE = 400000;
         final long MATCHER_FEE = 300000;
 
         final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
@@ -26,7 +27,8 @@ public class NodeExample {
         Node node = new Node();
 
         // Get blockchain height
-        System.out.println("height: " + node.getHeight());
+        int height = node.getHeight();
+        System.out.println("height: " + height);
 
         // Learn address balance
         System.out.println("Alice's balance: " + node.getBalance(address));
@@ -56,6 +58,11 @@ public class NodeExample {
         // Canceling a lease by tx ID
         String cancelTxId = node.cancelLease(alice, leaseTxId, FEE);
 
+        // Setting a script on an account.
+        // Be careful with the script you pass here, as it may lock the account forever!
+        String setScriptTxId = node.setScript(alice, "tx.type == 13 && height > " + height, Account.TESTNET, SCRIPT_FEE);
+        // Reset the script to default
+        String rmScriptTxId = node.setScript(alice, "", Account.TESTNET, SCRIPT_FEE);
 
         // Offline transaction signing
         //

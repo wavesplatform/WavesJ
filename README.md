@@ -50,6 +50,11 @@ String buddy = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
 String txId = node.transfer(account, buddy, 1_00000000, 100_000, "Here's for you");
 ```
 
+Set a script on an account. Be careful with the script you pass here, as it may lock the account forever!
+```
+String setScriptTxId = node.setScript(alice, "tx.type == 13 && height > " + height, Account.TESTNET, SCRIPT_FEE);
+```
+
 Sign a transaction offline:
 ```
 Transaction tx = Transaction.makeTransferTx(account, buddy, 1_00000000, Asset.WAVES, 100_000, Asset.WAVES, "");

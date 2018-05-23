@@ -155,8 +155,17 @@ public class Node {
     }
 
     public String setScript(PrivateKeyAccount from, String script, char scheme, long fee) throws IOException {
-        Transaction tx = Transaction.makeScriptTx(from, script, scheme, fee);
+        Transaction tx = Transaction.makeScriptTx(from, compileScript(script), scheme, fee);
         return send(tx);
+    }
+
+    private String compileScript(String script) throws IOException {
+        if (script == null || script.isEmpty()) {
+            return null;
+        }
+        HttpPost request = new HttpPost(uri.resolve("/utils/script/compile"));
+        request.setEntity(new StringEntity(script));
+        return parse(exec(request), "script").asText();
     }
 
     // Matcher transactions
@@ -222,7 +231,7 @@ public class Node {
     }
 
     private HttpUriRequest request(Transaction tx) {
-        HttpPost request = new HttpPost(uri + tx.endpoint);
+        HttpPost request = new HttpPost(uri.resolve(tx.endpoint));
         request.setEntity(new StringEntity(tx.getJson(), ContentType.APPLICATION_JSON));
         return request;
     }
