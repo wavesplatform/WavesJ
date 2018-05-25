@@ -15,6 +15,7 @@ public abstract class DataEntry<T> {
     private final static byte INTEGER = 0;
     private final static byte BOOLEAN = 1;
     private final static byte BINARY  = 2;
+    private final static byte STRING  = 3;
 
     public final String key;
     public final T value;
@@ -102,6 +103,23 @@ public abstract class DataEntry<T> {
                 gen.writeStringField("type", value.type);
                 gen.writeEndObject();
             }
+        }
+    }
+
+    public static class StringEntry extends DataEntry<String> {
+        private final byte[] bytes = value.getBytes(UTF8);
+
+        public StringEntry(String key, String value) {
+            super(key, "string", value);
+        }
+
+        int size() {
+            return super.size() + 1 + 2 + bytes.length;
+        }
+
+        void write(ByteBuffer buf) {
+            super.write(buf);
+            buf.put(STRING).putShort((short) bytes.length).put(bytes);
         }
     }
 }
