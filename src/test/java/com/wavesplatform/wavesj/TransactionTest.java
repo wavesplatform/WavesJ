@@ -30,7 +30,7 @@ public class TransactionTest {
         check(Transaction.makeTransferTx(acc, recipient, AMOUNT, null, FEE, null, "Shut up & take my money"));
         check(Transaction.makeMassTransferTx(acc, assetId, new LinkedList<Transfer>(), FEE, null));
         check(Transaction.makeDataTx(acc, new LinkedList<DataEntry<?>>(), FEE));
-        check(Transaction.makeScriptTx(acc, "Base58", 'T', FEE));
+        check(Transaction.makeScriptTx(acc, "base64:Base64EncodedScript", Account.TESTNET, FEE));
 
         List<Transfer> transfers = Arrays.asList(new Transfer(acc.getAddress(), AMOUNT), new Transfer(recipient, AMOUNT));
         check(Transaction.makeMassTransferTx(acc, Asset.WAVES, transfers, FEE, "mass transfer"));

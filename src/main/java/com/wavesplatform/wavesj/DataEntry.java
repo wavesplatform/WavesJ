@@ -98,7 +98,7 @@ public abstract class DataEntry<T> {
             public void serialize(BinaryEntry value, JsonGenerator gen, SerializerProvider provider) throws IOException {
                 gen.writeStartObject();
                 gen.writeStringField("key", value.key);
-                gen.writeStringField("value", Base58.encode(value.value));
+                gen.writeStringField("value", Base64.encode(value.value));
                 gen.writeStringField("type", value.type);
                 gen.writeEndObject();
             }

@@ -173,7 +173,7 @@ public class Node {
     /**
      * Compiles a script.
      * @param script the script to compile
-     * @return compiled script, base58 encoded
+     * @return compiled script, base64 encoded
      * @throws IOException if the script is not well formed or some other error occurs
      */
     public String compileScript(String script) throws IOException {

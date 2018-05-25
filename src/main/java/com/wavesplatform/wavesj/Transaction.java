@@ -363,7 +363,7 @@ public class Transaction {
     /**
      * Creates a signed SetScript transaction.
      * @param sender the account to set the script for
-     * @param script compiled script, base58 encoded
+     * @param script compiled script, base64 encoded
      * @param scheme network byte
      * @param fee transaction fee
      * @return transaction object
@@ -375,7 +375,7 @@ public class Transaction {
             throw new IllegalArgumentException("Scheme should be between 0 and 127");
         }
         long timestamp = System.currentTimeMillis();
-        byte[] rawScript = script == null ? new byte[0] : Base58.decode(script);
+        byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + rawScript.length);
         buf.put(SET_SCRIPT).put(DEFAULT_VERSION).put((byte) scheme).put(sender.getPublicKey());
         if (rawScript.length > 0) {

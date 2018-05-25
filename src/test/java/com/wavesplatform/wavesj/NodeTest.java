@@ -19,9 +19,9 @@ public class NodeTest {
     private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC);
 
     private static final PrivateKeyAccount alice =
-            PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
+            PrivateKeyAccount.fromPrivateKey("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
     private static final PrivateKeyAccount bob =
-            PrivateKeyAccount.fromPrivateKey("4n6L7rZYL2LAmwheLBketwXCCC4JZF3mHYEskySxeNqm", Account.TESTNET);
+            PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
 
     @Test
     public void testGetters() throws IOException {
@@ -83,6 +83,20 @@ public class NodeTest {
         data.add(integer);
         String txId = node.data(alice, data, FEE);
         assertNotNull(txId);
+    }
+
+    @Test
+    public void testScript() throws IOException {
+        Node node = new Node();
+
+        String setScriptId = node.setScript(alice, "tx.type == 13 && height > 11", Account.TESTNET, FEE * 4);
+        assertNotNull(setScriptId);
+
+        String clearScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 4);
+        assertNotNull(clearScriptId);
+
+        String compiledScript = node.compileScript("");
+        assertEquals(null, compiledScript);
     }
 
     @Test
