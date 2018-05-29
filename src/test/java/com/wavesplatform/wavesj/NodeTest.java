@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static com.wavesplatform.wavesj.DataEntry.*;
 import static org.junit.Assert.*;
@@ -38,6 +39,28 @@ public class NodeTest {
         assertEquals(wavesBalance, node.getBalance(address, null));
         assertEquals(wavesBalance, node.getBalance(address, ""));
         assertEquals(wavesBalance, node.getBalance(address, Asset.WAVES));
+    }
+
+    @Test
+    public void testBlocksAndTransactions() throws IOException {
+        Node node = new Node();
+
+        Block block = node.getBlock(362294);
+        assertNotNull(block);
+        assertEquals(362294, block.height);
+        assertEquals(3, block.version);
+
+        for (Transaction tx: block.transactions) {
+            Transaction tx1 = node.getTransaction(tx.id);
+            assertEquals(tx.id, tx1.id);
+        }
+
+        Block block1 = node.getBlock(block.signature);
+        assertEquals(block.signature, block1.signature);
+        assertEquals(block.height, block1.height);
+        assertEquals(block.size, block1.size);
+        assertEquals(block.fee, block1.fee);
+        assertEquals(block.timestamp, block1.timestamp);
     }
 
     @Test
@@ -91,11 +114,8 @@ public class NodeTest {
     public void testScript() throws IOException {
         Node node = new Node();
 
-        String setScriptId = node.setScript(alice, "tx.type == 13 && height > 11", Account.TESTNET, FEE * 4);
+        String setScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 4);
         assertNotNull(setScriptId);
-
-        String clearScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 4);
-        assertNotNull(clearScriptId);
 
         String compiledScript = node.compileScript("");
         assertEquals(null, compiledScript);

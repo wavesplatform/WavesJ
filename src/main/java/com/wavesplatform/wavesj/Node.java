@@ -16,6 +16,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -67,18 +68,48 @@ public class Node {
         return send("/addresses/balance/" + address + "/" + confirmations, "balance").asLong();
     }
 
+    public long getBalance(String address, String assetId) throws IOException {
+        return Asset.isWaves(assetId)
+                ? getBalance(address)
+                : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
+    }
+
+    /**
+     * Returns transaction by its ID.
+     * @param txId transaction ID
+     * @return transaction object
+     * @throws IOException if no transaction with the given ID exists
+     */
+    public Transaction getTransaction(String txId) throws IOException {
+        return mapper.convertValue(send("/transactions/info/" + txId), Transaction.class);
+    }
+
+    /**
+     * Returns block at given height.
+     * @param height blockchain height
+     * @return block object
+     * @throws IOException if no block exists at the given height
+     */
+    public Block getBlock(int height) throws IOException {
+        return mapper.convertValue(send("/blocks/at/" + height), Block.class);
+    }
+
+    /**
+     * Returns block by its signature.
+     * @param signature block signature
+     * @return block object
+     * @throws IOException if no block with the given signature exists
+     */
+    public Block getBlock(String signature) throws IOException {
+        return mapper.convertValue(send("/blocks/signature/" + signature), Block.class);
+    }
+
     public boolean validateAddresses(String address) throws IOException {
         return send("/addresses/validate/" + address, "valid").asBoolean();
     }
 
     public String getAddrByAlias(String alias) throws IOException {
         return send("/alias/by-alias/" + alias, "address").textValue();
-    }
-
-    public long getBalance(String address, String assetId) throws IOException {
-        return Asset.isWaves(assetId)
-                ? getBalance(address)
-                : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
     }
 
     /**
@@ -91,7 +122,7 @@ public class Node {
         return parse(exec(request(tx)), "id").asText();
     }
 
-    private JsonNode send(String path, String key) throws IOException {
+    private JsonNode send(String path, String... key) throws IOException {
         return parse(exec(request(path)), key);
     }
 
@@ -257,8 +288,7 @@ public class Node {
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             try {
-                String error = parse(r, "message").asText();
-                throw new IOException(error);
+                throw new IOException(EntityUtils.toString(r.getEntity()));
             } catch (JsonParseException e) {
                 throw new RuntimeException("Server error " + r.getStatusLine().getStatusCode());
             }

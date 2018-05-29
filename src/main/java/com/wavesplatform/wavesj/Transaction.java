@@ -1,8 +1,14 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -30,6 +36,7 @@ import static com.wavesplatform.wavesj.Asset.isWaves;
  *     {@code Transaction} it is called on, but rather returns a new instance.
  * </ul>
  */
+@JsonDeserialize(using = Transaction.Deserializer.class)
 public class Transaction {
     public static final int MAX_PROOF_COUNT = 8;
 
@@ -47,6 +54,9 @@ public class Transaction {
 
     private static final byte DEFAULT_VERSION = 1;
     private static final int MIN_BUFFER_SIZE = 120;
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
 
     /** Transaction ID. */
     public final String id;
@@ -87,6 +97,22 @@ public class Transaction {
         this.endpoint = tx.endpoint;
         this.bytes = tx.bytes;
         this.proofs = Collections.unmodifiableList(proofs);
+    }
+
+    private Transaction(Map<String, Object> data) {
+        this.data = Collections.unmodifiableMap(data);
+        this.id = (String) data.get("id");
+        this.proofs = (List<String>) data.get("proofs");
+        this.endpoint = null;
+        this.bytes = null;
+    }
+
+    static class Deserializer extends JsonDeserializer<Transaction> {
+        @Override
+        public Transaction deserialize(JsonParser p, DeserializationContext context) throws IOException {
+            Map<String, Object> data = mapper.convertValue(p.getCodec().readTree(p), TX_INFO);
+            return new Transaction(data);
+        }
     }
 
     /**
