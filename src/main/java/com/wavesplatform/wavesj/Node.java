@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
@@ -32,6 +33,7 @@ public class Node {
     private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {};
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {};
+    private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
 
     private final URI uri;
     private final CloseableHttpClient client = HttpClients.custom()
@@ -80,8 +82,8 @@ public class Node {
      * @return transaction object
      * @throws IOException if no transaction with the given ID exists
      */
-    public Transaction getTransaction(String txId) throws IOException {
-        return mapper.convertValue(send("/transactions/info/" + txId), Transaction.class);
+    public Map<String, Object> getTransaction(String txId) throws IOException {
+        return mapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
     }
 
     /**

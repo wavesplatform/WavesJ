@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents a block.
@@ -18,7 +19,7 @@ public class Block {
     public final int size;
     public final long fee;
     public final int height;
-    public final List<Transaction> transactions;
+    public final List<Map<String, Object>> transactions;
 
     @JsonCreator
     private Block(
@@ -28,7 +29,7 @@ public class Block {
             @JsonProperty("blocksize") int size,
             @JsonProperty("fee") long fee,
             @JsonProperty("height") int height,
-            @JsonProperty("transactions") List<Transaction> transactions)
+            @JsonProperty("transactions") List<Map<String, Object>> transactions)
     {
         this.version = version;
         this.timestamp = timestamp;

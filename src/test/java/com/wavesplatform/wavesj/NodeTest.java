@@ -4,10 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.wavesplatform.wavesj.DataEntry.*;
 import static org.junit.Assert.*;
@@ -50,9 +47,10 @@ public class NodeTest {
         assertEquals(362294, block.height);
         assertEquals(3, block.version);
 
-        for (Transaction tx: block.transactions) {
-            Transaction tx1 = node.getTransaction(tx.id);
-            assertEquals(tx.id, tx1.id);
+        for (Map<String, Object> tx: block.transactions) {
+            String id = (String) tx.get("id");
+            Map<String, Object> tx1 = node.getTransaction(id);
+            assertEquals(id, tx1.get("id"));
         }
 
         Block block1 = node.getBlock(block.signature);
@@ -130,14 +128,15 @@ public class NodeTest {
         assertNotNull(id1);
         assertEquals(id1, tx1.id);
 
-        Transaction tx2 = Transaction.makeTransferTx(bob, alice.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "Back to Alice");
+        Transaction tx2 = Transaction.makeMassTransferTx(bob, Asset.WAVES,
+                Collections.singletonList(new Transfer(alice.getAddress(), AMOUNT)), FEE * 2, "Back to Alice");
         String id2 = node.send(tx2);
         assertNotNull(id2);
         assertEquals(id2, tx2.id);
     }
 
     @Test
-    public void testMatcher() throws IOException, URISyntaxException {
+    public void testMatcher() throws IOException {
         Node matcher = new Node();
         String matcherKey = matcher.getMatcherKey();
 
