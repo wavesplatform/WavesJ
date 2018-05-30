@@ -177,9 +177,8 @@ public class Transaction {
     }
 
     public static Transaction makeIssueTx(PublicKeyAccount sender, String name, String description, long quantity,
-                                          int decimals, boolean reissuable, long fee)
+                                          int decimals, boolean reissuable, long fee, long timestamp)
     {
-        long timestamp = System.currentTimeMillis();
         int desclen = description == null ? 0 : description.length();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + name.length() + desclen);
         buf.put(ISSUE).put(sender.getPublicKey())
@@ -205,12 +204,15 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeReissueTx(PublicKeyAccount sender, String assetId, long quantity, boolean reissuable, long fee)
-    {
+    public static Transaction makeIssueTx(PublicKeyAccount sender, String name, String description, long quantity,
+                                          int decimals, boolean reissuable, long fee) {
+        return makeIssueTx(sender, name, description, quantity, decimals, reissuable, fee, System.currentTimeMillis());
+    }
+
+    public static Transaction makeReissueTx(PublicKeyAccount sender, String assetId, long quantity, boolean reissuable, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot reissue WAVES");
         }
-        long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(REISSUE).put(sender.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
@@ -225,14 +227,18 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
+    public static Transaction makeReissueTx(PublicKeyAccount sender, String assetId, long quantity, boolean reissuable, long fee)
+    {
+        return makeReissueTx(sender, assetId, quantity, reissuable, fee, System.currentTimeMillis());
+    }
+
     public static Transaction makeTransferTx(PublicKeyAccount sender, String toAddress, long amount, String assetId,
-                                             long fee, String feeAssetId, String attachment)
+                                             long fee, String feeAssetId, String attachment, long timestamp)
     {
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
         int datalen = (isWaves(assetId) ? 0 : 32) +
                 (isWaves(feeAssetId) ? 0 : 32) +
                 attachmentBytes.length + MIN_BUFFER_SIZE;
-        long timestamp = System.currentTimeMillis();
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
         buf.put(TRANSFER).put(sender.getPublicKey());
@@ -253,11 +259,16 @@ public class Transaction {
                 "attachment", Base58.encode(attachmentBytes));
     }
 
-    public static Transaction makeBurnTx(PublicKeyAccount sender, String assetId, long amount, long fee) {
+    public static Transaction makeTransferTx(PublicKeyAccount sender, String toAddress, long amount, String assetId,
+                                             long fee, String feeAssetId, String attachment)
+    {
+        return makeTransferTx(sender, toAddress, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
+    }
+
+    public static Transaction makeBurnTx(PublicKeyAccount sender, String assetId, long amount, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot burn WAVES");
         }
-        long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(BURN).put(sender.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
@@ -270,14 +281,17 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeSponsorTx(PublicKeyAccount sender, String assetId, long minAssetFee, long fee) {
+    public static Transaction makeBurnTx(PublicKeyAccount sender, String assetId, long amount, long fee) {
+        return makeBurnTx(sender, assetId, amount, fee, System.currentTimeMillis());
+    }
+
+    public static Transaction makeSponsorTx(PublicKeyAccount sender, String assetId, long minAssetFee, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot burn WAVES");
         }
         if (minAssetFee < 0) {
             throw new IllegalArgumentException("minAssetFee must be positive or zero");
         }
-        long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(SPONSOR).put(sender.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(minAssetFee).putLong(fee).putLong(timestamp);
@@ -292,8 +306,11 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee) {
-        long timestamp = System.currentTimeMillis();
+    public static Transaction makeSponsorTx(PublicKeyAccount sender, String assetId, long minAssetFee, long fee) {
+        return makeSponsorTx(sender, assetId, minAssetFee, fee, System.currentTimeMillis());
+    }
+
+    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee, long timestamp) {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE).put(sender.getPublicKey()).put(Base58.decode(toAddress))
                 .putLong(amount).putLong(fee).putLong(timestamp);
@@ -306,8 +323,11 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeLeaseCancelTx(PublicKeyAccount sender, String txId, long fee) {
-        long timestamp = System.currentTimeMillis();
+    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee) {
+        return makeLeaseTx(sender, toAddress, amount, fee, System.currentTimeMillis());
+    }
+
+    public static Transaction makeLeaseCancelTx(PublicKeyAccount sender, String txId, long fee, long timestamp) {
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE);
         buf.put(LEASE_CANCEL).put(sender.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(txId));
         return new Transaction(sender, buf,"/leasing/broadcast/cancel",
@@ -318,8 +338,11 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeAliasTx(PublicKeyAccount sender, String alias, char scheme, long fee) {
-        long timestamp = System.currentTimeMillis();
+    public static Transaction makeLeaseCancelTx(PublicKeyAccount sender, String txId, long fee) {
+        return makeLeaseCancelTx(sender, txId, fee, System.currentTimeMillis());
+    }
+
+    public static Transaction makeAliasTx(PublicKeyAccount sender, String alias, char scheme, long fee, long timestamp) {
         int aliaslen = alias.length();
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + aliaslen);
         buf.put(ALIAS).put(sender.getPublicKey())
@@ -333,9 +356,12 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
+    public static Transaction makeAliasTx(PublicKeyAccount sender, String alias, char scheme, long fee) {
+        return makeAliasTx(sender, alias, scheme, fee, System.currentTimeMillis());
+    }
+
     public static Transaction makeMassTransferTx(PublicKeyAccount sender, String assetId, Collection<Transfer> transfers,
-                                                 long fee, String attachment) {
-        long timestamp = System.currentTimeMillis();
+                                                 long fee, String attachment, long timestamp) {
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
         int datalen = (isWaves(assetId) ? 0 : 32) +
                 34 * transfers.size() +
@@ -362,8 +388,12 @@ public class Transaction {
                 "attachment", Base58.encode(attachmentBytes));
     }
 
-    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
-        long timestamp = System.currentTimeMillis();
+    public static Transaction makeMassTransferTx(PublicKeyAccount sender, String assetId, Collection<Transfer> transfers,
+                                                 long fee, String attachment) {
+        return makeMassTransferTx(sender, assetId, transfers, fee, attachment, System.currentTimeMillis());
+    }
+
+    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<DataEntry<?>> data, long fee, long timestamp) {
         int datalen = MIN_BUFFER_SIZE;
         for (DataEntry<?> e: data) {
             datalen += e.size();
@@ -386,21 +416,25 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
+    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
+        return makeDataTx(sender, data, fee, System.currentTimeMillis());
+    }
+
     /**
      * Creates a signed SetScript transaction.
      * @param sender the account to set the script for
      * @param script compiled script, base64 encoded
      * @param scheme network byte
      * @param fee transaction fee
+     * @param timestamp operation timestamp
      * @return transaction object
      * @see Account#MAINNET
      * @see Account#TESTNET
      */
-    public static Transaction makeScriptTx(PublicKeyAccount sender, String script, char scheme, long fee) {
+    public static Transaction makeScriptTx(PublicKeyAccount sender, String script, char scheme, long fee, long timestamp) {
         if (scheme > Byte.MAX_VALUE) {
             throw new IllegalArgumentException("Scheme should be between 0 and 127");
         }
-        long timestamp = System.currentTimeMillis();
         byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + rawScript.length);
         buf.put(SET_SCRIPT).put(DEFAULT_VERSION).put((byte) scheme).put(sender.getPublicKey());
@@ -420,10 +454,14 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
+
+    public static Transaction makeScriptTx(PublicKeyAccount sender, String script, char scheme, long fee) {
+        return makeScriptTx(sender, script, scheme, fee, System.currentTimeMillis());
+    }
+
     public static Transaction makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-            AssetPair assetPair, long price, long amount, long expiration, long matcherFee)
+            AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp)
     {
-        long timestamp = System.currentTimeMillis();
         int datalen = MIN_BUFFER_SIZE +
                 (isWaves(assetPair.amountAsset) ? 0 : 32) +
                 (isWaves(assetPair.priceAsset) ? 0 : 32);
@@ -447,6 +485,12 @@ public class Transaction {
                 "timestamp", timestamp,
                 "expiration", expiration,
                 "matcherFee", matcherFee);
+    }
+
+    public static Transaction makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                          AssetPair assetPair, long price, long amount, long expiration, long matcherFee)
+    {
+        return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
     }
 
     public static Transaction makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
