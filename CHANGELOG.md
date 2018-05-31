@@ -11,4 +11,10 @@ Reworked signing and proofs:
 - Moved `sign` method from `Transaction` to `PrivateKeyAccount`
 - In `Transaction`, `addProof(String)` becomes `setProof(int, String)` so that it's possible to create non-contiguous lists of proofs, e.g. define proofs 1 and 3 but leave proof 2 out.
 
-This is a non-compatible change, but hopefully not many people have started using features from version 0.5 given that they are three days old now. 
+This is a non-compatible change, but hopefully not many people have started using features from version 0.5 given that they are three days old now.
+
+## 0.7
+- Support for account scripts
+- Added `getBlock()` and `getTransaction()` to `Node`
+- Transaction factory methods got overrides that accept `timestamp` parameter
+- String entries in Data transactions
