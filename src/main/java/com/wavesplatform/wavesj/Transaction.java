@@ -115,6 +115,10 @@ public class Transaction {
             return new Transaction(data);
         }
     }
+    
+    public byte[] getBytes() {
+        return bytes.clone();
+    }
 
     /**
      * Returns JSON-encoded transaction data.
