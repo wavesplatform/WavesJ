@@ -52,7 +52,8 @@ public class Transaction {
     private static final byte SET_SCRIPT    = 13;
     private static final byte SPONSOR       = 14;
 
-    private static final byte DEFAULT_VERSION = 1;
+    private static final byte V1 = 1;
+    private static final byte V2 = 2;
     private static final int MIN_BUFFER_SIZE = 120;
 
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -127,6 +128,14 @@ public class Transaction {
             // assume proof0 is a signature
             toJson.put("signature", proofs.get(0));
         }
+        /// add version to json and bytes
+        /// Add v2-producing methods where needed
+        /// test sending with 0 fees
+        /// setProof -> withProof ?
+//        Byte type = (Byte) data.get("type");
+//        if (type != null && type != EXCHANGE) {
+//            toJson.put("version", type > ALIAS ? 1 : 2);
+//        }
         try {
             return new ObjectMapper().writeValueAsString(toJson);
         } catch (JsonProcessingException e) {
@@ -236,12 +245,13 @@ public class Transaction {
                                              long fee, String feeAssetId, String attachment, long timestamp)
     {
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
+        byte version = V2;
         int datalen = (isWaves(assetId) ? 0 : 32) +
                 (isWaves(feeAssetId) ? 0 : 32) +
                 attachmentBytes.length + MIN_BUFFER_SIZE;
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(TRANSFER).put(sender.getPublicKey());
+        buf.put(TRANSFER).put(version).put(sender.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress))
@@ -249,6 +259,7 @@ public class Transaction {
 
         return new Transaction(sender, buf,"/assets/broadcast/transfer",
                 "type", TRANSFER,
+                "version", version,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "recipient", toAddress,
                 "amount", amount,
@@ -298,7 +309,7 @@ public class Transaction {
 
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", SPONSOR,
-                "version", DEFAULT_VERSION,
+                "version", V1,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", assetId,
                 "minSponsoredAssetFee", minAssetFee == 0L ? null : minAssetFee,
@@ -368,7 +379,7 @@ public class Transaction {
                 attachmentBytes.length + MIN_BUFFER_SIZE;
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(MASS_TRANSFER).put(DEFAULT_VERSION).put(sender.getPublicKey());
+        buf.put(MASS_TRANSFER).put(V1).put(sender.getPublicKey());
         putAsset(buf, assetId);
         buf.putShort((short) transfers.size());
         for (Transfer t: transfers) {
@@ -379,7 +390,7 @@ public class Transaction {
 
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", MASS_TRANSFER,
-                "version", DEFAULT_VERSION,
+                "version", V1,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", Asset.toJsonObject(assetId),
                 "transfers", transfers,
@@ -400,7 +411,7 @@ public class Transaction {
         }
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(DATA).put(DEFAULT_VERSION).put(sender.getPublicKey());
+        buf.put(DATA).put(V1).put(sender.getPublicKey());
         buf.putShort((short) data.size());
         for (DataEntry<?> e: data) {
             e.write(buf);
@@ -409,7 +420,7 @@ public class Transaction {
 
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", DATA,
-                "version", DEFAULT_VERSION,
+                "version", V1,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "data", data,
                 "fee", fee,
@@ -437,7 +448,7 @@ public class Transaction {
         }
         byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
         ByteBuffer buf = ByteBuffer.allocate(MIN_BUFFER_SIZE + rawScript.length);
-        buf.put(SET_SCRIPT).put(DEFAULT_VERSION).put((byte) scheme).put(sender.getPublicKey());
+        buf.put(SET_SCRIPT).put(V1).put((byte) scheme).put(sender.getPublicKey());
         if (rawScript.length > 0) {
             buf.put((byte) 1).putShort((short) rawScript.length).put(rawScript);
         } else {
@@ -447,7 +458,7 @@ public class Transaction {
 
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", SET_SCRIPT,
-                "version", DEFAULT_VERSION,
+                "version", V1,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "script", script,
                 "fee", fee,
