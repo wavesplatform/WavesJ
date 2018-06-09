@@ -8,10 +8,7 @@ public class Base64 {
     }
 
     public static byte[] decode(String input) {
-        if (!input.startsWith("base64:")) {
-            throw new IllegalArgumentException("String of the form base64:chars expected");
-        } else {
-            return codec.decode(input.substring(7));
-        }
+        if (input.startsWith("base64:")) input = input.substring(7);
+        return codec.decode(input);
     }
 }

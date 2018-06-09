@@ -81,9 +81,9 @@ public class Base58 {
      * @throws IllegalArgumentException if the given string is not a valid base58 string
      */
     public static byte[] decode(String input) throws IllegalArgumentException {
-        if (input.length() == 0) {
-            return new byte[0];
-        }
+        if (input.startsWith("base58:")) input = input.substring(7);
+        if (input.length() == 0) return new byte[0];
+
         // Convert the base58-encoded ASCII chars to a base58 byte sequence (base58 digits).
         byte[] input58 = new byte[input.length()];
         for (int i = 0; i < input.length(); ++i) {

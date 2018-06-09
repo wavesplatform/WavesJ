@@ -203,17 +203,17 @@ public class PrivateKeyAccount extends PublicKeyAccount {
 
     private final byte[] privateKey;
 
-    private PrivateKeyAccount(byte[] privateKey, char scheme) {
-        super(publicKey(privateKey), scheme);
+    private PrivateKeyAccount(byte[] privateKey, byte chainId) {
+        super(publicKey(privateKey), chainId);
         this.privateKey = privateKey;
     }
 
-    public static PrivateKeyAccount fromSeed(String seed, int nonce, char scheme) {
-        return new PrivateKeyAccount(privateKey(seed, nonce), scheme);
+    public static PrivateKeyAccount fromSeed(String seed, int nonce, byte chainId) {
+        return new PrivateKeyAccount(privateKey(seed, nonce), chainId);
     }
 
-    public static PrivateKeyAccount fromPrivateKey(String privateKey, char scheme) {
-        return new PrivateKeyAccount(Base58.decode(privateKey), scheme);
+    public static PrivateKeyAccount fromPrivateKey(String privateKey, byte chainId) {
+        return new PrivateKeyAccount(Base58.decode(privateKey), chainId);
     }
 
     public final byte[] getPrivateKey() {
@@ -267,7 +267,7 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         buf.putInt(nonce).put(seed.getBytes());
         byte[] accountSeed = secureHash(buf.array(), 0, buf.array().length);
 
-        // private key from account seed & scheme
+        // private key from account seed & chainId
         byte[] hashedSeed = hash(accountSeed, 0, accountSeed.length, SHA256);
         byte[] privateKey = Arrays.copyOf(hashedSeed, 32);
         privateKey[0]  &= 248;

@@ -145,25 +145,25 @@ public class Node {
         return send(tx);
     }
 
-    public String cancelLease(PrivateKeyAccount account, String txId, long fee) throws IOException {
-        Transaction tx = Transaction.makeLeaseCancelTx(account, txId, fee);
+    public String cancelLease(PrivateKeyAccount account, byte scheme, String txId, long fee) throws IOException {
+        Transaction tx = Transaction.makeLeaseCancelTx(account, scheme, txId, fee);
         return send(tx);
     }
 
-    public String issueAsset(PrivateKeyAccount account,
-            String name, String description, long quantity, int decimals, boolean reissuable, long fee) throws IOException
+    public String issueAsset(PrivateKeyAccount account, byte scheme, String name, String description, long quantity,
+                             byte decimals, boolean reissuable, String script, long fee) throws IOException
     {
-        Transaction tx = Transaction.makeIssueTx(account, name, description, quantity, decimals, reissuable, fee);
+        Transaction tx = Transaction.makeIssueTx(account, scheme, name, description, quantity, decimals, reissuable, script, fee);
         return send(tx);
     }
 
-    public String reissueAsset(PrivateKeyAccount account, String assetId, long quantity, boolean reissuable, long fee) throws IOException {
-        Transaction tx = Transaction.makeReissueTx(account, assetId, quantity, reissuable, fee);
+    public String reissueAsset(PrivateKeyAccount account, byte scheme, String assetId, long quantity, boolean reissuable, long fee) throws IOException {
+        Transaction tx = Transaction.makeReissueTx(account, scheme, assetId, quantity, reissuable, fee);
         return send(tx);
     }
 
-    public String burnAsset(PrivateKeyAccount account, String assetId, long amount, long fee) throws IOException {
-        Transaction tx = Transaction.makeBurnTx(account, assetId, amount, fee);
+    public String burnAsset(PrivateKeyAccount account, byte scheme, String assetId, long amount, long fee) throws IOException {
+        Transaction tx = Transaction.makeBurnTx(account, scheme, assetId, amount, fee);
         return send(tx);
     }
 
@@ -172,7 +172,7 @@ public class Node {
         return send(tx);
     }
 
-    public String alias(PrivateKeyAccount account, String alias, char scheme, long fee) throws IOException {
+    public String alias(PrivateKeyAccount account, byte scheme, String alias, long fee) throws IOException {
         Transaction tx = Transaction.makeAliasTx(account, alias, scheme, fee);
         return send(tx);
     }
@@ -198,7 +198,7 @@ public class Node {
      * @see Account#MAINNET
      * @see Account#TESTNET
      */
-    public String setScript(PrivateKeyAccount from, String script, char scheme, long fee) throws IOException {
+    public String setScript(PrivateKeyAccount from, String script, byte scheme, long fee) throws IOException {
         Transaction tx = Transaction.makeScriptTx(from, compileScript(script), scheme, fee);
         return send(tx);
     }

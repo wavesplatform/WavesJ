@@ -176,7 +176,7 @@ public class NodeTest {
                 found = true;
             }
         }
-        assertTrue(found);
+        assertTrue("The order just filed should appear in the list of all orders for the account", found);
 
         // Verify the order appears in the list of orders for this asset pair
         orders = matcher.getOrders(alice, MARKET);

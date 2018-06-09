@@ -1,6 +1,6 @@
 package com.wavesplatform.wavesj;
 
 public interface Account {
-    static char MAINNET = 'W';
-    static char TESTNET = 'T';
+    static byte MAINNET = (byte) 'W';
+    static byte TESTNET = (byte) 'T';
 }

@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj-examples</artifactId>
-    <version>0.7</version>
+    <version>0.8</version>
     <packaging>jar</packaging>
 
     <name>WavesJ Examples</name>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>wavesj</artifactId>
-            <version>0.7</version>
+            <version>0.8</version>
         </dependency>
     </dependencies>
 </project>
