@@ -143,13 +143,6 @@ public class NodeTest {
         OrderBook orderBook = matcher.getOrderBook(MARKET);
         assertNotNull(orderBook);
 
-        // Cancel any active orders just in case
-        for (Order o: matcher.getOrders(alice)) {
-            if (o.isActive()) {
-                matcher.cancelOrder(alice, MARKET, o.id);
-            }
-        }
-
         // Create an order
         Order order = matcher.createOrder(alice, matcherKey,
                 MARKET, Order.Type.SELL,

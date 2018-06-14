@@ -1,4 +1,4 @@
-##0.8
+## 0.8
 - Support for transactions version 2 (compatible with Waves 0.13)
 - `Transaction.setProof()` was renamed `withProof()` to better reflect the fact that it doesn't modify the object but rather returns new one
 - `char PublicKeyAccount.scheme` was replaced with `byte chainId`
