@@ -43,20 +43,20 @@ public class NodeExample {
         String bob = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";
 
         // Create an alias
-        String txId = node.alias(alice, "alice", Account.TESTNET, FEE);
+        String txId = node.alias(alice, Account.TESTNET,"alice", FEE);
 
         // Issue an asset
-        String assetId = node.issueAsset(alice, "CleanAir", "The first air-backed blockchain asset ever",
-                1000000 * Asset.TOKEN, 8, true, ISSUE_FEE);
+        String assetId = node.issueAsset(alice, Account.TESTNET, "CleanAir", "The first air-backed blockchain asset ever",
+                1000000 * Asset.TOKEN, (byte) 8, true, null, ISSUE_FEE);
         // Reissuing, making it no longer reissuable
-        txId = node.reissueAsset(alice, assetId, 100 * Asset.TOKEN, false, ISSUE_FEE);
+        txId = node.reissueAsset(alice, Account.TESTNET, assetId, 100 * Asset.TOKEN, false, ISSUE_FEE);
         // Burning some coins
-        txId = node.burnAsset(alice, assetId, 20 * Asset.TOKEN, ISSUE_FEE);
+        txId = node.burnAsset(alice, Account.TESTNET, assetId, 20 * Asset.TOKEN, ISSUE_FEE);
 
         // Leasing coins
         String leaseTxId = node.lease(alice, bob, 100 * Asset.TOKEN, FEE);
         // Canceling a lease by tx ID
-        String cancelTxId = node.cancelLease(alice, leaseTxId, FEE);
+        String cancelTxId = node.cancelLease(alice, Account.TESTNET, leaseTxId, FEE);
 
         // Setting a script on an account.
         // Be careful with the script you pass here, as it may lock the account forever!

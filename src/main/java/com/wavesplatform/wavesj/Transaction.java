@@ -265,7 +265,7 @@ public class Transaction {
         return makeReissueTx(sender, chainId, assetId, quantity, reissuable, fee, System.currentTimeMillis());
     }
 
-    public static Transaction makeTransferTx(PublicKeyAccount sender, String toAddress, long amount, String assetId,
+    public static Transaction makeTransferTx(PublicKeyAccount sender, String recipient, long amount, String assetId,
                                              long fee, String feeAssetId, String attachment, long timestamp)
     {
         byte[] attachmentBytes = (attachment == null ? "" : attachment).getBytes();
@@ -273,14 +273,14 @@ public class Transaction {
         buf.put(TRANSFER).put(V2).put(sender.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
-        buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(toAddress));
+        buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(recipient));
         putString(buf, attachment);
 
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", TRANSFER,
                 "version", V2,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
-                "recipient", toAddress,
+                "recipient", recipient,
                 "amount", amount,
                 "assetId", Asset.toJsonObject(assetId),
                 "fee", fee,
@@ -289,10 +289,10 @@ public class Transaction {
                 "attachment", Base58.encode(attachmentBytes));
     }
 
-    public static Transaction makeTransferTx(PublicKeyAccount sender, String toAddress, long amount, String assetId,
+    public static Transaction makeTransferTx(PublicKeyAccount sender, String recipient, long amount, String assetId,
                                              long fee, String feeAssetId, String attachment)
     {
-        return makeTransferTx(sender, toAddress, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
+        return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
     }
 
     public static Transaction makeBurnTx(PublicKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
@@ -341,22 +341,22 @@ public class Transaction {
         return makeSponsorTx(sender, assetId, minAssetFee, fee, System.currentTimeMillis());
     }
 
-    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee, long timestamp) {
+    public static Transaction makeLeaseTx(PublicKeyAccount sender, String recipient, long amount, long fee, long timestamp) {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(LEASE).put(V2).put(sender.getPublicKey()).put(Base58.decode(toAddress))
+        buf.put(LEASE).put(V2).put(sender.getPublicKey()).put(Base58.decode(recipient))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", LEASE,
                 "version", V2,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
-                "recipient", toAddress,
+                "recipient", recipient,
                 "amount", amount,
                 "fee", fee,
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeLeaseTx(PublicKeyAccount sender, String toAddress, long amount, long fee) {
-        return makeLeaseTx(sender, toAddress, amount, fee, System.currentTimeMillis());
+    public static Transaction makeLeaseTx(PublicKeyAccount sender, String recipient, long amount, long fee) {
+        return makeLeaseTx(sender, recipient, amount, fee, System.currentTimeMillis());
     }
 
     public static Transaction makeLeaseCancelTx(PublicKeyAccount sender, byte chainId, String leaseId, long fee, long timestamp) {
