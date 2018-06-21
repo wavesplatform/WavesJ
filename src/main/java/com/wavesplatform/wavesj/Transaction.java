@@ -198,6 +198,17 @@ public class Transaction {
         buffer.putShort((short) bytes.length).put(bytes);
     }
 
+    private static String putRecipient(ByteBuffer buffer, byte chainId, String recipient) {
+        if (recipient.length() <= 30) {
+            // assume an alias
+            buffer.put((byte) 0x02).put(chainId).putShort((short) recipient.length()).put(recipient.getBytes(UTF8));
+            return String.format("alias:%c:%s", chainId, recipient);
+        } else {
+            buffer.put(Base58.decode(recipient));
+            return recipient;
+        }
+    }
+
     private static String hash(byte[] bytes) {
         return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
     }
@@ -273,7 +284,8 @@ public class Transaction {
         buf.put(TRANSFER).put(V2).put(sender.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
-        buf.putLong(timestamp).putLong(amount).putLong(fee).put(Base58.decode(recipient));
+        buf.putLong(timestamp).putLong(amount).putLong(fee);
+        recipient = putRecipient(buf, sender.getChainId(), recipient);
         putString(buf, attachment);
 
         return new Transaction(sender, buf,"/transactions/broadcast",
@@ -343,8 +355,9 @@ public class Transaction {
 
     public static Transaction makeLeaseTx(PublicKeyAccount sender, String recipient, long amount, long fee, long timestamp) {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(LEASE).put(V2).put(sender.getPublicKey()).put(Base58.decode(recipient))
-                .putLong(amount).putLong(fee).putLong(timestamp);
+        buf.put(LEASE).put(V2).put(sender.getPublicKey());
+        recipient = putRecipient(buf, sender.getChainId(), recipient);
+        buf.putLong(amount).putLong(fee).putLong(timestamp);
         return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", LEASE,
                 "version", V2,
@@ -402,8 +415,12 @@ public class Transaction {
         buf.put(MASS_TRANSFER).put(V1).put(sender.getPublicKey());
         putAsset(buf, assetId);
         buf.putShort((short) transfers.size());
+
+        List<Transfer> tr = new ArrayList<Transfer>(transfers.size());
         for (Transfer t: transfers) {
-            buf.put(Base58.decode(t.recipient)).putLong(t.amount);
+            String rc = putRecipient(buf, sender.getChainId(), t.recipient);
+            buf.putLong(t.amount);
+            tr.add(new Transfer(rc, t.amount));
         }
         buf.putLong(timestamp).putLong(fee);
         putString(buf, attachment);
@@ -413,7 +430,7 @@ public class Transaction {
                 "version", V1,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
                 "assetId", Asset.toJsonObject(assetId),
-                "transfers", transfers,
+                "transfers", tr,
                 "fee", fee,
                 "timestamp", timestamp,
                 "attachment", Base58.encode(attachmentBytes));

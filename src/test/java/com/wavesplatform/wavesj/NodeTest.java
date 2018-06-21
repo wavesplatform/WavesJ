@@ -74,7 +74,7 @@ public class NodeTest {
         txId = node.transfer(bob, null, alice.getAddress(), AMOUNT, FEE, Asset.WAVES, "Thanks, Alice");
         assertNotNull(txId);
 
-        txId = node.transfer(bob, Asset.WAVES, alice.getAddress(), AMOUNT, FEE, "", "Thanks again");
+        txId = node.transfer(bob, Asset.WAVES, "alice", AMOUNT, FEE, "", "Thanks again");
         assertNotNull(txId);
     }
 
@@ -85,6 +85,7 @@ public class NodeTest {
         String txId = node.massTransfer(alice, Asset.WAVES, transfers, FEE * 2, "sharedrop");
         assertNotNull(txId);
 
+        transfers = Collections.singletonList(new Transfer("alice", AMOUNT));
         txId = node.massTransfer(bob, null, transfers, FEE * 2, "same thing");
         assertNotNull(txId);
     }
