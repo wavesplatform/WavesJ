@@ -7,13 +7,14 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.wavesplatform.wavesj.transactions.TransferTransaction;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.*;
 
 import static com.wavesplatform.wavesj.Asset.isWaves;
+import static com.wavesplatform.wavesj.ByteUtils.*;
 
 /**
  * This class represents a Waves transaction. Instances are immutable, with data accessible through public final fields.
@@ -38,211 +39,49 @@ import static com.wavesplatform.wavesj.Asset.isWaves;
  * </ul>
  */
 @JsonDeserialize(using = Transaction.Deserializer.class)
-public class Transaction {
-    public static final int MAX_PROOF_COUNT = 8;
-
-    private static final byte ISSUE         = 3;
-    private static final byte TRANSFER      = 4;
-    private static final byte REISSUE       = 5;
-    private static final byte BURN          = 6;
-    private static final byte LEASE         = 8;
-    private static final byte LEASE_CANCEL  = 9;
-    private static final byte ALIAS         = 10;
-    private static final byte MASS_TRANSFER = 11;
-    private static final byte DATA          = 12;
-    private static final byte SET_SCRIPT    = 13;
-    private static final byte SPONSOR       = 14;
-
-    private static final byte V1 = 1;
-    private static final byte V2 = 2;
-    private static final int KBYTE = 1024;
-
-    private final static Charset UTF8 = Charset.forName("UTF-8");
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
-
+public abstract class Transaction {
     /** Transaction ID. */
-    public final String id;
+    public String getId() {
+        return hash(getBytes());
+    }
+    public abstract byte[] getBytes();
     /** Transaction data. */
-    public final Map<String, Object> data;
-    /**
-     * List of proofs. Each proof is a Base58-encoded byte array of at most 64 bytes.
-     * There's currently a limit of 8 proofs per transaction.
-     */
-    public final List<String> proofs;
-    final String endpoint;
-    final byte[] bytes;
+    public abstract Map<String, Object> getData();
 
-    private Transaction(PublicKeyAccount signer, ByteBuffer buffer, String endpoint, Object... items) {
-        this.bytes = toBytes(buffer);
-        this.id = hash(bytes);
-        this.endpoint = endpoint;
+    static final byte REISSUE       = 5;
+    static final byte BURN          = 6;
+    static final byte LEASE         = 8;
+    static final byte LEASE_CANCEL  = 9;
+    static final byte ALIAS         = 10;
+    static final byte MASS_TRANSFER = 11;
+    static final byte DATA          = 12;
+    static final byte SET_SCRIPT    = 13;
+    static final byte SPONSOR       = 14;
 
-        if (signer instanceof PrivateKeyAccount) {
-            this.proofs = Collections.singletonList(((PrivateKeyAccount) signer).sign(bytes));
-        } else {
-            this.proofs = Collections.emptyList();
-        }
+    static final byte V1 = 1;
 
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        for (int i=0; i<items.length; i+=2) {
-            Object value = items[i+1];
-            if (value != null) {
-                map.put((String) items[i], value);
-            }
-        }
-        this.data = Collections.unmodifiableMap(map);
-    }
+    static final ObjectMapper mapper = new ObjectMapper();
+    static final TypeReference<TransferTransaction> TRANSFER_TRANSACTION_INFO = new TypeReference<TransferTransaction>() {};
+    static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
 
-    private Transaction(Transaction tx, List<String> proofs) {
-        this.id = tx.id;
-        this.data = tx.data;
-        this.endpoint = tx.endpoint;
-        this.bytes = tx.bytes;
-        this.proofs = Collections.unmodifiableList(proofs);
-    }
 
-    private Transaction(Map<String, Object> data) {
-        this.data = Collections.unmodifiableMap(data);
-        this.id = (String) data.get("id");
-        this.proofs = (List<String>) data.get("proofs");
-        this.endpoint = null;
-        this.bytes = null;
-    }
 
     static class Deserializer extends JsonDeserializer<Transaction> {
         @Override
         public Transaction deserialize(JsonParser p, DeserializationContext context) throws IOException {
-            Map<String, Object> data = mapper.convertValue(p.getCodec().readTree(p), TX_INFO);
-            return new Transaction(data);
+            Map<String, Object> data = mapper.convertValue(p.getCodec().readTree(p), TRANSFER_TRANSACTION_INFO);
+            // todo is instance of
+            throw new IllegalArgumentException();
         }
-    }
-    
-    public byte[] getBytes() {
-        return bytes.clone();
-    }
-
-    /**
-     * Returns JSON-encoded transaction data.
-     * @return a JSON string
-     */
-    public String getJson() {
-        HashMap<String, Object> toJson = new HashMap<String, Object>(data);
-        toJson.put("id", id);
-        toJson.put("proofs", proofs);
-        if (proofs.size() == 1) {
-            // assume proof0 is a signature
-            toJson.put("signature", proofs.get(0));
-        }
-        /// add version to json and bytes
-        /// Add v2-producing methods where needed
-        /// test sending with 0 fees
-        /// setProof -> withProof ?
-//        Byte type = (Byte) data.get("type");
-//        if (type != null && type != EXCHANGE) {
-//            toJson.put("version", type > ALIAS ? 1 : 2);
-//        }
-        try {
-            return new ObjectMapper().writeValueAsString(toJson);
-        } catch (JsonProcessingException e) {
-            // not expected to ever happen
-            return null;
-        }
-    }
-
-    /**
-     * Returns a new {@code Transaction} object with the proof added.
-     * @param proof a Base58-encoded proof
-     * @return new {@code Transaction} object with the proof added
-     * @throws IllegalArgumentException if index is not between 0 and 7
-     */
-    public Transaction withProof(int index, String proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<String> newProofs = new LinkedList<String>(proofs);
-        for (int i = proofs.size(); i <= index; i++) {
-            newProofs.add("");
-        }
-        newProofs.set(index, proof);
-        return new Transaction(this, newProofs);
-    }
-
-    private static byte[] toBytes(ByteBuffer buffer) {
-        byte[] bytes = new byte[buffer.position()];
-        buffer.position(0);
-        buffer.get(bytes);
-        return bytes;
-    }
-
-    private static void putAsset(ByteBuffer buffer, String assetId) {
-        if (isWaves(assetId)) {
-            buffer.put((byte) 0);
-        } else {
-            buffer.put((byte) 1).put(Base58.decode(assetId));
-        }
-    }
-
-    private static void putString(ByteBuffer buffer, String s) {
-        if (s == null) s = "";
-        putBytes(buffer, s.getBytes(UTF8));
-    }
-
-    private static void putScript(ByteBuffer buffer, String script) {
-        byte[] bytes = script == null ? new byte[0] : Base64.decode(script);
-        buffer.put((byte) (bytes.length > 0 ? 1 : 0));
-        putBytes(buffer, bytes);
-    }
-
-    private static void putBytes(ByteBuffer buffer, byte[] bytes) {
-        buffer.putShort((short) bytes.length).put(bytes);
-    }
-
-    private static String putRecipient(ByteBuffer buffer, byte chainId, String recipient) {
-        if (recipient.length() <= 30) {
-            // assume an alias
-            buffer.put((byte) 0x02).put(chainId).putShort((short) recipient.length()).put(recipient.getBytes(UTF8));
-            return String.format("alias:%c:%s", chainId, recipient);
-        } else {
-            buffer.put(Base58.decode(recipient));
-            return recipient;
-        }
-    }
-
-    private static String hash(byte[] bytes) {
-        return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
-    }
-
-    static String sign(PrivateKeyAccount account, ByteBuffer buffer) {
-        return account.sign(toBytes(buffer));
     }
 
     public static Transaction makeIssueTx(PublicKeyAccount sender, byte chainId, String name, String description,
             long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp)
     {
-        ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
-        buf.put(ISSUE).put(V2).put(chainId).put(sender.getPublicKey());
-        putString(buf, name);
-        putString(buf, description);
-        buf.putLong(quantity)
-                .put(decimals)
-                .put((byte) (reissuable ? 1 : 0))
-                .putLong(fee)
-                .putLong(timestamp);
-        putScript(buf, script);
 
-       return new Transaction(sender, buf,"/transactions/broadcast",
-                "type", ISSUE,
-                "version", V2,
-                "senderPublicKey", Base58.encode(sender.getPublicKey()),
-                "name", name,
-                "description", description,
-                "quantity", quantity,
-                "decimals", decimals,
-                "reissuable", reissuable,
-                "script", script,
-                "fee", fee,
-                "timestamp", timestamp);
+
+       return new Transaction(sender, buf, "/transactions/broadcast",
+                );
     }
 
     public static Transaction makeIssueTx(PublicKeyAccount sender, byte chainId, String name, String description, long quantity,
