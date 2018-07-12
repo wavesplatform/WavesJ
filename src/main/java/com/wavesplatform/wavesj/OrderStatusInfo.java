@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wavesplatform.wavesj.matcher.Order;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderStatusInfo {

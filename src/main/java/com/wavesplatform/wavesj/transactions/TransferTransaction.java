@@ -71,7 +71,7 @@ public class TransferTransaction extends Transaction {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(TRANSFER).put(sender.getPublicKey());
+        buf.put(sender.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee);
@@ -92,6 +92,6 @@ public class TransferTransaction extends Transaction {
         data.put("feeAssetId", Asset.toJsonObject(feeAssetId));
         data.put("timestamp", timestamp);
         data.put("attachment", attachment);
-        return null;
+        return data;
     }
 }

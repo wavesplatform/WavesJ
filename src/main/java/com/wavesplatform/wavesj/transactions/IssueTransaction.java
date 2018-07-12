@@ -80,7 +80,6 @@ public class IssueTransaction extends Transaction {
 
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
-        buf.put(ISSUE);
         buf.put(sender.getPublicKey());
         putString(buf, name);
         putString(buf, description);

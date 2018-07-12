@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj;
 
+import com.wavesplatform.wavesj.matcher.Order;
 import org.junit.Test;
 
 import java.io.IOException;

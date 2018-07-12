@@ -1,9 +1,18 @@
-package com.wavesplatform.wavesj;
+package com.wavesplatform.wavesj.matcher;
 
 import com.fasterxml.jackson.annotation.*;
+import com.wavesplatform.wavesj.ApiJson;
+import com.wavesplatform.wavesj.AssetPair;
+
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Order {
+public class Order extends ApiJson  {
+    @Override
+    public Map<String, Object> getData() {
+        return null;
+    }
+
     public enum Type {
         BUY, SELL;
 
@@ -47,7 +56,6 @@ public class Order {
 
     @JsonAlias({"orderType"})
     public final Type type;
-    public final String id;
     public final long amount;
     public final long price;
     public final long filled;
@@ -56,8 +64,7 @@ public class Order {
     public final AssetPair assetPair;
 
     @JsonCreator
-    private Order(
-            @JsonProperty("id") String id,
+    public Order(
             @JsonProperty("type") Type type,
             @JsonProperty("assetPair") AssetPair assetPair,
             @JsonProperty("amount") long amount,
@@ -65,7 +72,6 @@ public class Order {
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("filled") long filled,
             @JsonProperty("status") Status status) {
-        this.id = id;
         this.type = type;
         this.assetPair = assetPair;
         this.amount = amount;
