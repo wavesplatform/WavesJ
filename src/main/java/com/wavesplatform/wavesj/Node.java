@@ -36,9 +36,13 @@ public class Node {
     private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
 
     private final URI uri;
-    private final CloseableHttpClient client = HttpClients.custom()
-            .setDefaultRequestConfig(
-                    RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+    private final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(
+            RequestConfig.custom()
+                    .setSocketTimeout(5000)
+                    .setConnectTimeout(5000)
+                    .setConnectionRequestTimeout(5000)
+                    .setCookieSpec(CookieSpecs.STANDARD)
+                    .build())
             .build();
 
     public Node() {
