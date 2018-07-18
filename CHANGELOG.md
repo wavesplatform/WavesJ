@@ -1,3 +1,7 @@
+## 0.9
+- Added network timeouts to Node so that requests do not hang
+- Support for aliases in transfers and leases
+
 ## 0.8
 - Support for transactions version 2 (compatible with Waves 0.13)
 - `Transaction.setProof()` was renamed `withProof()` to better reflect the fact that it doesn't modify the object but rather returns new one
