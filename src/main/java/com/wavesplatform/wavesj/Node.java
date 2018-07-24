@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class Node {
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {};
     private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
+    private static final TypeReference<List<List<Map<String, Object>>>> TX_LIST = new TypeReference<List<List<Map<String, Object>>>>() {};
 
     private final URI uri;
     private final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(
@@ -88,6 +90,22 @@ public class Node {
      */
     public Map<String, Object> getTransaction(String txId) throws IOException {
         return mapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
+    }
+
+    /**
+     * Returns a list of transactions of an address.
+     * @param address address
+     * @param limit amount of transactions
+     * @return transaction list
+     * @throws IOException if no transactions with the given address exist
+     */
+    public List<Map<String, Object>> getTransactionList(String address, int limit) throws IOException {
+        List<List<Map<String, Object>>> result = mapper.convertValue(send("/transactions/address/"+address+"/limit/"+limit), TX_LIST);
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Map<String, Object> m : result.get(0)){
+            list.add(m);
+        }
+        return list;
     }
 
     /**
