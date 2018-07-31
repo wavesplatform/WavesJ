@@ -1,5 +1,8 @@
 package com.wavesplatform.wavesj.transactions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.wavesplatform.wavesj.Base58;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
@@ -11,8 +14,13 @@ import java.util.Map;
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putString;
 
+//@JsonDeserialize(using = IssueTransaction.Deserializer.class)
 public class IssueTransaction extends Transaction {
-    static final byte ISSUE = 3;
+    public static final byte ISSUE = 3;
+
+    public static final TypeReference<IssueTransaction> TRANSACTION_TYPE = new TypeReference<IssueTransaction>() {};
+    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, IssueTransaction.class);
+    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, IssueTransaction.class);
 
     private final PublicKeyAccount sender;
     private final byte chainId;
@@ -88,7 +96,10 @@ public class IssueTransaction extends Transaction {
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee)
                 .putLong(timestamp);
-        return buf.array();
+        byte[] bytes = new byte[buf.position()];
+        buf.position(0);
+        buf.get(bytes);
+        return bytes;
     }
 
     @Override

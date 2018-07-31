@@ -221,23 +221,23 @@ public class PrivateKeyAccount extends PublicKeyAccount {
     }
 
     /**
-     * Signs a transaction and returns Base58-encoded signature.
-     * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease transaction:
+     * Signs a object and returns Base58-encoded signature.
+     * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease object:
      * <code>
      *     PublicKeyAccount leaser = ...
      *     PrivateKeyAccount signer = ...
-     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned transaction
+     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned object
      *     tx = tx.setProof(0, signer.sign(tx));  // sets the signature as proof 0
      *     node.send(tx);
      * </code>
-     * @param tx transaction to sign
+     * @param tx object to sign
      * @return Base58-encoded signature
      */
     public String sign(Transaction tx) {
         return sign(tx.getBytes());
     }
 
-    String sign(byte[] bytes) {
+    public String sign(byte[] bytes) {
         return Base58.encode(cipher.calculateSignature(getPrivateKey(), bytes));
     }
 

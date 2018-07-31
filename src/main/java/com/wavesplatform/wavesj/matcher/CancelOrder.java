@@ -1,26 +1,28 @@
 package com.wavesplatform.wavesj.matcher;
 
-import com.wavesplatform.wavesj.ApiJson;
-import com.wavesplatform.wavesj.AssetPair;
-import com.wavesplatform.wavesj.Base58;
-import com.wavesplatform.wavesj.PublicKeyAccount;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.wavesplatform.wavesj.*;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CancelOrder extends ApiJson {
-    private PublicKeyAccount account;
-    private AssetPair assetPair;
-    private String orderId;
+import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-    public CancelOrder(PublicKeyAccount account, AssetPair assetPair, String orderId) {
-        this.account = account;
+@JsonIgnoreProperties(ignoreUnknown = true, allowGetters = true)
+public class CancelOrder extends ApiJson implements Signable {
+    private final PublicKeyAccount sender;
+    private final AssetPair assetPair;
+    private final String orderId;
+
+    public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId) {
+        this.sender = sender;
         this.assetPair = assetPair;
         this.orderId = orderId;
     }
 
-    public PublicKeyAccount getAccount() {
-        return account;
+    public PublicKeyAccount getSender() {
+        return sender;
     }
 
     public AssetPair getAssetPair() {
@@ -34,8 +36,18 @@ public class CancelOrder extends ApiJson {
     @Override
     public Map<String, Object> getData() {
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("sender", Base58.encode(account.getPublicKey()));
+        data.put("sender", Base58.encode(sender.getPublicKey()));
         data.put("orderId", orderId);
         return data;
+    }
+
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(sender.getPublicKey()).put(Base58.decode(orderId));
+        byte[] bytes = new byte[buf.position()];
+        buf.position(0);
+        buf.get(bytes);
+        return bytes;
     }
 }

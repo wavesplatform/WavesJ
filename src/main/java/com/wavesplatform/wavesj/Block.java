@@ -19,7 +19,7 @@ public class Block {
     public final int size;
     public final long fee;
     public final int height;
-    public final List<Map<String, Object>> transactions;
+    public final List<Transaction> transactions;
 
     @JsonCreator
     private Block(
@@ -29,7 +29,7 @@ public class Block {
             @JsonProperty("blocksize") int size,
             @JsonProperty("fee") long fee,
             @JsonProperty("height") int height,
-            @JsonProperty("transactions") List<Map<String, Object>> transactions)
+            @JsonProperty("transactions") List<Transaction> transactions)
     {
         this.version = version;
         this.timestamp = timestamp;

@@ -1,6 +1,10 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
+import com.wavesplatform.wavesj.transactions.ObjectWithProofs;
+import com.wavesplatform.wavesj.transactions.ObjectWithSignature;
+import com.wavesplatform.wavesj.transactions.TransferTransaction;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,15 +47,15 @@ public class NodeTest {
     public void testBlocksAndTransactions() throws IOException {
         Node node = new Node();
 
-        Block block = node.getBlock(362294);
+        Block block = node.getBlock(337062);
         assertNotNull(block);
         assertEquals(362294, block.height);
         assertEquals(3, block.version);
 
-        for (Map<String, Object> tx: block.transactions) {
-            String id = (String) tx.get("id");
-            Map<String, Object> tx1 = node.getTransaction(id);
-            assertEquals(id, tx1.get("id"));
+        for (Transaction tx: block.transactions) {
+            String id = tx.getId();
+            Transaction tx1 = node.getTransaction(id);
+            assertEquals(id, tx1.getId());
         }
 
         Block block1 = node.getBlock(block.signature);
@@ -125,16 +129,16 @@ public class NodeTest {
     public void testSendTransaction() throws IOException {
         Node node = new Node();
 
-        Transaction tx1 = Transaction.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
+        ObjectWithProofs<TransferTransaction> tx1 = Transaction.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
         String id1 = node.send(tx1);
         assertNotNull(id1);
-        assertEquals(id1, tx1.id);
+        assertEquals(id1, tx1.getObject().getId());
 
-        Transaction tx2 = Transaction.makeMassTransferTx(bob, Asset.WAVES,
+        ObjectWithProofs<MassTransferTransaction> tx2 = Transaction.makeMassTransferTx(bob, Asset.WAVES,
                 Collections.singletonList(new Transfer(alice.getAddress(), AMOUNT)), FEE * 2, "Back to Alice");
         String id2 = node.send(tx2);
         assertNotNull(id2);
-        assertEquals(id2, tx2.id);
+        assertEquals(id2, tx2.getObject().getId());
     }
 
     @Test
@@ -151,23 +155,23 @@ public class NodeTest {
                 1, 1 * Asset.TOKEN,
                 System.currentTimeMillis() + 65000,
                 MFEE);
-        assertNotNull(order.id);
-        assertEquals(Order.Type.SELL, order.type);
-        assertEquals(Order.Status.ACCEPTED, order.status);
-        assertEquals(Asset.WAVES, order.assetPair.amountAsset);
-        assertEquals(WBTC, order.assetPair.priceAsset);
-        assertEquals(1 * Asset.TOKEN, order.amount);
-        assertEquals(1, order.price);
+        assertNotNull(order.getId());
+        assertEquals(Order.Type.SELL, order.getOrderType());
+        assertEquals(Order.Status.ACCEPTED, order.getStatus());
+        assertEquals(Asset.WAVES, order.getAssetPair().amountAsset);
+        assertEquals(WBTC, order.getAssetPair().priceAsset);
+        assertEquals(1 * Asset.TOKEN, order.getAmount());
+        assertEquals(1, order.getPrice());
 
         // Check order status
-        String status = matcher.getOrderStatus(order.id, MARKET).status.toString();
+        String status = matcher.getOrderStatus(order.getId(), MARKET).status.toString();
         assertEquals("ACCEPTED", status);
 
         // Verify the order appears in the list of all orders
         List<Order> orders = matcher.getOrders(alice);
         boolean found = false;
         for (Order o: orders) {
-            if (o.id.equals(order.id)) {
+            if (o.getId().equals(order.getId())) {
                 found = true;
             }
         }
@@ -177,28 +181,28 @@ public class NodeTest {
         orders = matcher.getOrders(alice, MARKET);
         found = false;
         for (Order o: orders) {
-            if (o.id.equals(order.id)) {
+            if (o.getId().equals(order.getId())) {
                 found = true;
             }
         }
         assertTrue(found);
 
         for (Order o: orders) {
-            assertNotNull(o.id);
-            assertNotNull(o.type);
-            assertNotNull(o.status);
-            assertNotNull(o.assetPair);
-            assertTrue(o.amount > 0);
-            assertTrue(o.price > 0);
-            assertTrue(o.timestamp > 0);
+            assertNotNull(o.getId());
+            assertNotNull(o.getOrderType());
+            assertNotNull(o.getStatus());
+            assertNotNull(o.getAssetPair());
+            assertTrue(o.getAmount() > 0);
+            assertTrue(o.getPrice() > 0);
+            assertTrue(o.getTimestamp() > 0);
         }
 
         // Cancel order
-        String canceled = matcher.cancelOrder(alice, MARKET, order.id);
+        String canceled = matcher.cancelOrder(alice, MARKET, order.getId());
         assertEquals("OrderCanceled", canceled);
 
         // Delete order from history
-        String deleted = matcher.deleteOrder(alice, MARKET, order.id);
+        String deleted = matcher.deleteOrder(alice, MARKET, order.getId());
         assertEquals("OrderDeleted", deleted);
     }
 

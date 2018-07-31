@@ -21,7 +21,7 @@ public abstract class DataEntry<T> {
     public final T value;
 
     @JsonProperty
-    final String type;
+    public final String type;
 
     private DataEntry(String key, String type, T value) {
         this.key = key;
@@ -29,11 +29,11 @@ public abstract class DataEntry<T> {
         this.value = value;
     }
 
-    int size() {
+    public int size() {
         return key.getBytes(UTF8).length + 2;
     }
 
-    void write(ByteBuffer buf) {
+    public void write(ByteBuffer buf) {
         byte[] bytes = key.getBytes(UTF8);
         buf.putShort((short) bytes.length).put(bytes);
     }
@@ -44,11 +44,11 @@ public abstract class DataEntry<T> {
             super(key, "integer", value);
         }
 
-        int size() {
+        public int size() {
             return super.size() + 1 + 8;
         }
 
-        void write(ByteBuffer buf) {
+        public void write(ByteBuffer buf) {
             super.write(buf);
             buf.put(INTEGER).putLong(value);
         }
@@ -59,11 +59,11 @@ public abstract class DataEntry<T> {
             super(key, "boolean", value);
         }
 
-        int size() {
+        public int size() {
             return super.size() + 1 + 1;
         }
 
-        void write(ByteBuffer buf) {
+        public void write(ByteBuffer buf) {
             super.write(buf);
             buf.put(BOOLEAN).put((byte) (value ? 1 : 0));
         }
@@ -75,11 +75,11 @@ public abstract class DataEntry<T> {
             super(key, "binary", value);
         }
 
-        int size() {
+        public int size() {
             return super.size() + 1 + 2 + value.length;
         }
 
-        void write(ByteBuffer buf) {
+        public void write(ByteBuffer buf) {
             super.write(buf);
             buf.put(BINARY).putShort((short) value.length).put(value);
         }
@@ -113,11 +113,11 @@ public abstract class DataEntry<T> {
             super(key, "string", value);
         }
 
-        int size() {
+        public int size() {
             return super.size() + 1 + 2 + bytes.length;
         }
 
-        void write(ByteBuffer buf) {
+        public void write(ByteBuffer buf) {
             super.write(buf);
             buf.put(STRING).putShort((short) bytes.length).put(bytes);
         }

@@ -1,5 +1,8 @@
 package com.wavesplatform.wavesj.transactions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.wavesplatform.wavesj.Base58;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
@@ -10,9 +13,13 @@ import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
+//@JsonDeserialize(using = ReissueTransaction.Deserializer.class)
 public class ReissueTransaction extends Transaction {
+    public static final byte REISSUE = 5;
 
-    static final byte REISSUE       = 5;
+    public static final TypeReference<ReissueTransaction> TRANSACTION_TYPE = new TypeReference<ReissueTransaction>() {};
+    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, ReissueTransaction.class);
+    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, ReissueTransaction.class);
 
     private PublicKeyAccount sender;
     private byte chainId;
@@ -66,13 +73,17 @@ public class ReissueTransaction extends Transaction {
         buf.put(sender.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
-        return buf.array();
+        byte[] bytes = new byte[buf.position()];
+        buf.position(0);
+        buf.get(bytes);
+        return bytes;
     }
 
     @Override
     public Map<String, Object> getData() {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("type", REISSUE);
+        data.put("id", getId());
         data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
         data.put("assetId", assetId);
         data.put("quantity", quantity);

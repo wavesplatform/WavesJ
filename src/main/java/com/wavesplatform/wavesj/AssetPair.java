@@ -26,7 +26,7 @@ public class AssetPair {
         return String.format("AssetPair[%s to %s]", amountAsset, priceAsset);
     }
 
-    Object toJsonObject() {
+    public Object toJsonObject() {
         return new AssetPair(Asset.toJsonObject(amountAsset), Asset.toJsonObject(priceAsset), null);
     }
 }

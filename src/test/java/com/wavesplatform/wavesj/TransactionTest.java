@@ -1,5 +1,7 @@
 package com.wavesplatform.wavesj;
 
+import com.wavesplatform.wavesj.transactions.LeaseTransaction;
+import com.wavesplatform.wavesj.transactions.ObjectWithProofs;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,53 +49,40 @@ public class TransactionTest {
 
     @Test
     public void multiSigTest() {
-        PublicKeyAccount sender = new PublicKeyAccount("8LbAU5BSrGkpk5wbjLMNjrbc9VzN9KBBYv9X8wGpmAJT", Account.TESTNET);
+        PrivateKeyAccount sender = PrivateKeyAccount.fromPrivateKey("8LbAU5BSrGkpk5wbjLMNjrbc9VzN9KBBYv9X8wGpmAJT", Account.TESTNET);
         PrivateKeyAccount signer1 = PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
         PrivateKeyAccount signer2 = PrivateKeyAccount.fromPrivateKey("4n6L7rZYL2LAmwheLBketwXCCC4JZF3mHYEskySxeNqm", Account.TESTNET);
 
-        Transaction tx = Transaction.makeLeaseTx(sender, signer1.getAddress(), Asset.TOKEN, FEE);
-        assertEquals(0, tx.proofs.size());
-        checkSendProven(tx);
+        LeaseTransaction tx = new LeaseTransaction(sender, signer1.getAddress(), Asset.TOKEN, FEE, System.currentTimeMillis());
 
         String proof = "some proof";
-        Transaction provenTx = tx.withProof(1, proof);
-        assertEquals(2, provenTx.proofs.size());
-        assertEquals("", provenTx.proofs.get(0));
-        assertEquals(proof, provenTx.proofs.get(1));
-        checkSendProven(tx);
-
-        String signature = signer1.sign(provenTx);
-        Transaction signedTx = provenTx.withProof(0, signature);
-        assertEquals(2, signedTx.proofs.size());
-        assertEquals(signature, signedTx.proofs.get(0));
-        assertEquals(proof, signedTx.proofs.get(1));
-        checkSendProven(tx);
+        ObjectWithProofs<LeaseTransaction> provenTx = new ObjectWithProofs<LeaseTransaction>(tx, sender);
+        provenTx = provenTx.withProof(1, proof);
+        assertEquals(2, provenTx.getProofs().size());
+        assertEquals(proof, provenTx.getProofs().get(1));
+        checkSendProven(provenTx);
 
         try {
-            signedTx.withProof(8, "bah!");
+            provenTx.withProof(8, "bah!");
             fail("Was able to add 9 proofs to a transaction");
         } catch (IllegalArgumentException ex) {
             // okay
         }
     }
 
-    private void check(Transaction tx) {
-        assertNotNull(tx.id);
-        assertFalse(tx.id.isEmpty());
+    private <T extends Transaction> void check(ObjectWithProofs<T> tx) {
+        assertNotNull(tx.getObject().getId());
+        assertFalse(tx.getObject().getId().isEmpty());
 
-        assertEquals(1, tx.proofs.size());
-        assertFalse(tx.proofs.get(0).isEmpty());
-
-        assertNotNull(tx.endpoint);
-        assertFalse(tx.endpoint.isEmpty());
+        assertEquals(1, tx.getProofs().size());
+        assertFalse(tx.getProofs().get(0).isEmpty());
 
         checkSend(tx, "does not exceed minimal value", "Transaction should have failed because of insufficient fee");
 
-        tx = tx.withProof(4, "proof");
-        checkSendProven(tx);
+        checkSendProven(tx.withProof(4, "proof"));
     }
 
-    private void checkSend(Transaction tx, String failure, String message) {
+    private <T extends Transaction> void checkSend(ObjectWithProofs<T> tx, String failure, String message) {
         try {
             node.send(tx);
             fail(message);
@@ -103,8 +92,8 @@ public class TransactionTest {
         }
     }
 
-    private void checkSendProven(Transaction tx) {
+    private <T extends Transaction> void checkSendProven(ObjectWithProofs<T> tx) {
         checkSend(tx, "Transactions from non-scripted accounts must have exactly 1 proof",
-                "Multi proof transaction should have failed because account is non-scripted");
+                "Multi proof object should have failed because account is non-scripted");
     }
 }

@@ -1,5 +1,8 @@
 package com.wavesplatform.wavesj.transactions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.wavesplatform.wavesj.Base58;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
@@ -10,15 +13,20 @@ import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
+//@JsonDeserialize(using = BurnTransaction.Deserializer.class)
 public class BurnTransaction extends Transaction {
-    static final byte BURN = 6;
+    public static final byte BURN = 6;
 
-    private PublicKeyAccount sender;
-    private byte chainId;
-    private String assetId;
-    private long amount;
-    private long fee;
-    private long timestamp;
+    public static final TypeReference<BurnTransaction> TRANSACTION_TYPE = new TypeReference<BurnTransaction>() {};
+    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, BurnTransaction.class);
+    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, BurnTransaction.class);
+
+    private final PublicKeyAccount sender;
+    private final byte chainId;
+    private final String assetId;
+    private final long amount;
+    private final long fee;
+    private final long timestamp;
 
     public BurnTransaction(PublicKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
         this.sender = sender;
@@ -58,13 +66,17 @@ public class BurnTransaction extends Transaction {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(sender.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
-        return buf.array();
+        byte[] bytes = new byte[buf.position()];
+        buf.position(0);
+        buf.get(bytes);
+        return bytes;
     }
 
     @Override
     public Map<String, Object> getData() {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("type", BURN);
+        data.put("id", getId());
         data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
         data.put("assetId", assetId);
         data.put("quantity", amount);
