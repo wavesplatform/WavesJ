@@ -1,31 +1,15 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.wavesplatform.wavesj.Asset;
-import com.wavesplatform.wavesj.Base58;
-import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.Transaction;
+import com.wavesplatform.wavesj.*;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-//@JsonDeserialize(using = TransferTransaction.Deserializer.class)
 public class TransferTransaction extends Transaction {
     public static final byte TRANSFER = 4;
-
-    public static final TypeReference<TransferTransaction> TRANSACTION_TYPE = new TypeReference<TransferTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, TransferTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, TransferTransaction.class);
-
 
     private final PublicKeyAccount sender;
     private final String recipient;
@@ -33,10 +17,10 @@ public class TransferTransaction extends Transaction {
     private final String assetId;
     private final long fee;
     private final String feeAssetId;
-    private final String attachment;
+    private final ByteString attachment;
     private final long timestamp;
 
-    public TransferTransaction(PublicKeyAccount sender, String recipient, long amount, String assetId, long fee, String feeAssetId, String attachment, long timestamp) {
+    public TransferTransaction(PublicKeyAccount sender, String recipient, long amount, String assetId, long fee, String feeAssetId, ByteString attachment, long timestamp) {
         this.sender = sender;
         this.recipient = recipient;
         this.amount = amount;
@@ -71,7 +55,7 @@ public class TransferTransaction extends Transaction {
         return feeAssetId;
     }
 
-    public String getAttachment() {
+    public ByteString getAttachment() {
         return attachment;
     }
 
@@ -88,7 +72,7 @@ public class TransferTransaction extends Transaction {
         putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee);
         putRecipient(buf, sender.getChainId(), recipient);
-        putString(buf, attachment);
+        putString(buf, attachment.getBase58String());
         byte[] bytes = new byte[buf.position()];
         buf.position(0);
         buf.get(bytes);
@@ -109,5 +93,10 @@ public class TransferTransaction extends Transaction {
         data.put("timestamp", timestamp);
         data.put("attachment", attachment);
         return data;
+    }
+
+    @Override
+    public byte getType() {
+        return TRANSFER;
     }
 }

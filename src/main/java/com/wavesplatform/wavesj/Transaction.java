@@ -1,23 +1,16 @@
 package com.wavesplatform.wavesj;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
-import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
+import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.*;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 import static com.wavesplatform.wavesj.Asset.isWaves;
-import static com.wavesplatform.wavesj.ByteUtils.*;
+import static com.wavesplatform.wavesj.ByteUtils.hash;
 
 /**
  * This class represents a Waves object. Instances are immutable, with data accessible through public final fields.
@@ -41,13 +34,16 @@ import static com.wavesplatform.wavesj.ByteUtils.*;
  *     {@code Transaction} it is called on, but rather returns a new instance.
  * </ul>
  */
-@JsonDeserialize(using = Transaction.Deserializer.class)
 public abstract class Transaction extends JsonRepresented implements Proofable {
     /** Transaction ID. */
+    @JsonIgnore
     public String getId() {
         return hash(getBytes());
     }
+
+    public abstract byte getType();
     /** Transaction data. */
+    @JsonIgnore
     public abstract Map<String, Object> getData();
 
     public static final int MAX_PROOF_COUNT = 8;
@@ -67,33 +63,6 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
     private static final byte V1 = 1;
     private static final byte V2 = 2;
     private static final int KBYTE = 1024;
-
-    static final protected ObjectMapper mapper = new ObjectMapper();
-    static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
-
-    static class Deserializer extends JsonDeserializer<Transaction> {
-        @Override
-        public Transaction deserialize(JsonParser p, DeserializationContext context) throws IOException {
-            TreeNode n = p.getCodec().readTree(p);
-            IntNode typeN = (IntNode) n.get("type");
-            TypeReference<? extends Transaction> t = null;
-            switch (typeN.intValue()) {
-                case AliasTransaction.ALIAS: t = AliasTransaction.TRANSACTION_TYPE; break;
-                case BurnTransaction.BURN: t = BurnTransaction.TRANSACTION_TYPE; break;
-                case DataTransaction.DATA: t = DataTransaction.TRANSACTION_TYPE; break;
-                case IssueTransaction.ISSUE: t = IssueTransaction.TRANSACTION_TYPE; break;
-                case LeaseCancelTransaction.LEASE_CANCEL: t = LeaseCancelTransaction.TRANSACTION_TYPE; break;
-                case LeaseTransaction.LEASE: t = LeaseTransaction.TRANSACTION_TYPE; break;
-                case MassTransferTransaction.MASS_TRANSFER: t = MassTransferTransaction.TRANSACTION_TYPE; break;
-                case ReissueTransaction.REISSUE: t = ReissueTransaction.TRANSACTION_TYPE; break;
-                case ScriptTransaction.SET_SCRIPT: t = ScriptTransaction.TRANSACTION_TYPE; break;
-                case SponsorTransaction.SPONSOR: t = SponsorTransaction.TRANSACTION_TYPE; break;
-                case TransferTransaction.TRANSFER: t = TransferTransaction.TRANSACTION_TYPE; break;
-                default: throw new IllegalArgumentException();
-            }
-            return mapper.reader(t).readValue(p);
-        }
-    }
 
     public static ObjectWithProofs<IssueTransaction> makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description,
                                                                  long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp)
@@ -123,7 +92,7 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
     public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
                                                                        long fee, String feeAssetId, String attachment, long timestamp)
     {
-        return new ObjectWithProofs<TransferTransaction>(new TransferTransaction(sender, recipient, amount, assetId, fee, feeAssetId, attachment, timestamp), sender);
+        return new ObjectWithProofs<TransferTransaction>(new TransferTransaction(sender, recipient, amount, assetId, fee, feeAssetId, new ByteString(attachment.getBytes()), timestamp), sender);
     }
 
     public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
@@ -176,7 +145,7 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
     }
 
     public static ObjectWithProofs<AliasTransaction> makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee, long timestamp) {
-        return new ObjectWithProofs<AliasTransaction>(new AliasTransaction(sender, alias, chainId, fee, timestamp), sender);
+        return new ObjectWithProofs<AliasTransaction>(new AliasTransaction(sender, new Alias(alias, chainId), chainId, fee, timestamp), sender);
     }
 
     public static ObjectWithProofs<AliasTransaction> makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee) {
@@ -212,12 +181,12 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
      * @see Account#MAINNET
      * @see Account#TESTNET
      */
-    public static ObjectWithProofs<ScriptTransaction> makeScriptTx(PrivateKeyAccount sender, String script, byte chainId, long fee, long timestamp) {
-        return new ObjectWithProofs<ScriptTransaction>(new ScriptTransaction(sender, script, chainId, fee, timestamp), sender);
+    public static ObjectWithProofs<SetScriptTransaction> makeScriptTx(PrivateKeyAccount sender, String script, byte chainId, long fee, long timestamp) {
+        return new ObjectWithProofs<SetScriptTransaction>(new SetScriptTransaction(sender, script, chainId, fee, timestamp), sender);
     }
 
 
-    public static ObjectWithProofs<ScriptTransaction> makeScriptTx(PrivateKeyAccount sender, String script, byte chainId, long fee) {
+    public static ObjectWithProofs<SetScriptTransaction> makeScriptTx(PrivateKeyAccount sender, String script, byte chainId, long fee) {
         return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
     }
 

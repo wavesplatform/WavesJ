@@ -18,9 +18,9 @@ import static com.wavesplatform.wavesj.ByteUtils.putRecipient;
 public class LeaseTransaction extends Transaction {
     public static final byte LEASE = 8;
 
-    public static final TypeReference<LeaseTransaction> TRANSACTION_TYPE = new TypeReference<LeaseTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, LeaseTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, LeaseTransaction.class);
+//    public static final TypeReference<LeaseTransaction> TRANSACTION_TYPE = new TypeReference<LeaseTransaction>() {};
+//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, LeaseTransaction.class);
+//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, LeaseTransaction.class);
 
     private final PublicKeyAccount sender;
     private final String recipient;
@@ -79,5 +79,10 @@ public class LeaseTransaction extends Transaction {
         data.put("fee", fee);
         data.put("timestamp", timestamp);
         return data;
+    }
+
+    @Override
+    public byte getType() {
+        return LEASE;
     }
 }

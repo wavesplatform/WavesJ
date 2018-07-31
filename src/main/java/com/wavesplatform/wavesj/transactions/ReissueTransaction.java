@@ -17,9 +17,9 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 public class ReissueTransaction extends Transaction {
     public static final byte REISSUE = 5;
 
-    public static final TypeReference<ReissueTransaction> TRANSACTION_TYPE = new TypeReference<ReissueTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, ReissueTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, ReissueTransaction.class);
+//    public static final TypeReference<ReissueTransaction> TRANSACTION_TYPE = new TypeReference<ReissueTransaction>() {};
+//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, ReissueTransaction.class);
+//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, ReissueTransaction.class);
 
     private PublicKeyAccount sender;
     private byte chainId;
@@ -91,5 +91,10 @@ public class ReissueTransaction extends Transaction {
         data.put("fee", fee);
         data.put("timestamp", timestamp);
         return data;
+    }
+
+    @Override
+    public byte getType() {
+        return REISSUE;
     }
 }

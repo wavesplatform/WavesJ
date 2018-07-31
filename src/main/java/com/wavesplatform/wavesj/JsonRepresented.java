@@ -1,11 +1,13 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
 public abstract class JsonRepresented {
+    @JsonIgnore
     public abstract Map<String, Object> getData();
 
     /**
@@ -16,6 +18,7 @@ public abstract class JsonRepresented {
      * Returns JSON-encoded object data.
      * @return a JSON string
      */
+    @JsonIgnore
     public String getJson() {
         /// add version to json and bytes
         /// Add v2-producing methods where needed

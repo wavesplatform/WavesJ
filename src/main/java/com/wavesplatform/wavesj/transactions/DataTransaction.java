@@ -19,9 +19,9 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 public class DataTransaction extends Transaction {
     public static final byte DATA = 12;
 
-    public static final TypeReference<DataTransaction> TRANSACTION_TYPE = new TypeReference<DataTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, DataTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, DataTransaction.class);
+//    public static final TypeReference<DataTransaction> TRANSACTION_TYPE = new TypeReference<DataTransaction>() {};
+//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, DataTransaction.class);
+//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, DataTransaction.class);
 
     private final PublicKeyAccount sender;
     private final Collection<DataEntry<?>> data;
@@ -81,5 +81,10 @@ public class DataTransaction extends Transaction {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public byte getType() {
+        return DATA;
     }
 }

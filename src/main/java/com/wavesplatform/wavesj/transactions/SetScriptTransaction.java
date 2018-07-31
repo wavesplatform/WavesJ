@@ -14,13 +14,13 @@ import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-//@JsonDeserialize(using = ScriptTransaction.Deserializer.class)
-public class ScriptTransaction extends Transaction {
+//@JsonDeserialize(using = SetScriptTransaction.Deserializer.class)
+public class SetScriptTransaction extends Transaction {
     public static final byte SET_SCRIPT = 13;
 
-    public static final TypeReference<ScriptTransaction> TRANSACTION_TYPE = new TypeReference<ScriptTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, ScriptTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, ScriptTransaction.class);
+//    public static final TypeReference<SetScriptTransaction> TRANSACTION_TYPE = new TypeReference<SetScriptTransaction>() {};
+//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, SetScriptTransaction.class);
+//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, SetScriptTransaction.class);
 
     private PublicKeyAccount sender;
     private String script;
@@ -28,7 +28,7 @@ public class ScriptTransaction extends Transaction {
     private long fee;
     private long timestamp;
 
-    public ScriptTransaction(PublicKeyAccount sender, String script, byte chainId, long fee, long timestamp) {
+    public SetScriptTransaction(PublicKeyAccount sender, String script, byte chainId, long fee, long timestamp) {
         this.sender = sender;
         this.script = script;
         this.chainId = chainId;
@@ -83,5 +83,10 @@ public class ScriptTransaction extends Transaction {
         data.put("fee", fee);
         data.put("timestamp", timestamp);
         return data;
+    }
+
+    @Override
+    public byte getType() {
+        return SET_SCRIPT;
     }
 }

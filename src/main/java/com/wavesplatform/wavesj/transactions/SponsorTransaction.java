@@ -22,9 +22,9 @@ public class SponsorTransaction extends Transaction {
     private long fee;
     private long timestamp;
 
-    public static final TypeReference<SponsorTransaction> TRANSACTION_TYPE = new TypeReference<SponsorTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, SponsorTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, SponsorTransaction.class);
+//    public static final TypeReference<SponsorTransaction> TRANSACTION_TYPE = new TypeReference<SponsorTransaction>() {};
+//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, SponsorTransaction.class);
+//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, SponsorTransaction.class);
 
     public SponsorTransaction(PublicKeyAccount sender, String assetId, long minAssetFee, long fee, long timestamp) {
         this.sender = sender;
@@ -76,5 +76,10 @@ public class SponsorTransaction extends Transaction {
         data.put("fee", fee);
         data.put("timestamp", timestamp);
         return data;
+    }
+
+    @Override
+    public byte getType() {
+        return SPONSOR;
     }
 }

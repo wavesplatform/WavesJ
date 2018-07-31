@@ -17,9 +17,9 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 public class BurnTransaction extends Transaction {
     public static final byte BURN = 6;
 
-    public static final TypeReference<BurnTransaction> TRANSACTION_TYPE = new TypeReference<BurnTransaction>() {};
-    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, BurnTransaction.class);
-    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, BurnTransaction.class);
+//    public static final TypeReference<BurnTransaction> TRANSACTION_TYPE = new TypeReference<BurnTransaction>() {};
+//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, BurnTransaction.class);
+//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, BurnTransaction.class);
 
     private final PublicKeyAccount sender;
     private final byte chainId;
@@ -83,5 +83,10 @@ public class BurnTransaction extends Transaction {
         data.put("fee", fee);
         data.put("timestamp", timestamp);
         return data;
+    }
+
+    @Override
+    public byte getType() {
+        return BURN;
     }
 }
