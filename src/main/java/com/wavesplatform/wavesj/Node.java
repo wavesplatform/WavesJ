@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -101,11 +100,7 @@ public class Node {
      */
     public List<Map<String, Object>> getTransactionList(String address, int limit) throws IOException {
         List<List<Map<String, Object>>> result = mapper.convertValue(send("/transactions/address/"+address+"/limit/"+limit), TX_LIST);
-        List<Map<String, Object>> list = new ArrayList<>();
-        for (Map<String, Object> m : result.get(0)){
-            list.add(m);
-        }
-        return list;
+        return result.get(0);
     }
 
     /**
