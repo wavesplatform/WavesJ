@@ -110,6 +110,11 @@ public class Order extends ApiJson implements Signable {
         return bytes;
     }
 
+    @Override
+    public byte[] getPublicKey() {
+        return senderPublicKey.getPublicKey();
+    }
+
     public Order.Type getOrderType() {
         return orderType;
     }

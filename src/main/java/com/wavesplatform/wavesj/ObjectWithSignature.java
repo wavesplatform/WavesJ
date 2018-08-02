@@ -1,25 +1,39 @@
 package com.wavesplatform.wavesj;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.wavesplatform.wavesj.transactions.DataTransaction;
+import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
+import com.wavesplatform.wavesj.transactions.SetScriptTransaction;
+import com.wavesplatform.wavesj.transactions.SponsorTransaction;
+import org.whispersystems.curve25519.Curve25519;
 
-public class ObjectWithSignature<T extends Signable> extends ApiJson implements ProofedObject<T> {
+public class ObjectWithSignature<T extends Signable> extends ApiJson implements ProofedObject<T>, Signable {
     public static final byte V1 = 1;
 
-    protected final String signature;
+    protected final ByteString signature;
     protected final T object;
 
-    public ObjectWithSignature(T object, String signature) {
+    private static void checkAllowSignatureObject(Signable object) {
+        if (object instanceof SponsorTransaction ||
+                object instanceof SetScriptTransaction ||
+                object instanceof MassTransferTransaction ||
+                object instanceof DataTransaction) {
+            throw new IllegalArgumentException("You need to use proofs for this transaction type");
+        }
+    }
+
+    public ObjectWithSignature(T object, ByteString signature) {
+        checkAllowSignatureObject(object);
         this.signature = signature;
         this.object = object;
     }
 
     public ObjectWithSignature(T object, PrivateKeyAccount account) {
-        this.signature = account.sign(object.getBytes());
+        checkAllowSignatureObject(object);
         this.object = object;
+        this.signature = new ByteString(account.sign(getBytes()));
     }
 
-    public String getSignature() {
+    public ByteString getSignature() {
         return signature;
     }
 
@@ -31,11 +45,21 @@ public class ObjectWithSignature<T extends Signable> extends ApiJson implements 
         return V1;
     }
 
-    public Map<String, Object> getData() {
-        Map<String, Object> base = new HashMap<String, Object>();
-        HashMap<String, Object> toJson = new HashMap<String, Object>(base);
-        toJson.put("signature", signature);
-        toJson.put("version", V1);
-        return toJson;
+    @Override
+    public byte[] getBytes() {
+        byte[] bytePrefix = new byte[]{};
+        if (object instanceof Transaction) {
+            bytePrefix = new byte[]{((Transaction) object).getType()};
+        }
+        return ByteArraysUtils.addAll(bytePrefix, object.getBytes());
+    }
+
+    @Override
+    public byte[] getPublicKey() {
+        return object.getPublicKey();
+    }
+
+    public boolean verifySignature() {
+        return Curve25519.getInstance(Curve25519.BEST).verifySignature(getPublicKey(), getBytes(), signature.getBytes());
     }
 }

@@ -21,7 +21,7 @@ public class ObjectWithSignatureSer extends JsonSerializer<ObjectWithSignature> 
     public void serialize(ObjectWithSignature objectWithSignature, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeObjectField("signature", objectWithSignature.getSignature());
-        jsonGenerator.writeNumberField("version", ObjectWithSignature.V1);
+        jsonGenerator.writeNumberField("version", objectWithSignature.getVersion());
         JsonFactory factory = new JsonFactory();
         StringWriter innerJsonWriter = new StringWriter();
         JsonGenerator g = factory.createGenerator(innerJsonWriter);

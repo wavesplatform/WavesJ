@@ -5,6 +5,7 @@ import org.apache.commons.codec.Charsets;
 import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
+import static com.wavesplatform.wavesj.ByteUtils.putString;
 
 public class Alias {
     private String name;
@@ -32,8 +33,8 @@ public class Alias {
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(Alias.AddressVersion)
-                .put(chainId)
-                .put(name.getBytes(Charsets.UTF_8));
+                .put(chainId);
+        putString(buf, name);
         byte[] bytes = new byte[buf.position()];
         buf.position(0);
         buf.get(bytes);

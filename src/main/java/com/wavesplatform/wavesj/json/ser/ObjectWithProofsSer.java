@@ -26,14 +26,7 @@ public class ObjectWithProofsSer extends JsonSerializer<ObjectWithProofs> {
     public void serialize(ObjectWithProofs objectWithProofs, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeObjectField("proofs", objectWithProofs.getProofs());
-        byte version = ObjectWithProofs.V2;
-        if (objectWithProofs.getObject() instanceof SponsorTransaction ||
-                objectWithProofs.getObject() instanceof SetScriptTransaction ||
-                objectWithProofs.getObject() instanceof MassTransferTransaction ||
-                objectWithProofs.getObject() instanceof DataTransaction) {
-            version = ObjectWithSignature.V1;
-        }
-        jsonGenerator.writeNumberField("version", version);
+        jsonGenerator.writeNumberField("version", objectWithProofs.getVersion());
         JsonFactory factory = new JsonFactory();
         StringWriter innerJsonWriter = new StringWriter();
         JsonGenerator g = factory.createGenerator(innerJsonWriter);

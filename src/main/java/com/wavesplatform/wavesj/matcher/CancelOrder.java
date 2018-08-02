@@ -42,4 +42,9 @@ public class CancelOrder extends ApiJson implements Signable {
         buf.get(bytes);
         return bytes;
     }
+
+    @Override
+    public byte[] getPublicKey() {
+        return sender.getPublicKey();
+    }
 }

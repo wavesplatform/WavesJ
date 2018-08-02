@@ -55,7 +55,7 @@ public class IntegrationTransactionsTest {
 
         LeaseTransaction tx = new LeaseTransaction(sender, signer1.getAddress(), Asset.TOKEN, NORMAL_FEE, System.currentTimeMillis());
 
-        String proof = Base58.encode("some proof".getBytes());
+        ByteString proof = new ByteString("some proof");
         ObjectWithProofs<LeaseTransaction> provenTx = new ObjectWithProofs<LeaseTransaction>(tx, sender);
         provenTx = provenTx.withProof(1, proof);
         assertEquals(2, provenTx.getProofs().size());
@@ -63,7 +63,7 @@ public class IntegrationTransactionsTest {
         checkSendProven(provenTx);
 
         try {
-            provenTx.withProof(8, "bah!");
+            provenTx.withProof(8, new ByteString("bah!"));
             fail("Was able to add 9 proofs to a transaction");
         } catch (IllegalArgumentException ex) {
             // okay

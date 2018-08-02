@@ -38,7 +38,7 @@ import static com.wavesplatform.wavesj.ByteUtils.hash;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonTypeIdResolver(TransactionTypeResolver.class)
-public abstract class Transaction implements Proofable {
+public abstract class Transaction implements Proofable, Signable {
     /**
      * Transaction ID.
      */
@@ -47,6 +47,12 @@ public abstract class Transaction implements Proofable {
         return hash(getBytes());
     }
 
+    @Override
+    public byte[] getPublicKey() {
+        return getSenderPublicKey().getPublicKey();
+    }
+
+    public abstract PublicKeyAccount getSenderPublicKey();
     public abstract byte getType();
 
     public static ObjectWithProofs<IssueTransaction> makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description,
@@ -125,7 +131,7 @@ public abstract class Transaction implements Proofable {
     }
 
     public static ObjectWithProofs<AliasTransaction> makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee, long timestamp) {
-        return new ObjectWithProofs<AliasTransaction>(new AliasTransaction(sender, new Alias(alias, chainId), chainId, fee, timestamp), sender);
+        return new ObjectWithProofs<AliasTransaction>(new AliasTransaction(sender, new Alias(alias, chainId), fee, timestamp), sender);
     }
 
     public static ObjectWithProofs<AliasTransaction> makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee) {

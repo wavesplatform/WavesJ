@@ -35,11 +35,10 @@ public class ObjectContainerDeser extends JsonDeserializer<ProofedObject> implem
         Object tx = objectMapper.treeToValue(treeNode, valueType.getRawClass());
         if (signatureNode != null) {
             String signature = ((TextNode) signatureNode).textValue();
-            return new ObjectWithSignature<Signable>((Signable) tx, signature);
+            return new ObjectWithSignature<Signable>((Signable) tx, new ByteString(signature));
         } else if (proofsNode != null) {
-            List<String> proofs = objectMapper.readValue(proofsNode.traverse(), new TypeReference<List<String>>() {
-            });
-            return new ObjectWithProofs<Proofable>((Proofable) tx, proofs);
+            List<ByteString> proofs = objectMapper.readValue(proofsNode.traverse(), new TypeReference<List<ByteString>>() {});
+            return new ObjectWithProofs<Transaction>((Transaction) tx, proofs);
         } else {
             throw new IllegalArgumentException();
         }
