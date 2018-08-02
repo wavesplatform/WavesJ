@@ -13,7 +13,7 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 public class ReissueTransaction extends Transaction {
     public static final byte REISSUE = 5;
 
-    private PublicKeyAccount sender;
+    private PublicKeyAccount senderPublicKey;
     private byte chainId;
     private String assetId;
     private long quantity;
@@ -22,14 +22,14 @@ public class ReissueTransaction extends Transaction {
     private long timestamp;
 
     @JsonCreator
-    public ReissueTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public ReissueTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                               @JsonProperty("chainId") byte chainId,
                               @JsonProperty("assetId") String assetId,
                               @JsonProperty("quantity") long quantity,
                               @JsonProperty("reissuable") boolean reissuable,
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.assetId = assetId;
         this.quantity = quantity;
@@ -38,8 +38,8 @@ public class ReissueTransaction extends Transaction {
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public byte getChainId() {
@@ -69,7 +69,7 @@ public class ReissueTransaction extends Transaction {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
+        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
         byte[] bytes = new byte[buf.position()];

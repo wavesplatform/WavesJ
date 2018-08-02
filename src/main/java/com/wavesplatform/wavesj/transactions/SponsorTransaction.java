@@ -13,27 +13,27 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public class SponsorTransaction extends Transaction {
     public static final byte SPONSOR = 14;
-    private PublicKeyAccount sender;
+    private PublicKeyAccount senderPublicKey;
     private String assetId;
     private long minAssetFee;
     private long fee;
     private long timestamp;
 
     @JsonCreator
-    public SponsorTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public SponsorTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                               @JsonProperty("assetId") String assetId,
                               @JsonProperty("minAssetFee") long minAssetFee,
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.minAssetFee = minAssetFee;
         this.fee = fee;
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public String getAssetId() {
@@ -55,7 +55,7 @@ public class SponsorTransaction extends Transaction {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey()).put(Base58.decode(assetId))
+        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(minAssetFee).putLong(fee).putLong(timestamp);
         byte[] bytes = new byte[buf.position()];
         buf.position(0);

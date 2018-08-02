@@ -73,7 +73,7 @@ public abstract class Transaction implements Proofable {
 
     public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
                                                                        long fee, String feeAssetId, String attachment, long timestamp) {
-        return new ObjectWithProofs<TransferTransaction>(new TransferTransaction(sender, recipient, amount, assetId, fee, feeAssetId, new ByteString(attachment.getBytes()), timestamp), sender);
+        return new ObjectWithProofs<TransferTransaction>(new TransferTransaction(sender, recipient, amount, assetId, fee, feeAssetId, attachment == null ? ByteString.EMPTY : new ByteString(attachment.getBytes()), timestamp), sender);
     }
 
     public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
@@ -134,7 +134,7 @@ public abstract class Transaction implements Proofable {
 
     public static ObjectWithProofs<MassTransferTransaction> makeMassTransferTx(PrivateKeyAccount sender, String assetId, Collection<Transfer> transfers,
                                                                                long fee, String attachment, long timestamp) {
-        return new ObjectWithProofs<MassTransferTransaction>(new MassTransferTransaction(sender, assetId, transfers, fee, new ByteString(attachment.getBytes()), timestamp), sender);
+        return new ObjectWithProofs<MassTransferTransaction>(new MassTransferTransaction(sender, assetId, transfers, fee, attachment == null ? ByteString.EMPTY : new ByteString(attachment.getBytes()), timestamp), sender);
     }
 
     public static ObjectWithProofs<MassTransferTransaction> makeMassTransferTx(PrivateKeyAccount sender, String assetId, Collection<Transfer> transfers,

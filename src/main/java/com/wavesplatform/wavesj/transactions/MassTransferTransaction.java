@@ -14,7 +14,7 @@ import static com.wavesplatform.wavesj.ByteUtils.*;
 public class MassTransferTransaction extends Transaction {
     public static final byte MASS_TRANSFER = 11;
 
-    private final PublicKeyAccount sender;
+    private final PublicKeyAccount senderPublicKey;
     private final String assetId;
     private final Collection<Transfer> transfers;
     private final long fee;
@@ -22,13 +22,13 @@ public class MassTransferTransaction extends Transaction {
     private final long timestamp;
 
     @JsonCreator
-    public MassTransferTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public MassTransferTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                                    @JsonProperty("assetId") String assetId,
                                    @JsonProperty("transfers") Collection<Transfer> transfers,
                                    @JsonProperty("fee") long fee,
                                    @JsonProperty("attachment") ByteString attachment,
                                    @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.transfers = transfers;
         this.fee = fee;
@@ -36,8 +36,8 @@ public class MassTransferTransaction extends Transaction {
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public String getAssetId() {
@@ -63,13 +63,13 @@ public class MassTransferTransaction extends Transaction {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(5 * KBYTE);
-        buf.put(sender.getPublicKey());
+        buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);
         buf.putShort((short) transfers.size());
 
         List<Transfer> tr = new ArrayList<Transfer>(transfers.size());
         for (Transfer t : transfers) {
-            String rc = putRecipient(buf, sender.getChainId(), t.recipient);
+            String rc = putRecipient(buf, senderPublicKey.getChainId(), t.recipient);
             buf.putLong(t.amount);
             tr.add(new Transfer(rc, t.amount));
         }

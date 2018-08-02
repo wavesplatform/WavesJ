@@ -13,7 +13,7 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 public class BurnTransaction extends Transaction {
     public static final byte BURN = 6;
 
-    private final PublicKeyAccount sender;
+    private final PublicKeyAccount senderPublicKey;
     private final byte chainId;
     private final String assetId;
     private final long amount;
@@ -21,13 +21,13 @@ public class BurnTransaction extends Transaction {
     private final long timestamp;
 
     @JsonCreator
-    public BurnTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public BurnTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                            @JsonProperty("chainId") byte chainId,
                            @JsonProperty("assetId") String assetId,
                            @JsonProperty("amount") long amount,
                            @JsonProperty("fee") long fee,
                            @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.assetId = assetId;
         this.amount = amount;
@@ -35,8 +35,8 @@ public class BurnTransaction extends Transaction {
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public byte getChainId() {
@@ -62,7 +62,7 @@ public class BurnTransaction extends Transaction {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey()).put(Base58.decode(assetId))
+        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         byte[] bytes = new byte[buf.position()];
         buf.position(0);

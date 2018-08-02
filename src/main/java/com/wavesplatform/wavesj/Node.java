@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Node {
-    private static final String DEFAULT_NODE = "http://pool.testnet.wavesnodes.com";
+    private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
 
     private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {};
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};

@@ -42,7 +42,7 @@ public class Alias {
 
     @Override
     public String toString() {
-        return Alias.PREFIX + (char) chainId + ":" + name;
+        return name;
     }
 
     public static Alias fromString(String str) {

@@ -13,7 +13,7 @@ import static com.wavesplatform.wavesj.ByteUtils.putString;
 public class IssueTransaction extends Transaction {
     public static final byte ISSUE = 3;
 
-    private final PublicKeyAccount sender;
+    private final PublicKeyAccount senderPublicKey;
     private final byte chainId;
     private final String name;
     private final String description;
@@ -25,7 +25,7 @@ public class IssueTransaction extends Transaction {
     private final long timestamp;
 
     @JsonCreator
-    public IssueTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public IssueTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                             @JsonProperty("chainId") byte chainId,
                             @JsonProperty("name") String name,
                             @JsonProperty("description") String description,
@@ -35,7 +35,7 @@ public class IssueTransaction extends Transaction {
                             @JsonProperty("script") String script,
                             @JsonProperty("fee") long fee,
                             @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.name = name;
         this.description = description;
@@ -47,8 +47,8 @@ public class IssueTransaction extends Transaction {
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public byte getChainId() {
@@ -89,7 +89,7 @@ public class IssueTransaction extends Transaction {
 
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
-        buf.put(sender.getPublicKey());
+        buf.put(senderPublicKey.getPublicKey());
         putString(buf, name);
         putString(buf, description);
         buf.putLong(quantity)

@@ -15,24 +15,24 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 public class DataTransaction extends Transaction {
     public static final byte DATA = 12;
 
-    private final PublicKeyAccount sender;
+    private final PublicKeyAccount senderPublicKey;
     private final Collection<DataEntry<?>> data;
     private final long fee;
     private final long timestamp;
 
     @JsonCreator
-    public DataTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public DataTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                            @JsonProperty("data") Collection<DataEntry<?>> data,
                            @JsonProperty("fee") long fee,
                            @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.data = data;
         this.fee = fee;
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DataTransaction extends Transaction {
         }
 
         ByteBuffer buf = ByteBuffer.allocate(datalen);
-        buf.put(DATA).put(ObjectWithSignature.V1).put(sender.getPublicKey());
+        buf.put(DATA).put(ObjectWithSignature.V1).put(senderPublicKey.getPublicKey());
         buf.putShort((short) data.size());
         for (DataEntry<?> e : data) {
             e.write(buf);
@@ -55,7 +55,7 @@ public class DataTransaction extends Transaction {
         return bytes;
     }
 
-    public Collection<DataEntry<?>> getTransactionData() {
+    public Collection<DataEntry<?>> getData() {
         return data;
     }
 

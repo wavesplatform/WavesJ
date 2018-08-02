@@ -13,27 +13,27 @@ import static com.wavesplatform.wavesj.ByteUtils.putRecipient;
 public class LeaseTransaction extends Transaction {
     public static final byte LEASE = 8;
 
-    private final PublicKeyAccount sender;
+    private final PublicKeyAccount senderPublicKey;
     private final String recipient;
     private final long amount;
     private final long fee;
     private final long timestamp;
 
     @JsonCreator
-    public LeaseTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+    public LeaseTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                             @JsonProperty("recipient") String recipient,
                             @JsonProperty("amount") long amount,
                             @JsonProperty("fee") long fee,
                             @JsonProperty("timestamp") long timestamp) {
-        this.sender = sender;
+        this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public String getRecipient() {
@@ -55,8 +55,8 @@ public class LeaseTransaction extends Transaction {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey());
-        putRecipient(buf, sender.getChainId(), recipient);
+        buf.put(senderPublicKey.getPublicKey());
+        putRecipient(buf, senderPublicKey.getChainId(), recipient);
         buf.putLong(amount).putLong(fee).putLong(timestamp);
         byte[] bytes = new byte[buf.position()];
         buf.position(0);

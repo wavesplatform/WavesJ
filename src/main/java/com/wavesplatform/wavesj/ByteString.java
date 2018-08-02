@@ -13,6 +13,8 @@ public class ByteString {
         this.base58String = Base58.encode(bytes);
     }
 
+    public static ByteString EMPTY = new ByteString(new byte[0]);
+
     public String getBase58String() {
         return base58String;
     }
