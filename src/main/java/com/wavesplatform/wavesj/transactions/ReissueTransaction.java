@@ -1,25 +1,17 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.Base58;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-//@JsonDeserialize(using = ReissueTransaction.Deserializer.class)
 public class ReissueTransaction extends Transaction {
     public static final byte REISSUE = 5;
-
-//    public static final TypeReference<ReissueTransaction> TRANSACTION_TYPE = new TypeReference<ReissueTransaction>() {};
-//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, ReissueTransaction.class);
-//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, ReissueTransaction.class);
 
     private PublicKeyAccount sender;
     private byte chainId;
@@ -29,7 +21,14 @@ public class ReissueTransaction extends Transaction {
     private long fee;
     private long timestamp;
 
-    public ReissueTransaction(PublicKeyAccount sender, byte chainId, String assetId, long quantity, boolean reissuable, long fee, long timestamp) {
+    @JsonCreator
+    public ReissueTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+                              @JsonProperty("chainId") byte chainId,
+                              @JsonProperty("assetId") String assetId,
+                              @JsonProperty("quantity") long quantity,
+                              @JsonProperty("reissuable") boolean reissuable,
+                              @JsonProperty("fee") long fee,
+                              @JsonProperty("timestamp") long timestamp) {
         this.sender = sender;
         this.chainId = chainId;
         this.assetId = assetId;
@@ -77,20 +76,6 @@ public class ReissueTransaction extends Transaction {
         buf.position(0);
         buf.get(bytes);
         return bytes;
-    }
-
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("type", REISSUE);
-        data.put("id", getId());
-        data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
-        data.put("assetId", assetId);
-        data.put("quantity", quantity);
-        data.put("reissuable", reissuable);
-        data.put("fee", fee);
-        data.put("timestamp", timestamp);
-        return data;
     }
 
     @Override

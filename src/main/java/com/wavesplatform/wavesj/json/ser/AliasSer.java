@@ -8,7 +8,8 @@ import com.wavesplatform.wavesj.Alias;
 import java.io.IOException;
 
 public class AliasSer extends JsonSerializer<Alias> {
-    public AliasSer() {}
+    public AliasSer() {
+    }
 
     @Override
     public void serialize(Alias alias, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {

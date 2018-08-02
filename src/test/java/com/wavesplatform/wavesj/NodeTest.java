@@ -2,8 +2,6 @@ package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
-import com.wavesplatform.wavesj.transactions.ObjectWithProofs;
-import com.wavesplatform.wavesj.transactions.ObjectWithSignature;
 import com.wavesplatform.wavesj.transactions.TransferTransaction;
 import org.junit.Test;
 
@@ -47,23 +45,23 @@ public class NodeTest {
     public void testBlocksAndTransactions() throws IOException {
         Node node = new Node();
 
-        Block block = node.getBlock(337062);
+        Block block = node.getBlock(335753);
         assertNotNull(block);
-        assertEquals(362294, block.height);
-        assertEquals(3, block.version);
+        assertEquals(335753, block.getHeight());
+        assertEquals(3, block.getVersion());
 
-        for (Transaction tx: block.transactions) {
-            String id = tx.getId();
+        for (ProofedObject<Transaction> tx: block.getTransactions()) {
+            String id = tx.getObject().getId();
             Transaction tx1 = node.getTransaction(id);
             assertEquals(id, tx1.getId());
         }
 
-        Block block1 = node.getBlock(block.signature);
-        assertEquals(block.signature, block1.signature);
-        assertEquals(block.height, block1.height);
-        assertEquals(block.size, block1.size);
-        assertEquals(block.fee, block1.fee);
-        assertEquals(block.timestamp, block1.timestamp);
+        Block block1 = node.getBlock(block.getSignature());
+        assertEquals(block.getSignature(), block1.getSignature());
+        assertEquals(block.getHeight(), block1.getHeight());
+        assertEquals(block.getSize(), block1.getSize());
+        assertEquals(block.getFee(), block1.getFee());
+        assertEquals(block.getTimestamp(), block1.getTimestamp());
     }
 
     @Test
@@ -219,7 +217,7 @@ public class NodeTest {
     public void testAliasGet() throws IOException, URISyntaxException {
         String addr = "3PA1KvFfq9VuJjg45p2ytGgaNjrgnLSgf4r";
         String alias = "blackturtle";
-        Node node = new Node("https://nodes.wavesnodes.com/");
+        Node node = new Node("https://nodes.wavesnodes.com/", 'W');
         assertEquals(node.getAddrByAlias(alias),addr);
     }
 }

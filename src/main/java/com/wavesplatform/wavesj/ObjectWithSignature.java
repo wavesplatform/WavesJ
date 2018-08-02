@@ -1,13 +1,10 @@
-package com.wavesplatform.wavesj.transactions;
-
-import com.wavesplatform.wavesj.*;
+package com.wavesplatform.wavesj;
 
 import java.util.HashMap;
 import java.util.Map;
 
-//@JsonDeserialize(using = ObjectWithSignature.Deserializer.class)
-public class ObjectWithSignature<T extends Signable> extends ApiJson implements ObjectContainer<T> {
-    static final byte V1 = 1;
+public class ObjectWithSignature<T extends Signable> extends ApiJson implements ProofedObject<T> {
+    public static final byte V1 = 1;
 
     protected final String signature;
     protected final T object;
@@ -30,11 +27,12 @@ public class ObjectWithSignature<T extends Signable> extends ApiJson implements 
         return object;
     }
 
+    public byte getVersion() {
+        return V1;
+    }
+
     public Map<String, Object> getData() {
         Map<String, Object> base = new HashMap<String, Object>();
-        if (object instanceof JsonRepresented) {
-            base = ((JsonRepresented) object).getData();
-        }
         HashMap<String, Object> toJson = new HashMap<String, Object>(base);
         toJson.put("signature", signature);
         toJson.put("version", V1);

@@ -8,7 +8,8 @@ import com.wavesplatform.wavesj.ByteString;
 import java.io.IOException;
 
 public class ByteStringSer extends JsonSerializer<ByteString> {
-    public ByteStringSer() {}
+    public ByteStringSer() {
+    }
 
     @Override
     public void serialize(ByteString byteString, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {

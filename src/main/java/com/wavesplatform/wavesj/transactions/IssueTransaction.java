@@ -1,26 +1,17 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.wavesplatform.wavesj.Base58;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putString;
 
-//@JsonDeserialize(using = IssueTransaction.Deserializer.class)
 public class IssueTransaction extends Transaction {
     public static final byte ISSUE = 3;
-
-//    public static final TypeReference<IssueTransaction> TRANSACTION_TYPE = new TypeReference<IssueTransaction>() {};
-//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, IssueTransaction.class);
-//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, IssueTransaction.class);
 
     private final PublicKeyAccount sender;
     private final byte chainId;
@@ -33,7 +24,17 @@ public class IssueTransaction extends Transaction {
     private final long fee;
     private final long timestamp;
 
-    public IssueTransaction(PublicKeyAccount sender, byte chainId, String name, String description, long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp) {
+    @JsonCreator
+    public IssueTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+                            @JsonProperty("chainId") byte chainId,
+                            @JsonProperty("name") String name,
+                            @JsonProperty("description") String description,
+                            @JsonProperty("quantity") long quantity,
+                            @JsonProperty("decimals") byte decimals,
+                            @JsonProperty("reissuable") boolean reissuable,
+                            @JsonProperty("script") String script,
+                            @JsonProperty("fee") long fee,
+                            @JsonProperty("timestamp") long timestamp) {
         this.sender = sender;
         this.chainId = chainId;
         this.name = name;
@@ -100,22 +101,6 @@ public class IssueTransaction extends Transaction {
         buf.position(0);
         buf.get(bytes);
         return bytes;
-    }
-
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("type", ISSUE);
-        data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
-        data.put("name", name);
-        data.put("description", description);
-        data.put("quantity", quantity);
-        data.put("decimals", decimals);
-        data.put("reissuable", reissuable);
-        data.put("script", script);
-        data.put("fee", fee);
-        data.put("timestamp", timestamp);
-        return data;
     }
 
     @Override

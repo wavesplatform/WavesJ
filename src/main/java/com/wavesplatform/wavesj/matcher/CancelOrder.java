@@ -1,20 +1,19 @@
 package com.wavesplatform.wavesj.matcher;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-@JsonIgnoreProperties(ignoreUnknown = true, allowGetters = true)
 public class CancelOrder extends ApiJson implements Signable {
     private final PublicKeyAccount sender;
     private final AssetPair assetPair;
     private final String orderId;
 
+    @JsonCreator
     public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId) {
         this.sender = sender;
         this.assetPair = assetPair;
@@ -25,20 +24,13 @@ public class CancelOrder extends ApiJson implements Signable {
         return sender;
     }
 
+    @JsonIgnore
     public AssetPair getAssetPair() {
         return assetPair;
     }
 
     public String getOrderId() {
         return orderId;
-    }
-
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("sender", Base58.encode(sender.getPublicKey()));
-        data.put("orderId", orderId);
-        return data;
     }
 
     @Override

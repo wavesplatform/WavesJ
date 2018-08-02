@@ -1,14 +1,13 @@
 package com.wavesplatform.wavesj.transactions;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.Alias;
-import com.wavesplatform.wavesj.Base58;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
@@ -22,7 +21,12 @@ public class AliasTransaction extends Transaction {
     private final long fee;
     private final long timestamp;
 
-    public AliasTransaction(PublicKeyAccount senderPublicKey, Alias alias, byte chainId, long fee, long timestamp) {
+    @JsonCreator
+    public AliasTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
+                            @JsonProperty("alias") Alias alias,
+                            @JsonProperty("chainId") byte chainId,
+                            @JsonProperty("fee") long fee,
+                            @JsonProperty("timestamp") long timestamp) {
         this.senderPublicKey = senderPublicKey;
         this.alias = alias;
         this.chainId = chainId;
@@ -65,15 +69,4 @@ public class AliasTransaction extends Transaction {
         return ALIAS;
     }
 
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("type", ALIAS);
-        data.put("id", getId());
-        data.put("senderPublicKey", Base58.encode(senderPublicKey.getPublicKey()));
-        data.put("alias", alias.toString());
-        data.put("fee", fee);
-        data.put("timestamp", timestamp);
-        return data;
-    }
 }

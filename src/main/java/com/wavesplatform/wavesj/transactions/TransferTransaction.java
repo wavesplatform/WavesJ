@@ -1,17 +1,20 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.wavesplatform.wavesj.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wavesplatform.wavesj.Asset;
+import com.wavesplatform.wavesj.ByteString;
+import com.wavesplatform.wavesj.PublicKeyAccount;
+import com.wavesplatform.wavesj.Transaction;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
 public class TransferTransaction extends Transaction {
     public static final byte TRANSFER = 4;
 
-    private final PublicKeyAccount sender;
+    private final PublicKeyAccount senderPublicKey;
     private final String recipient;
     private final long amount;
     private final String assetId;
@@ -20,8 +23,16 @@ public class TransferTransaction extends Transaction {
     private final ByteString attachment;
     private final long timestamp;
 
-    public TransferTransaction(PublicKeyAccount sender, String recipient, long amount, String assetId, long fee, String feeAssetId, ByteString attachment, long timestamp) {
-        this.sender = sender;
+    @JsonCreator
+    public TransferTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
+                               @JsonProperty("recipient") String recipient,
+                               @JsonProperty("amount") long amount,
+                               @JsonProperty("assetId") String assetId,
+                               @JsonProperty("fee") long fee,
+                               @JsonProperty("feeAssetId") String feeAssetId,
+                               @JsonProperty("attachment") ByteString attachment,
+                               @JsonProperty("timestamp") long timestamp) {
+        this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
         this.assetId = assetId;
@@ -31,8 +42,8 @@ public class TransferTransaction extends Transaction {
         this.timestamp = timestamp;
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
+    public PublicKeyAccount getSenderPublicKey() {
+        return senderPublicKey;
     }
 
     public String getRecipient() {
@@ -44,7 +55,7 @@ public class TransferTransaction extends Transaction {
     }
 
     public String getAssetId() {
-        return assetId;
+        return Asset.toJsonObject(assetId);
     }
 
     public long getFee() {
@@ -52,7 +63,7 @@ public class TransferTransaction extends Transaction {
     }
 
     public String getFeeAssetId() {
-        return feeAssetId;
+        return Asset.toJsonObject(feeAssetId);
     }
 
     public ByteString getAttachment() {
@@ -63,36 +74,19 @@ public class TransferTransaction extends Transaction {
         return timestamp;
     }
 
-
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey());
+        buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee);
-        putRecipient(buf, sender.getChainId(), recipient);
+        putRecipient(buf, senderPublicKey.getChainId(), recipient);
         putString(buf, attachment.getBase58String());
         byte[] bytes = new byte[buf.position()];
         buf.position(0);
         buf.get(bytes);
         return bytes;
-    }
-
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("type", TRANSFER);
-        data.put("id", getId());
-        data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
-        data.put("recipient", recipient);
-        data.put("amount", amount);
-        data.put("assetId", Asset.toJsonObject(assetId));
-        data.put("fee", fee);
-        data.put("feeAssetId", Asset.toJsonObject(feeAssetId));
-        data.put("timestamp", timestamp);
-        data.put("attachment", attachment);
-        return data;
     }
 
     @Override

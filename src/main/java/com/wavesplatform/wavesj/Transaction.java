@@ -1,13 +1,15 @@
 package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import com.wavesplatform.wavesj.json.deser.TransactionTypeResolver;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.util.Collection;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.Asset.isWaves;
 import static com.wavesplatform.wavesj.ByteUtils.hash;
@@ -34,40 +36,22 @@ import static com.wavesplatform.wavesj.ByteUtils.hash;
  *     {@code Transaction} it is called on, but rather returns a new instance.
  * </ul>
  */
-public abstract class Transaction extends JsonRepresented implements Proofable {
-    /** Transaction ID. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
+@JsonTypeIdResolver(TransactionTypeResolver.class)
+public abstract class Transaction implements Proofable {
+    /**
+     * Transaction ID.
+     */
     @JsonIgnore
     public String getId() {
         return hash(getBytes());
     }
 
     public abstract byte getType();
-    /** Transaction data. */
-    @JsonIgnore
-    public abstract Map<String, Object> getData();
-
-    public static final int MAX_PROOF_COUNT = 8;
-
-    private static final byte ISSUE         = 3;
-    private static final byte TRANSFER      = 4;
-    private static final byte REISSUE       = 5;
-    private static final byte BURN          = 6;
-    private static final byte LEASE         = 8;
-    private static final byte LEASE_CANCEL  = 9;
-    private static final byte ALIAS         = 10;
-    private static final byte MASS_TRANSFER = 11;
-    private static final byte DATA          = 12;
-    private static final byte SET_SCRIPT    = 13;
-    private static final byte SPONSOR       = 14;
-
-    private static final byte V1 = 1;
-    private static final byte V2 = 2;
-    private static final int KBYTE = 1024;
 
     public static ObjectWithProofs<IssueTransaction> makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description,
-                                                                 long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp)
-    {
-       return new ObjectWithProofs<IssueTransaction>(new IssueTransaction(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp), sender);
+                                                                 long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp) {
+        return new ObjectWithProofs<IssueTransaction>(new IssueTransaction(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp), sender);
     }
 
     public static ObjectWithProofs<IssueTransaction> makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description, long quantity,
@@ -76,28 +60,24 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
     }
 
     public static ObjectWithProofs<ReissueTransaction> makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity,
-                                                                     boolean reissuable, long fee, long timestamp)
-    {
+                                                                     boolean reissuable, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot reissue WAVES");
         }
         return new ObjectWithProofs<ReissueTransaction>(new ReissueTransaction(sender, chainId, assetId, quantity, reissuable, fee, timestamp), sender);
     }
 
-    public static ObjectWithProofs<ReissueTransaction> makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity, boolean reissuable, long fee)
-    {
+    public static ObjectWithProofs<ReissueTransaction> makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity, boolean reissuable, long fee) {
         return makeReissueTx(sender, chainId, assetId, quantity, reissuable, fee, System.currentTimeMillis());
     }
 
     public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
-                                                                       long fee, String feeAssetId, String attachment, long timestamp)
-    {
+                                                                       long fee, String feeAssetId, String attachment, long timestamp) {
         return new ObjectWithProofs<TransferTransaction>(new TransferTransaction(sender, recipient, amount, assetId, fee, feeAssetId, new ByteString(attachment.getBytes()), timestamp), sender);
     }
 
     public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
-                                                                       long fee, String feeAssetId, String attachment)
-    {
+                                                                       long fee, String feeAssetId, String attachment) {
         return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
     }
 
@@ -154,7 +134,7 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
 
     public static ObjectWithProofs<MassTransferTransaction> makeMassTransferTx(PrivateKeyAccount sender, String assetId, Collection<Transfer> transfers,
                                                                                long fee, String attachment, long timestamp) {
-        return new ObjectWithProofs<MassTransferTransaction>(new MassTransferTransaction(sender, assetId, transfers, fee, attachment, timestamp), sender);
+        return new ObjectWithProofs<MassTransferTransaction>(new MassTransferTransaction(sender, assetId, transfers, fee, new ByteString(attachment.getBytes()), timestamp), sender);
     }
 
     public static ObjectWithProofs<MassTransferTransaction> makeMassTransferTx(PrivateKeyAccount sender, String assetId, Collection<Transfer> transfers,
@@ -172,10 +152,11 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
 
     /**
      * Creates a signed SetScript object.
-     * @param sender the account to set the script for
-     * @param script compiled script, base64 encoded
-     * @param chainId chain ID
-     * @param fee object fee
+     *
+     * @param sender    the account to set the script for
+     * @param script    compiled script, base64 encoded
+     * @param chainId   chain ID
+     * @param fee       object fee
      * @param timestamp operation timestamp
      * @return object object
      * @see Account#MAINNET
@@ -191,8 +172,7 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
     }
 
     public static ObjectWithSignature<Order> makeOrderTx(PrivateKeyAccount account, String matcherKey, com.wavesplatform.wavesj.matcher.Order.Type orderType,
-                                                         AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp)
-    {
+                                                         AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
         if (isWaves(assetPair.amountAsset) && isWaves(assetPair.priceAsset)) {
             throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
         }
@@ -202,8 +182,7 @@ public abstract class Transaction extends JsonRepresented implements Proofable {
     }
 
     public static ObjectWithSignature<Order> makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                                         AssetPair assetPair, long price, long amount, long expiration, long matcherFee)
-    {
+                                                         AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
         return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
     }
 

@@ -1,14 +1,16 @@
 package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
-import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
-import com.wavesplatform.wavesj.transactions.*;
+import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.LeaseTransaction;
+import com.wavesplatform.wavesj.transactions.TransferTransaction;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
@@ -31,15 +33,15 @@ import java.util.List;
 import java.util.Map;
 
 public class Node {
-    private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
+    private static final String DEFAULT_NODE = "http://pool.testnet.wavesnodes.com";
 
-    private static final ObjectMapper mapper = new ObjectMapper();
     private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {};
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {};
     private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
 
     private final URI uri;
+    private final WavesJsonMapper wavesJsonMapper;
     private final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(
             RequestConfig.custom()
                     .setSocketTimeout(5000)
@@ -52,14 +54,16 @@ public class Node {
     public Node() {
         try {
             this.uri = new URI(DEFAULT_NODE);
+            this.wavesJsonMapper = new WavesJsonMapper((byte) 'T');
         } catch (URISyntaxException e) {
             // should not happen
             throw new RuntimeException(e);
         }
     }
 
-    public Node(String uri) throws URISyntaxException {
+    public Node(String uri, char chainId) throws URISyntaxException {
         this.uri = new URI(uri);
+        this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
     }
 
     public String getVersion() throws IOException {
@@ -92,11 +96,11 @@ public class Node {
      * @throws IOException if no object with the given ID exists
      */
     public Transaction getTransaction(String txId) throws IOException {
-        return mapper.convertValue(send("/transactions/info/" + txId), Transaction.class);
+        return wavesJsonMapper.convertValue(send("/transactions/info/" + txId), Transaction.class);
     }
 
     public Map<String, Object> getTransactionData(String txId) throws IOException {
-        return mapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
+        return wavesJsonMapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
     }
 
     /**
@@ -107,7 +111,7 @@ public class Node {
      * @throws IOException if no block exists at the given height
      */
     public Block getBlock(int height) throws IOException {
-        return mapper.convertValue(send("/blocks/at/" + height), Block.class);
+        return wavesJsonMapper.convertValue(send("/blocks/at/" + height), Block.class);
     }
 
     /**
@@ -118,7 +122,7 @@ public class Node {
      * @throws IOException if no block with the given signature exists
      */
     public Block getBlock(String signature) throws IOException {
-        return mapper.convertValue(send("/blocks/signature/" + signature), Block.class);
+        return wavesJsonMapper.convertValue(send("/blocks/signature/" + signature), Block.class);
     }
 
     public boolean validateAddresses(String address) throws IOException {
@@ -238,7 +242,7 @@ public class Node {
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
         message.put("status", tree.get("status").asText());
-        return mapper.treeToValue(tree.get("message"), Order.class);
+        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
     }
 
     public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
@@ -287,10 +291,10 @@ public class Node {
         return req;
     }
 
-    private HttpUriRequest request(ApiJson obj) {
+    private HttpUriRequest request(ApiJson obj) throws JsonProcessingException {
         String endpoint;
-        if (obj instanceof ObjectContainer) {
-            Object o = ((ObjectContainer) obj).getObject();
+        if (obj instanceof ProofedObject) {
+            Object o = ((ProofedObject) obj).getObject();
             if (o instanceof Transaction) {
                 endpoint = "/transactions/broadcast";
             } else if (o instanceof Order) {
@@ -308,7 +312,7 @@ public class Node {
             throw new IllegalArgumentException();
         }
         HttpPost request = new HttpPost(uri.resolve(endpoint));
-        request.setEntity(new StringEntity(obj.getJson(), ContentType.APPLICATION_JSON));
+        request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
         return request;
     }
 
@@ -324,12 +328,12 @@ public class Node {
         return r;
     }
 
-    private static <T> T parse(HttpResponse r, TypeReference<T> ref) throws IOException {
-        return mapper.readValue(r.getEntity().getContent(), ref);
+    private <T> T parse(HttpResponse r, TypeReference<T> ref) throws IOException {
+        return wavesJsonMapper.readValue(r.getEntity().getContent(), ref);
     }
 
-    private static JsonNode parse(HttpResponse r, String... keys) throws IOException {
-        JsonNode tree = mapper.readTree(r.getEntity().getContent());
+    private JsonNode parse(HttpResponse r, String... keys) throws IOException {
+        JsonNode tree = wavesJsonMapper.readTree(r.getEntity().getContent());
         for (String key : keys) {
             tree = tree.get(key);
         }

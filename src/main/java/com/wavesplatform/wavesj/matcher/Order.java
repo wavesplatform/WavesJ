@@ -1,19 +1,17 @@
 package com.wavesplatform.wavesj.matcher;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.ApiJson;
+import com.wavesplatform.wavesj.AssetPair;
+import com.wavesplatform.wavesj.PublicKeyAccount;
+import com.wavesplatform.wavesj.Signable;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
-import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
-import static com.wavesplatform.wavesj.ByteUtils.hash;
-import static com.wavesplatform.wavesj.ByteUtils.putAsset;
+import static com.wavesplatform.wavesj.ByteUtils.*;
 
-@JsonIgnoreProperties(ignoreUnknown = true, allowGetters = true)
 public class Order extends ApiJson implements Signable {
     public String getId() {
         return hash(getBytes());
@@ -37,7 +35,7 @@ public class Order extends ApiJson implements Signable {
         ACCEPTED, FILLED, PARTIALLY_FILLED, CANCELED, NOT_FOUND;
 
         @JsonCreator
-        static Status fromString(String json) {
+        public static Status fromString(String json) {
             if (json == null) return null;
             json = json.intern();
             if (json == "Accepted" || json == "OrderAccepted") {
@@ -72,6 +70,7 @@ public class Order extends ApiJson implements Signable {
     private final PublicKeyAccount senderPublicKey;
     private final PublicKeyAccount matcherPublicKey;
 
+    @JsonCreator
     public Order(
             Order.Type orderType,
             AssetPair assetPair,
@@ -95,22 +94,6 @@ public class Order extends ApiJson implements Signable {
         this.matcherFee = matcherFee;
         this.senderPublicKey = senderPublicKey;
         this.matcherPublicKey = matcherKey;
-    }
-    
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("senderPublicKey", Base58.encode(senderPublicKey.getPublicKey()));
-        data.put("matcherPublicKey", Base58.encode(matcherPublicKey.getPublicKey()));
-        data.put("assetPair", assetPair.toJsonObject());
-        data.put("orderType", orderType.toJson());
-        data.put("price", price);
-        data.put("amount", amount);
-        data.put("timestamp", timestamp);
-        data.put("expiration", expiration);
-        data.put("matcherFee", matcherFee);
-
-        return data;
     }
 
     @Override
@@ -169,5 +152,10 @@ public class Order extends ApiJson implements Signable {
 
     public PublicKeyAccount getMatcherPublicKey() {
         return matcherPublicKey;
+    }
+
+    @JsonIgnore
+    public boolean isActive() {
+        return status.isActive();
     }
 }

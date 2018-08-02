@@ -1,4 +1,6 @@
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.TransferTransaction;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -64,21 +66,21 @@ public class NodeExample {
         // Reset the script to default
         String rmScriptTxId = node.setScript(alice, "", Account.TESTNET, SCRIPT_FEE);
 
-        // Offline transaction signing
+        // Offline object signing
         //
-        Transaction tx = Transaction.makeTransferTx(alice, bob,
+        ObjectWithProofs<TransferTransaction> tx = Transaction.makeTransferTx(alice, bob,
                 1 * Asset.TOKEN, WAVES, FEE, WAVES,
                 "Here's for the coffee");
-        // tx.getEndpoint() == "/assets/broadcast/transfer" is the server endpoint to send this transaction to.
-        // tx.getJson() is JSON-encoded transaction data. You can use Swagger UI to send it to the network.
+        // tx.getEndpoint() == "/assets/broadcast/transfer" is the server endpoint to send this object to.
+        // tx.getJson() is JSON-encoded object data. You can use Swagger UI to send it to the network.
 
-        // Now send the signed transaction from an online computer
+        // Now send the signed object from an online computer
         node.send(tx);
 
 
         // Matcher interaction
         //
-        Node matcher = new Node("https://testnode2.wavesnodes.com");
+        Node matcher = new Node("https://testnode2.wavesnodes.com", 'T');
         String matcherKey = matcher.getMatcherKey();
 
         // Create an order
@@ -88,9 +90,9 @@ public class NodeExample {
                 Order.Type.BUY, 90000, 10 * Asset.TOKEN,
                 // make order valid for 1 hour
                 System.currentTimeMillis() + 3600000, MATCHER_FEE);
-        String orderId = order.id;
+        String orderId = order.getId();
         System.out.printf("Filed order %s to %s %d WAVES at %.8f\n",
-                order.id, order.type, order.amount / Asset.TOKEN, ((float) order.price) / Asset.TOKEN);
+                order.getId(), order.getOrderType(), order.getAmount() / Asset.TOKEN, ((float) order.getPrice()) / Asset.TOKEN);
 
         // Get order status by id
         matcher.getOrderStatus(orderId, market);

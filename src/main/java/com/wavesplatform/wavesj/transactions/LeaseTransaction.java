@@ -1,26 +1,17 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.wavesplatform.wavesj.Base58;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putRecipient;
 
-//@JsonDeserialize(using = LeaseTransaction.Deserializer.class)
 public class LeaseTransaction extends Transaction {
     public static final byte LEASE = 8;
-
-//    public static final TypeReference<LeaseTransaction> TRANSACTION_TYPE = new TypeReference<LeaseTransaction>() {};
-//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, LeaseTransaction.class);
-//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, LeaseTransaction.class);
 
     private final PublicKeyAccount sender;
     private final String recipient;
@@ -28,7 +19,12 @@ public class LeaseTransaction extends Transaction {
     private final long fee;
     private final long timestamp;
 
-    public LeaseTransaction(PublicKeyAccount sender, String recipient, long amount, long fee, long timestamp) {
+    @JsonCreator
+    public LeaseTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+                            @JsonProperty("recipient") String recipient,
+                            @JsonProperty("amount") long amount,
+                            @JsonProperty("fee") long fee,
+                            @JsonProperty("timestamp") long timestamp) {
         this.sender = sender;
         this.recipient = recipient;
         this.amount = amount;
@@ -66,19 +62,6 @@ public class LeaseTransaction extends Transaction {
         buf.position(0);
         buf.get(bytes);
         return bytes;
-    }
-
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("type", LEASE);
-        data.put("id", getId());
-        data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
-        data.put("recipient", recipient);
-        data.put("amount", amount);
-        data.put("fee", fee);
-        data.put("timestamp", timestamp);
-        return data;
     }
 
     @Override

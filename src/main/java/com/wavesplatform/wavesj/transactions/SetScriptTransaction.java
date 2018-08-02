@@ -1,26 +1,17 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.wavesplatform.wavesj.Base58;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.Base64;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-//@JsonDeserialize(using = SetScriptTransaction.Deserializer.class)
 public class SetScriptTransaction extends Transaction {
     public static final byte SET_SCRIPT = 13;
-
-//    public static final TypeReference<SetScriptTransaction> TRANSACTION_TYPE = new TypeReference<SetScriptTransaction>() {};
-//    public static final JavaType SIGNED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithSignature.class, SetScriptTransaction.class);
-//    public static final JavaType PROOFED_TRANSACTION_TYPE = mapper.getTypeFactory().constructParametricType(ObjectWithProofs.class, SetScriptTransaction.class);
 
     private PublicKeyAccount sender;
     private String script;
@@ -28,7 +19,12 @@ public class SetScriptTransaction extends Transaction {
     private long fee;
     private long timestamp;
 
-    public SetScriptTransaction(PublicKeyAccount sender, String script, byte chainId, long fee, long timestamp) {
+    @JsonCreator
+    public SetScriptTransaction(@JsonProperty("sender") PublicKeyAccount sender,
+                                @JsonProperty("script") String script,
+                                @JsonProperty("chainId") byte chainId,
+                                @JsonProperty("fee") long fee,
+                                @JsonProperty("timestamp") long timestamp) {
         this.sender = sender;
         this.script = script;
         this.chainId = chainId;
@@ -71,18 +67,6 @@ public class SetScriptTransaction extends Transaction {
         buf.position(0);
         buf.get(bytes);
         return bytes;
-    }
-
-    @Override
-    public Map<String, Object> getData() {
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("type", SET_SCRIPT);
-        data.put("id", getId());
-        data.put("senderPublicKey", Base58.encode(sender.getPublicKey()));
-        data.put("script", script);
-        data.put("fee", fee);
-        data.put("timestamp", timestamp);
-        return data;
     }
 
     @Override

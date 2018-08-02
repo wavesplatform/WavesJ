@@ -1,27 +1,27 @@
 package com.wavesplatform.wavesj.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.wavesplatform.wavesj.Alias;
-import com.wavesplatform.wavesj.ByteString;
-import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.Transaction;
-import com.wavesplatform.wavesj.json.deser.AliasDeser;
-import com.wavesplatform.wavesj.json.deser.ByteStringDeser;
-import com.wavesplatform.wavesj.json.deser.PublicKeyAccountDeser;
-import com.wavesplatform.wavesj.json.deser.TransactionDeser;
-import com.wavesplatform.wavesj.json.ser.AliasSer;
-import com.wavesplatform.wavesj.json.ser.ByteStringSer;
-import com.wavesplatform.wavesj.json.ser.PublicKeyAccountSer;
+import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.json.deser.*;
+import com.wavesplatform.wavesj.json.ser.*;
+import com.wavesplatform.wavesj.matcher.Order;
 
 public class WavesModule extends SimpleModule {
-    public WavesModule(byte chainId) {
+    public WavesModule(byte chainId, ObjectMapper objectMapper) {
         addDeserializer(PublicKeyAccount.class, new PublicKeyAccountDeser(chainId));
-        addDeserializer(Transaction.class, new TransactionDeser());
         addDeserializer(ByteString.class, new ByteStringDeser());
         addDeserializer(Alias.class, new AliasDeser());
+        addDeserializer(ProofedObject.class, new ObjectContainerDeser(objectMapper));
+        addDeserializer(Order.Type.class, new OrderTypeDeser());
+        addDeserializer(Order.Status.class, new OrderStatusDeser());
 
         addSerializer(PublicKeyAccount.class, new PublicKeyAccountSer());
         addSerializer(ByteString.class, new ByteStringSer());
         addSerializer(Alias.class, new AliasSer());
+        addSerializer(ObjectWithProofs.class, new ObjectWithProofsSer(objectMapper));
+        addSerializer(ObjectWithSignature.class, new ObjectWithSignatureSer(objectMapper));
+        addSerializer(AssetPair.class, new AssetPairSer());
+        addSerializer(Order.Type.class, new OrderTypeSer());
     }
 }

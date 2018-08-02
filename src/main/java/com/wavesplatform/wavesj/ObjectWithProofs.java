@@ -1,11 +1,10 @@
-package com.wavesplatform.wavesj.transactions;
+package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import java.util.*;
-
-//@JsonDeserialize(using = ObjectWithProofs.Deserializer.class)
-public class ObjectWithProofs<T extends Proofable> extends ApiJson implements ObjectContainer<T> {
+public class ObjectWithProofs<T extends Proofable> extends ApiJson implements ProofedObject<T> {
     public static final int MAX_PROOF_COUNT = 8;
     public static final byte V2 = 2;
 
@@ -32,6 +31,10 @@ public class ObjectWithProofs<T extends Proofable> extends ApiJson implements Ob
         return proofs;
     }
 
+    public byte getVersion() {
+        return V2;
+    }
+
     /**
      * Returns a new {@code Transaction} object with the proof added.
      *
@@ -49,17 +52,5 @@ public class ObjectWithProofs<T extends Proofable> extends ApiJson implements Ob
         }
         newProofs.set(index, proof);
         return new ObjectWithProofs<T>(object, newProofs);
-    }
-
-    public Map<String, Object> getData() {
-        Map<String, Object> base = new HashMap<String, Object>();
-        if (object instanceof JsonRepresented) {
-            base = ((JsonRepresented) object).getData();
-        }
-        HashMap<String, Object> toJson = new HashMap<String, Object>(base);
-        toJson.put("version", V2);
-        toJson.put("proofs", proofs);
-        return toJson;
-
     }
 }

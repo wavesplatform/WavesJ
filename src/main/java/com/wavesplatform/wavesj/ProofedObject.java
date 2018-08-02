@@ -1,5 +1,5 @@
 package com.wavesplatform.wavesj;
 
-public interface ObjectContainer<T> {
+public interface ProofedObject<T> {
     T getObject();
 }
