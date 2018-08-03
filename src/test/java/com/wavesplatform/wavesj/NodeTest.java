@@ -2,7 +2,7 @@ package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
-import com.wavesplatform.wavesj.transactions.TransferTransaction;
+import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -50,9 +50,9 @@ public class NodeTest {
         assertEquals(335753, block.getHeight());
         assertEquals(3, block.getVersion());
 
-        for (ProofedObject<Transaction> tx: block.getTransactions()) {
-            String id = tx.getObject().getId();
-            Transaction tx1 = node.getTransaction(id);
+        for (Transaction tx: block.getTransactions()) {
+            ByteString id = tx.getId();
+            Transaction tx1 = node.getTransaction(id.getBase58String());
             assertEquals(id, tx1.getId());
         }
 
@@ -127,16 +127,16 @@ public class NodeTest {
     public void testSendTransaction() throws IOException {
         Node node = new Node();
 
-        ObjectWithProofs<TransferTransaction> tx1 = Transaction.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
+        TransferTransactionV1 tx1 = Transactions.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
         String id1 = node.send(tx1);
         assertNotNull(id1);
-        assertEquals(id1, tx1.getObject().getId());
+        assertEquals(id1, tx1.getId().getBase58String());
 
-        ObjectWithProofs<MassTransferTransaction> tx2 = Transaction.makeMassTransferTx(bob, Asset.WAVES,
+        MassTransferTransaction tx2 = Transactions.makeMassTransferTx(bob, Asset.WAVES,
                 Collections.singletonList(new Transfer(alice.getAddress(), AMOUNT)), FEE * 2, "Back to Alice");
         String id2 = node.send(tx2);
         assertNotNull(id2);
-        assertEquals(id2, tx2.getObject().getId());
+        assertEquals(id2, tx2.getId().getBase58String());
     }
 
     @Test
@@ -162,7 +162,7 @@ public class NodeTest {
         assertEquals(1, order.getPrice());
 
         // Check order status
-        String status = matcher.getOrderStatus(order.getId(), MARKET).status.toString();
+        String status = matcher.getOrderStatus(order.getId().getBase58String(), MARKET).status.toString();
         assertEquals("ACCEPTED", status);
 
         // Verify the order appears in the list of all orders
@@ -196,11 +196,11 @@ public class NodeTest {
         }
 
         // Cancel order
-        String canceled = matcher.cancelOrder(alice, MARKET, order.getId());
+        String canceled = matcher.cancelOrder(alice, MARKET, order.getId().getBase58String());
         assertEquals("OrderCanceled", canceled);
 
         // Delete order from history
-        String deleted = matcher.deleteOrder(alice, MARKET, order.getId());
+        String deleted = matcher.deleteOrder(alice, MARKET, order.getId().getBase58String());
         assertEquals("OrderDeleted", deleted);
     }
 

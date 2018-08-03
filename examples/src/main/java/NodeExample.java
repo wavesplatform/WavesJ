@@ -1,6 +1,6 @@
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.transactions.TransferTransaction;
+import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -68,7 +68,7 @@ public class NodeExample {
 
         // Offline object signing
         //
-        ObjectWithProofs<TransferTransaction> tx = Transaction.makeTransferTx(alice, bob,
+        TransferTransactionV1 tx = Transactions.makeTransferTx(alice, bob,
                 1 * Asset.TOKEN, WAVES, FEE, WAVES,
                 "Here's for the coffee");
         // tx.getEndpoint() == "/assets/broadcast/transfer" is the server endpoint to send this object to.
@@ -90,7 +90,7 @@ public class NodeExample {
                 Order.Type.BUY, 90000, 10 * Asset.TOKEN,
                 // make order valid for 1 hour
                 System.currentTimeMillis() + 3600000, MATCHER_FEE);
-        String orderId = order.getId();
+        String orderId = order.getId().getBase58String();
         System.out.printf("Filed order %s to %s %d WAVES at %.8f\n",
                 order.getId(), order.getOrderType(), order.getAmount() / Asset.TOKEN, ((float) order.getPrice()) / Asset.TOKEN);
 

@@ -16,7 +16,7 @@ public class Block {
     private final int size;
     private final long fee;
     private final int height;
-    private final Collection<ProofedObject<Transaction>> transactions;
+    private final Collection<Transaction> transactions;
 
     @JsonCreator
     private Block(
@@ -26,7 +26,7 @@ public class Block {
             @JsonProperty("blocksize") int size,
             @JsonProperty("fee") long fee,
             @JsonProperty("height") int height,
-            @JsonProperty("transactions") Collection<ProofedObject<Transaction>> transactions) {
+            @JsonProperty("transactions") Collection<Transaction> transactions) {
         this.version = version;
         this.timestamp = timestamp;
         this.signature = signature;
@@ -60,7 +60,7 @@ public class Block {
         return height;
     }
 
-    public Collection<ProofedObject<Transaction>> getTransactions() {
+    public Collection<Transaction> getTransactions() {
         return transactions;
     }
 }

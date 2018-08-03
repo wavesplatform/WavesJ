@@ -2,109 +2,28 @@ package com.wavesplatform.wavesj.transactions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.Transaction;
+import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putString;
 
-public class IssueTransaction extends Transaction {
-    public static final byte ISSUE = 3;
+public interface IssueTransaction extends Transaction, Signable, WithId {
+    static final byte ISSUE = 3;
 
-    private final PublicKeyAccount senderPublicKey;
-    private final byte chainId;
-    private final String name;
-    private final String description;
-    private final long quantity;
-    private final byte decimals;
-    private final boolean reissuable;
-    private final String script;
-    private final long fee;
-    private final long timestamp;
+    byte getChainId();
 
-    @JsonCreator
-    public IssueTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                            @JsonProperty("chainId") byte chainId,
-                            @JsonProperty("name") String name,
-                            @JsonProperty("description") String description,
-                            @JsonProperty("quantity") long quantity,
-                            @JsonProperty("decimals") byte decimals,
-                            @JsonProperty("reissuable") boolean reissuable,
-                            @JsonProperty("script") String script,
-                            @JsonProperty("fee") long fee,
-                            @JsonProperty("timestamp") long timestamp) {
-        this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
-        this.name = name;
-        this.description = description;
-        this.quantity = quantity;
-        this.decimals = decimals;
-        this.reissuable = reissuable;
-        this.script = script;
-        this.fee = fee;
-        this.timestamp = timestamp;
-    }
+    String getName();
 
-    public PublicKeyAccount getSenderPublicKey() {
-        return senderPublicKey;
-    }
+    String getDescription();
 
-    public byte getChainId() {
-        return chainId;
-    }
+    long getQuantity();
 
-    public String getName() {
-        return name;
-    }
+    byte getDecimals();
 
-    public String getDescription() {
-        return description;
-    }
+    boolean isReissuable();
 
-    public long getQuantity() {
-        return quantity;
-    }
-
-    public byte getDecimals() {
-        return decimals;
-    }
-
-    public boolean isReissuable() {
-        return reissuable;
-    }
-
-    public String getScript() {
-        return script;
-    }
-
-    public long getFee() {
-        return fee;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
-        buf.put(senderPublicKey.getPublicKey());
-        putString(buf, name);
-        putString(buf, description);
-        buf.putLong(quantity)
-                .put(decimals)
-                .put((byte) (reissuable ? 1 : 0))
-                .putLong(fee)
-                .putLong(timestamp);
-        byte[] bytes = new byte[buf.position()];
-        buf.position(0);
-        buf.get(bytes);
-        return bytes;
-    }
-
-    @Override
-    public byte getType() {
-        return ISSUE;
-    }
+    String getScript();
 }

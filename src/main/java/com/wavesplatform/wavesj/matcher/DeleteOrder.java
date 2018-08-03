@@ -3,18 +3,27 @@ package com.wavesplatform.wavesj.matcher;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wavesplatform.wavesj.*;
+import org.whispersystems.curve25519.Curve25519;
 
 import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class DeleteOrder extends ApiJson implements Signable {
+public class DeleteOrder extends ObjectWithSignature implements ApiJson {
     private PublicKeyAccount sender;
     private AssetPair assetPair;
     private String orderId;
 
+    public DeleteOrder(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
+        super(sender);
+        this.sender = sender;
+        this.assetPair = assetPair;
+        this.orderId = orderId;
+    }
+
     @JsonCreator
-    public DeleteOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId) {
+    public DeleteOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId, ByteString signature) {
+        super(signature);
         this.sender = sender;
         this.assetPair = assetPair;
         this.orderId = orderId;
@@ -45,7 +54,7 @@ public class DeleteOrder extends ApiJson implements Signable {
     }
 
     @Override
-    public byte[] getPublicKey() {
-        return sender.getPublicKey();
+    public PublicKeyAccount getSenderPublicKey() {
+        return sender;
     }
 }

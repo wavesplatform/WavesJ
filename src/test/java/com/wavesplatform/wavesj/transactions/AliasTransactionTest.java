@@ -9,8 +9,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class AliasTransactionTest {
-    ObjectWithSignature<AliasTransaction> txV1 = new ObjectWithSignature<AliasTransaction>(new AliasTransaction(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), new Alias("myalias", (byte) 'T'), 100000, 1526910778245L), new ByteString("CC1jQ4qkuVfMvB2Kpg2Go6QKXJxUFC8UUswUxBsxwisrR8N5s3Yc8zA6dhjTwfWKfdouSTAnRXCxTXb3T6pJq3T"));
-    ObjectWithProofs<AliasTransaction> txV2 = new ObjectWithProofs<AliasTransaction>(new AliasTransaction(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), new Alias("myalias", (byte) 'T'), 100000, 1526910778245L), Collections.singletonList(new ByteString("26U7rQTwpdma5GYSZb5bNygVCtSuWL6DKet1Nauf5J57v19mmfnq434YrkKYJqvYt2ydQBUT3P7Xgj5ZVDVAcc5k")));
+    AliasTransactionV1 txV1 = new AliasTransactionV1(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), new Alias("myalias", (byte) 'T'), 100000, 1526910778245L, new ByteString("CC1jQ4qkuVfMvB2Kpg2Go6QKXJxUFC8UUswUxBsxwisrR8N5s3Yc8zA6dhjTwfWKfdouSTAnRXCxTXb3T6pJq3T"));
+    AliasTransactionV2 txV2 = new AliasTransactionV2(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), new Alias("myalias", (byte) 'T'), 100000, 1526910778245L, Collections.singletonList(new ByteString("26U7rQTwpdma5GYSZb5bNygVCtSuWL6DKet1Nauf5J57v19mmfnq434YrkKYJqvYt2ydQBUT3P7Xgj5ZVDVAcc5k")));
 
     @Test
     public void bytesV1BytesTest() {
@@ -19,7 +19,7 @@ public class AliasTransactionTest {
 
     @Test
     public void bytesV1IdTest() {
-        assertEquals("7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug", txV1.getObject().getId());
+        assertEquals("7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug", txV1.getId().getBase58String());
     }
 
     @Test
@@ -29,7 +29,7 @@ public class AliasTransactionTest {
 
     @Test
     public void bytesV2IdTest() {
-        assertEquals("7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug", txV2.getObject().getId());
+        assertEquals("7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug", txV2.getId().getBase58String());
     }
 
     @Test

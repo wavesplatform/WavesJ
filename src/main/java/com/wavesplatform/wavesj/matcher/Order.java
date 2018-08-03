@@ -3,18 +3,15 @@ package com.wavesplatform.wavesj.matcher;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.wavesplatform.wavesj.ApiJson;
-import com.wavesplatform.wavesj.AssetPair;
-import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.Signable;
+import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class Order extends ApiJson implements Signable {
-    public String getId() {
-        return hash(getBytes());
+public class Order extends ObjectWithSignature implements ApiJson {
+    public ByteString getId() {
+        return new ByteString(hash(getBytes()));
     }
 
     public enum Type {
@@ -70,6 +67,32 @@ public class Order extends ApiJson implements Signable {
     private final PublicKeyAccount senderPublicKey;
     private final PublicKeyAccount matcherPublicKey;
 
+    public Order(
+            Order.Type orderType,
+            AssetPair assetPair,
+            long amount,
+            long price,
+            long timestamp,
+            long filled,
+            Order.Status status,
+            long expiration,
+            long matcherFee,
+            PrivateKeyAccount senderPublicKey,
+            PublicKeyAccount matcherKey) {
+        super(senderPublicKey);
+        this.orderType = orderType;
+        this.assetPair = assetPair;
+        this.amount = amount;
+        this.price = price;
+        this.timestamp = timestamp;
+        this.status = status;
+        this.filled = filled;
+        this.expiration = expiration;
+        this.matcherFee = matcherFee;
+        this.senderPublicKey = senderPublicKey;
+        this.matcherPublicKey = matcherKey;
+    }
+
     @JsonCreator
     public Order(
             Order.Type orderType,
@@ -82,7 +105,9 @@ public class Order extends ApiJson implements Signable {
             long expiration,
             long matcherFee,
             PublicKeyAccount senderPublicKey,
-            PublicKeyAccount matcherKey) {
+            PublicKeyAccount matcherKey,
+            ByteString signature) {
+        super(signature);
         this.orderType = orderType;
         this.assetPair = assetPair;
         this.amount = amount;
@@ -108,11 +133,6 @@ public class Order extends ApiJson implements Signable {
         buf.position(0);
         buf.get(bytes);
         return bytes;
-    }
-
-    @Override
-    public byte[] getPublicKey() {
-        return senderPublicKey.getPublicKey();
     }
 
     public Order.Type getOrderType() {

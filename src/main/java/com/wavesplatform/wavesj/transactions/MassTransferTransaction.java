@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class MassTransferTransaction extends Transaction {
+public class MassTransferTransaction extends TransactionWithProofs {
     public static final byte MASS_TRANSFER = 11;
 
     private final PublicKeyAccount senderPublicKey;
@@ -27,7 +27,24 @@ public class MassTransferTransaction extends Transaction {
                                    @JsonProperty("transfers") Collection<Transfer> transfers,
                                    @JsonProperty("fee") long fee,
                                    @JsonProperty("attachment") ByteString attachment,
-                                   @JsonProperty("timestamp") long timestamp) {
+                                   @JsonProperty("timestamp") long timestamp,
+                                   @JsonProperty("proofs") List<ByteString> proofs) {
+        super(proofs);
+        this.senderPublicKey = senderPublicKey;
+        this.assetId = assetId;
+        this.transfers = transfers;
+        this.fee = fee;
+        this.attachment = attachment;
+        this.timestamp = timestamp;
+    }
+
+    public MassTransferTransaction(PrivateKeyAccount senderPublicKey,
+                                   String assetId,
+                                   Collection<Transfer> transfers,
+                                   long fee,
+                                   ByteString attachment,
+                                   long timestamp) {
+        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.transfers = transfers;
@@ -76,14 +93,16 @@ public class MassTransferTransaction extends Transaction {
         buf.putLong(timestamp).putLong(fee);
         putString(buf, attachment.getBase58String());
 
-        byte[] bytes = new byte[buf.position()];
-        buf.position(0);
-        buf.get(bytes);
-        return bytes;
+        return ByteArraysUtils.getOnlyUsed(buf);
     }
 
     @Override
     public byte getType() {
         return MASS_TRANSFER;
+    }
+
+    @Override
+    public byte getVersion() {
+        return 1;
     }
 }

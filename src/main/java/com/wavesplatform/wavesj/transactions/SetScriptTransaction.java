@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj.transactions;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.Base64;
+import com.wavesplatform.wavesj.ByteArraysUtils;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.Transaction;
 
@@ -10,7 +11,7 @@ import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class SetScriptTransaction extends Transaction {
+public class SetScriptTransaction extends TransactionWithBytesHashId {
     public static final byte SET_SCRIPT = 13;
 
     private PublicKeyAccount senderPublicKey;
@@ -63,14 +64,16 @@ public class SetScriptTransaction extends Transaction {
             buf.put((byte) 0);
         }
         buf.putLong(fee).putLong(timestamp);
-        byte[] bytes = new byte[buf.position()];
-        buf.position(0);
-        buf.get(bytes);
-        return bytes;
+        return ByteArraysUtils.getOnlyUsed(buf);
     }
 
     @Override
     public byte getType() {
         return SET_SCRIPT;
+    }
+
+    @Override
+    public byte getVersion() {
+        return Transaction.V1;
     }
 }

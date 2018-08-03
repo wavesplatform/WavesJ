@@ -8,13 +8,22 @@ import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class CancelOrder extends ApiJson implements Signable {
+public class CancelOrder extends ObjectWithSignature implements ApiJson {
     private final PublicKeyAccount sender;
     private final AssetPair assetPair;
     private final String orderId;
 
     @JsonCreator
-    public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId) {
+    public CancelOrder(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
+        super(sender);
+        this.sender = sender;
+        this.assetPair = assetPair;
+        this.orderId = orderId;
+    }
+
+    @JsonCreator
+    public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId, ByteString signature) {
+        super(signature);
         this.sender = sender;
         this.assetPair = assetPair;
         this.orderId = orderId;
@@ -44,7 +53,7 @@ public class CancelOrder extends ApiJson implements Signable {
     }
 
     @Override
-    public byte[] getPublicKey() {
-        return sender.getPublicKey();
+    public PublicKeyAccount getSenderPublicKey() {
+        return sender;
     }
 }

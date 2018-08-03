@@ -4,15 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import com.wavesplatform.wavesj.json.deser.TransactionTypeResolver;
-import com.wavesplatform.wavesj.matcher.CancelOrder;
-import com.wavesplatform.wavesj.matcher.DeleteOrder;
-import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.transactions.*;
-
-import java.util.Collection;
-
-import static com.wavesplatform.wavesj.Asset.isWaves;
-import static com.wavesplatform.wavesj.ByteUtils.hash;
 
 /**
  * This class represents a Waves object. Instances are immutable, with data accessible through public final fields.
@@ -38,165 +29,20 @@ import static com.wavesplatform.wavesj.ByteUtils.hash;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonTypeIdResolver(TransactionTypeResolver.class)
-public abstract class Transaction implements Proofable, Signable {
+public interface Transaction extends ApiJson, Signable {
+    public static final byte V1 = 1;
+    public static final byte V2 = 2;
+
+    public long getFee();
+    public long getTimestamp();
+
     /**
      * Transaction ID.
      */
     @JsonIgnore
-    public String getId() {
-        return hash(getBytes());
-    }
-
-    @Override
-    public byte[] getPublicKey() {
-        return getSenderPublicKey().getPublicKey();
-    }
+    public ByteString getId();
 
     public abstract PublicKeyAccount getSenderPublicKey();
     public abstract byte getType();
-
-    public static ObjectWithProofs<IssueTransaction> makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description,
-                                                                 long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp) {
-        return new ObjectWithProofs<IssueTransaction>(new IssueTransaction(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<IssueTransaction> makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description, long quantity,
-                                                                 byte decimals, boolean reissuable, String script, long fee) {
-        return makeIssueTx(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<ReissueTransaction> makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity,
-                                                                     boolean reissuable, long fee, long timestamp) {
-        if (isWaves(assetId)) {
-            throw new IllegalArgumentException("Cannot reissue WAVES");
-        }
-        return new ObjectWithProofs<ReissueTransaction>(new ReissueTransaction(sender, chainId, assetId, quantity, reissuable, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<ReissueTransaction> makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity, boolean reissuable, long fee) {
-        return makeReissueTx(sender, chainId, assetId, quantity, reissuable, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
-                                                                       long fee, String feeAssetId, String attachment, long timestamp) {
-        return new ObjectWithProofs<TransferTransaction>(new TransferTransaction(sender, recipient, amount, assetId, fee, feeAssetId, attachment == null ? ByteString.EMPTY : new ByteString(attachment.getBytes()), timestamp), sender);
-    }
-
-    public static ObjectWithProofs<TransferTransaction> makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
-                                                                       long fee, String feeAssetId, String attachment) {
-        return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<BurnTransaction> makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
-        if (isWaves(assetId)) {
-            throw new IllegalArgumentException("Cannot burn WAVES");
-        }
-
-        return new ObjectWithProofs<BurnTransaction>(new BurnTransaction(sender, chainId, assetId, amount, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<BurnTransaction> makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee) {
-        return makeBurnTx(sender, chainId, assetId, amount, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<SponsorTransaction> makeSponsorTx(PrivateKeyAccount sender, String assetId, long minAssetFee, long fee, long timestamp) {
-        if (isWaves(assetId)) {
-            throw new IllegalArgumentException("Cannot sponsor WAVES");
-        }
-        if (minAssetFee < 0) {
-            throw new IllegalArgumentException("minAssetFee must be positive or zero");
-        }
-
-        return new ObjectWithProofs<SponsorTransaction>(new SponsorTransaction(sender, assetId, minAssetFee, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<SponsorTransaction> makeSponsorTx(PrivateKeyAccount sender, String assetId, long minAssetFee, long fee) {
-        return makeSponsorTx(sender, assetId, minAssetFee, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<LeaseTransaction> makeLeaseTx(PrivateKeyAccount sender, String recipient, long amount, long fee, long timestamp) {
-        return new ObjectWithProofs<LeaseTransaction>(new LeaseTransaction(sender, recipient, amount, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<LeaseTransaction> makeLeaseTx(PrivateKeyAccount sender, String recipient, long amount, long fee) {
-        return makeLeaseTx(sender, recipient, amount, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<LeaseCancelTransaction> makeLeaseCancelTx(PrivateKeyAccount sender, byte chainId, String leaseId, long fee, long timestamp) {
-        return new ObjectWithProofs<LeaseCancelTransaction>(new LeaseCancelTransaction(sender, chainId, leaseId, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<LeaseCancelTransaction> makeLeaseCancelTx(PrivateKeyAccount sender, byte chainId, String leaseId, long fee) {
-        return makeLeaseCancelTx(sender, chainId, leaseId, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<AliasTransaction> makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee, long timestamp) {
-        return new ObjectWithProofs<AliasTransaction>(new AliasTransaction(sender, new Alias(alias, chainId), fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<AliasTransaction> makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee) {
-        return makeAliasTx(sender, alias, chainId, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<MassTransferTransaction> makeMassTransferTx(PrivateKeyAccount sender, String assetId, Collection<Transfer> transfers,
-                                                                               long fee, String attachment, long timestamp) {
-        return new ObjectWithProofs<MassTransferTransaction>(new MassTransferTransaction(sender, assetId, transfers, fee, attachment == null ? ByteString.EMPTY : new ByteString(attachment.getBytes()), timestamp), sender);
-    }
-
-    public static ObjectWithProofs<MassTransferTransaction> makeMassTransferTx(PrivateKeyAccount sender, String assetId, Collection<Transfer> transfers,
-                                                                               long fee, String attachment) {
-        return makeMassTransferTx(sender, assetId, transfers, fee, attachment, System.currentTimeMillis());
-    }
-
-    public static ObjectWithProofs<DataTransaction> makeDataTx(PrivateKeyAccount sender, Collection<DataEntry<?>> data, long fee, long timestamp) {
-        return new ObjectWithProofs<DataTransaction>(new DataTransaction(sender, data, fee, timestamp), sender);
-    }
-
-    public static ObjectWithProofs<DataTransaction> makeDataTx(PrivateKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
-        return makeDataTx(sender, data, fee, System.currentTimeMillis());
-    }
-
-    /**
-     * Creates a signed SetScript object.
-     *
-     * @param sender    the account to set the script for
-     * @param script    compiled script, base64 encoded
-     * @param chainId   chain ID
-     * @param fee       object fee
-     * @param timestamp operation timestamp
-     * @return object object
-     * @see Account#MAINNET
-     * @see Account#TESTNET
-     */
-    public static ObjectWithProofs<SetScriptTransaction> makeScriptTx(PrivateKeyAccount sender, String script, byte chainId, long fee, long timestamp) {
-        return new ObjectWithProofs<SetScriptTransaction>(new SetScriptTransaction(sender, script, chainId, fee, timestamp), sender);
-    }
-
-
-    public static ObjectWithProofs<SetScriptTransaction> makeScriptTx(PrivateKeyAccount sender, String script, byte chainId, long fee) {
-        return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithSignature<Order> makeOrderTx(PrivateKeyAccount account, String matcherKey, com.wavesplatform.wavesj.matcher.Order.Type orderType,
-                                                         AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
-        if (isWaves(assetPair.amountAsset) && isWaves(assetPair.priceAsset)) {
-            throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
-        }
-        Order co = new Order(orderType, assetPair, amount, price, timestamp, 0, Order.Status.ACCEPTED,
-                expiration, matcherFee, account, new PublicKeyAccount(matcherKey, account.getChainId()));
-        return new ObjectWithSignature<Order>(co, account);
-    }
-
-    public static ObjectWithSignature<Order> makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                                         AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
-        return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
-    }
-
-    public static ObjectWithSignature<CancelOrder> makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
-        return new ObjectWithSignature<CancelOrder>(new CancelOrder(account, assetPair, orderId), account);
-    }
-
-    public static ObjectWithSignature<DeleteOrder> makeDeleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
-        return new ObjectWithSignature<DeleteOrder>(new DeleteOrder(account, assetPair, orderId), account);
-    }
+    public abstract byte getVersion();
 }

@@ -2,16 +2,13 @@ package com.wavesplatform.wavesj.transactions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wavesplatform.wavesj.Asset;
-import com.wavesplatform.wavesj.Base58;
-import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.Transaction;
+import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class SponsorTransaction extends Transaction {
+public class SponsorTransaction extends TransactionWithBytesHashId {
     public static final byte SPONSOR = 14;
     private PublicKeyAccount senderPublicKey;
     private String assetId;
@@ -57,14 +54,16 @@ public class SponsorTransaction extends Transaction {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(minAssetFee).putLong(fee).putLong(timestamp);
-        byte[] bytes = new byte[buf.position()];
-        buf.position(0);
-        buf.get(bytes);
-        return bytes;
+        return ByteArraysUtils.getOnlyUsed(buf);
     }
 
     @Override
     public byte getType() {
         return SPONSOR;
+    }
+
+    @Override
+    public byte getVersion() {
+        return Transaction.V1;
     }
 }

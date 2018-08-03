@@ -3,14 +3,14 @@ package com.wavesplatform.wavesj;
 import com.wavesplatform.wavesj.transactions.TransactionWithBytesHashId;
 import org.whispersystems.curve25519.Curve25519;
 
-public abstract class ObjectWithSignature implements Signable {
+public abstract class TransactionWithSignature extends TransactionWithBytesHashId {
     protected final ByteString signature;
 
-    public ObjectWithSignature(ByteString signature) {
+    public TransactionWithSignature(ByteString signature) {
         this.signature = signature;
     }
 
-    public ObjectWithSignature(PrivateKeyAccount account) {
+    public TransactionWithSignature(PrivateKeyAccount account) {
         this.signature = new ByteString(account.sign(getBytes()));
     }
 

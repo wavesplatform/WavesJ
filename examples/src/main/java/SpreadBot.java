@@ -53,7 +53,7 @@ public class SpreadBot {
         long expiration = System.currentTimeMillis() + Math.max(period, 61000); // matcher requires expiration > 1 min in the future
         Order order = matcher.createOrder(account, matcherKey, market, type, price, amount, expiration, fee);
         System.out.printf("Filed order %s to %s %d at %d\n", order.getId(), type, amount, price);
-        return order.getId();
+        return order.getId().getBase58String();
     }
 
     private void round() throws IOException, InterruptedException {
@@ -62,7 +62,7 @@ public class SpreadBot {
         // Cancel all orders filed at our market
         for (Order order: matcher.getOrders(account, market)) {
             if (order.isActive()) {
-                cancelOrder(order.getId());
+                cancelOrder(order.getId().getBase58String());
             }
         }
 

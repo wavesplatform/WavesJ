@@ -33,14 +33,14 @@ public class TransactionTypeResolver extends TypeIdResolverBase {
             case AliasTransaction.ALIAS:
                 t = AliasTransaction.class;
                 break;
-            case BurnTransaction.BURN:
-                t = BurnTransaction.class;
+            case BurnTransactionV1.BURN:
+                t = BurnTransactionV1.class;
                 break;
             case DataTransaction.DATA:
                 t = DataTransaction.class;
                 break;
-            case IssueTransaction.ISSUE:
-                t = IssueTransaction.class;
+            case IssueTransactionV1.ISSUE:
+                t = IssueTransactionV1.class;
                 break;
             case LeaseCancelTransaction.LEASE_CANCEL:
                 t = LeaseCancelTransaction.class;
@@ -51,8 +51,8 @@ public class TransactionTypeResolver extends TypeIdResolverBase {
             case MassTransferTransaction.MASS_TRANSFER:
                 t = MassTransferTransaction.class;
                 break;
-            case ReissueTransaction.REISSUE:
-                t = ReissueTransaction.class;
+            case ReissueTransactionV1.REISSUE:
+                t = ReissueTransactionV1.class;
                 break;
             case SetScriptTransaction.SET_SCRIPT:
                 t = SetScriptTransaction.class;
@@ -60,8 +60,8 @@ public class TransactionTypeResolver extends TypeIdResolverBase {
             case SponsorTransaction.SPONSOR:
                 t = SponsorTransaction.class;
                 break;
-            case TransferTransaction.TRANSFER:
-                t = TransferTransaction.class;
+            case TransferTransactionV1.TRANSFER:
+                t = TransferTransactionV1.class;
                 break;
             default:
                 throw new IllegalArgumentException();

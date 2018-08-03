@@ -10,7 +10,7 @@ import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.LeaseTransaction;
-import com.wavesplatform.wavesj.transactions.TransferTransaction;
+import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
@@ -140,7 +140,7 @@ public class Node {
      * @return Transaction ID
      * @throws IOException
      */
-    public String send(ApiJson tx) throws IOException {
+    public String send(Transaction tx) throws IOException {
         return parse(exec(request(tx)), "id").asText();
     }
 
@@ -149,52 +149,52 @@ public class Node {
     }
 
     public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, String message) throws IOException {
-        ObjectWithProofs<TransferTransaction> tx = Transaction.makeTransferTx(from, recipient, amount, null, fee, null, message);
+        TransferTransactionV1 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, message);
         return send(tx);
     }
 
     public String transfer(PrivateKeyAccount from, String assetId, String recipient,
                            long amount, long fee, String feeAssetId, String message) throws IOException {
-        ObjectWithProofs<TransferTransaction> tx = Transaction.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
+        TransferTransactionV1 tx = Transactions.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
         return send(tx);
     }
 
     public String lease(PrivateKeyAccount from, String recipient, long amount, long fee) throws IOException {
-        ObjectWithProofs<LeaseTransaction> tx = Transaction.makeLeaseTx(from, recipient, amount, fee);
+        LeaseTransaction tx = Transactions.makeLeaseTx(from, recipient, amount, fee);
         return send(tx);
     }
 
     public String cancelLease(PrivateKeyAccount account, byte chainId, String txId, long fee) throws IOException {
-        return send(Transaction.makeLeaseCancelTx(account, chainId, txId, fee));
+        return send(Transactions.makeLeaseCancelTx(account, chainId, txId, fee));
     }
 
     public String issueAsset(PrivateKeyAccount account, byte chainId, String name, String description, long quantity,
                              byte decimals, boolean reissuable, String script, long fee) throws IOException {
-        return send(Transaction.makeIssueTx(account, chainId, name, description, quantity, decimals, reissuable, script, fee));
+        return send(Transactions.makeIssueTx(account, chainId, name, description, quantity, decimals, reissuable, script, fee));
     }
 
     public String reissueAsset(PrivateKeyAccount account, byte chainId, String assetId, long quantity, boolean reissuable, long fee) throws IOException {
-        return send(Transaction.makeReissueTx(account, chainId, assetId, quantity, reissuable, fee));
+        return send(Transactions.makeReissueTx(account, chainId, assetId, quantity, reissuable, fee));
     }
 
     public String burnAsset(PrivateKeyAccount account, byte chainId, String assetId, long amount, long fee) throws IOException {
-        return send(Transaction.makeBurnTx(account, chainId, assetId, amount, fee));
+        return send(Transactions.makeBurnTx(account, chainId, assetId, amount, fee));
     }
 
     public String sponsorAsset(PrivateKeyAccount account, String assetId, long minAssetFee, long fee) throws IOException {
-        return send(Transaction.makeSponsorTx(account, assetId, minAssetFee, fee));
+        return send(Transactions.makeSponsorTx(account, assetId, minAssetFee, fee));
     }
 
     public String alias(PrivateKeyAccount account, byte chainId, String alias, long fee) throws IOException {
-        return send(Transaction.makeAliasTx(account, alias, chainId, fee));
+        return send(Transactions.makeAliasTx(account, alias, chainId, fee));
     }
 
     public String massTransfer(PrivateKeyAccount from, String assetId, Collection<Transfer> transfers, long fee, String message) throws IOException {
-        return send(Transaction.makeMassTransferTx(from, assetId, transfers, fee, message));
+        return send(Transactions.makeMassTransferTx(from, assetId, transfers, fee, message));
     }
 
     public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
-        return send(Transaction.makeDataTx(from, data, fee));
+        return send(Transactions.makeDataTx(from, data, fee));
     }
 
     /**
@@ -210,7 +210,7 @@ public class Node {
      * @see Account#TESTNET
      */
     public String setScript(PrivateKeyAccount from, String script, byte chainId, long fee) throws IOException {
-        return send(Transaction.makeScriptTx(from, compileScript(script), chainId, fee));
+        return send(Transactions.makeScriptTx(from, compileScript(script), chainId, fee));
     }
 
     /**
@@ -237,7 +237,7 @@ public class Node {
 
     public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
                              long price, long amount, long expiration, long matcherFee) throws IOException {
-        ObjectWithSignature<Order> tx = Transaction.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
+        Order tx = Transactions.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
         JsonNode tree = parse(exec(request(tx)));
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
@@ -246,12 +246,12 @@ public class Node {
     }
 
     public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
-        ApiJson tx = Transaction.makeOrderCancelTx(account, assetPair, orderId);
+        ApiJson tx = Transactions.makeOrderCancelTx(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
     }
 
     public String deleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
-        ApiJson tx = Transaction.makeDeleteOrder(account, assetPair, orderId);
+        ApiJson tx = Transactions.makeDeleteOrder(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
     }
 
