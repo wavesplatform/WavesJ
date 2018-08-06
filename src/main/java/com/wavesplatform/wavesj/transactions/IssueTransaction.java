@@ -24,6 +24,4 @@ public interface IssueTransaction extends Transaction, Signable, WithId {
     byte getDecimals();
 
     boolean isReissuable();
-
-    String getScript();
 }

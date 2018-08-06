@@ -15,7 +15,7 @@ public abstract class TransactionWithProofs extends TransactionWithBytesHashId {
         if (proofs.size() >= MAX_PROOF_COUNT) {
             throw new IllegalArgumentException("proofs count should be between 0 and " + (MAX_PROOF_COUNT - 1));
         }
-        this.proofs = proofs;
+        this.proofs = Collections.unmodifiableList(proofs);
     }
 
     public TransactionWithProofs(PrivateKeyAccount account) {

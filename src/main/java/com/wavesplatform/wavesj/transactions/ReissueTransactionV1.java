@@ -6,10 +6,9 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 
-import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
+import static com.wavesplatform.wavesj.ByteUtils.*;
 
 public class ReissueTransactionV1 extends TransactionWithSignature implements ReissueTransaction {
-    public static final byte REISSUE = 5;
 
     private PublicKeyAccount senderPublicKey;
     private byte chainId;
@@ -86,7 +85,8 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
+        buf.put(ReissueTransaction.REISSUE)
+                .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
         return ByteArraysUtils.getOnlyUsed(buf);

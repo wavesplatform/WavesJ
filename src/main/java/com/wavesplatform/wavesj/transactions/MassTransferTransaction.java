@@ -80,6 +80,7 @@ public class MassTransferTransaction extends TransactionWithProofs {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(5 * KBYTE);
+        buf.put(MassTransferTransaction.MASS_TRANSFER).put(Transaction.V1);
         buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);
         buf.putShort((short) transfers.size());
@@ -91,7 +92,7 @@ public class MassTransferTransaction extends TransactionWithProofs {
             tr.add(new Transfer(rc, t.amount));
         }
         buf.putLong(timestamp).putLong(fee);
-        putString(buf, attachment.getBase58String());
+        putBytes(buf, attachment.getBytes());
 
         return ByteArraysUtils.getOnlyUsed(buf);
     }
@@ -103,6 +104,6 @@ public class MassTransferTransaction extends TransactionWithProofs {
 
     @Override
     public byte getVersion() {
-        return 1;
+        return Transaction.V1;
     }
 }

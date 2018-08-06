@@ -87,7 +87,8 @@ public class ReissueTransactionV2 extends TransactionWithProofs implements Reiss
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
+        buf.put(ReissueTransaction.REISSUE).put(Transaction.V2).put(chainId)
+                .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee).putLong(timestamp);
         return ByteArraysUtils.getOnlyUsed(buf);

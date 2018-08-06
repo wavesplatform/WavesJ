@@ -69,6 +69,7 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(LeaseCancelTransaction.LEASE_CANCEL).put(Transaction.V2).put(chainId);
         buf.put(senderPublicKey.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(leaseId));
         return ByteArraysUtils.getOnlyUsed(buf);
     }

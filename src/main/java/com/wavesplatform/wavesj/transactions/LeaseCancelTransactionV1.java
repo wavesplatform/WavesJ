@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.rmi.dgc.Lease;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
@@ -68,7 +69,10 @@ public class LeaseCancelTransactionV1 extends TransactionWithSignature implement
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(senderPublicKey.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(leaseId));
+        buf.put(LeaseCancelTransaction.LEASE_CANCEL);
+        buf.put(senderPublicKey.getPublicKey())
+                .putLong(fee).putLong(timestamp)
+                .put(Base58.decode(leaseId));
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

@@ -93,12 +93,17 @@ public class TransferTransactionV1 extends TransactionWithSignature implements T
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(TransferTransaction.TRANSFER);
         buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee);
         putRecipient(buf, senderPublicKey.getChainId(), recipient);
-        putString(buf, attachment.getBase58String());
+        if (attachment != null) {
+            putBytes(buf, attachment.getBytes());
+        } else {
+            buf.put((byte) 0);
+        }
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

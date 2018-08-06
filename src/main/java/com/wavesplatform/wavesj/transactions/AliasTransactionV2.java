@@ -71,7 +71,7 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(ALIAS).put(getVersion()).put(senderPublicKey.getPublicKey());
+        buf.put(ALIAS).put(Transaction.V2).put(senderPublicKey.getPublicKey());
         putBytes(buf, alias.getBytes());
         buf.putLong(fee).putLong(timestamp);
         return ByteArraysUtils.getOnlyUsed(buf);
@@ -96,6 +96,6 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
             newProofs.add(ByteString.EMPTY);
         }
         newProofs.set(index, proof);
-        return new AliasTransactionV2(senderPublicKey, alias, fee, timestamp, Collections.unmodifiableList(newProofs));
+        return new AliasTransactionV2(senderPublicKey, alias, fee, timestamp, newProofs);
     }
 }

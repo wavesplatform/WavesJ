@@ -2,16 +2,14 @@ package com.wavesplatform.wavesj.transactions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wavesplatform.wavesj.Base64;
-import com.wavesplatform.wavesj.ByteArraysUtils;
-import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.Transaction;
+import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class SetScriptTransaction extends TransactionWithBytesHashId {
+public class SetScriptTransaction extends TransactionWithProofs {
     public static final byte SET_SCRIPT = 13;
 
     private PublicKeyAccount senderPublicKey;
@@ -25,7 +23,22 @@ public class SetScriptTransaction extends TransactionWithBytesHashId {
                                 @JsonProperty("script") String script,
                                 @JsonProperty("chainId") byte chainId,
                                 @JsonProperty("fee") long fee,
-                                @JsonProperty("timestamp") long timestamp) {
+                                @JsonProperty("timestamp") long timestamp,
+                                @JsonProperty("proofs") List<ByteString> proofs) {
+        super(proofs);
+        this.senderPublicKey = senderPublicKey;
+        this.script = script;
+        this.chainId = chainId;
+        this.fee = fee;
+        this.timestamp = timestamp;
+    }
+
+    public SetScriptTransaction(PrivateKeyAccount senderPublicKey,
+                                String script,
+                                byte chainId,
+                                long fee,
+                                long timestamp) {
+        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.script = script;
         this.chainId = chainId;
@@ -57,6 +70,7 @@ public class SetScriptTransaction extends TransactionWithBytesHashId {
     public byte[] getBytes() {
         byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
         ByteBuffer buf = ByteBuffer.allocate(KBYTE + rawScript.length);
+        buf.put(SetScriptTransaction.SET_SCRIPT).put(Transaction.V1).put(chainId);
         buf.put(senderPublicKey.getPublicKey());
         if (rawScript.length > 0) {
             buf.put((byte) 1).putShort((short) rawScript.length).put(rawScript);

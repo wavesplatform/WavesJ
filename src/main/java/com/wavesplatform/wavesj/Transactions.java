@@ -11,12 +11,12 @@ import static com.wavesplatform.wavesj.Asset.isWaves;
 
 public class Transactions {
 
-    public static IssueTransactionV1 makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description,
+    public static IssueTransactionV2 makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description,
                                                  long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp) {
-        return new IssueTransactionV1(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp);
+        return new IssueTransactionV2(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp);
     }
 
-    public static IssueTransactionV1 makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description, long quantity,
+    public static IssueTransactionV2 makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description, long quantity,
                                                  byte decimals, boolean reissuable, String script, long fee) {
         return makeIssueTx(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, System.currentTimeMillis());
     }

@@ -74,7 +74,8 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
+        buf.put(BurnTransaction.BURN)
+                .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);
         return ByteArraysUtils.getOnlyUsed(buf);
     }

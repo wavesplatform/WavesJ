@@ -71,6 +71,7 @@ public class LeaseTransactionV1 extends TransactionWithSignature implements Leas
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(LeaseTransaction.LEASE);
         buf.put(senderPublicKey.getPublicKey());
         putRecipient(buf, senderPublicKey.getChainId(), recipient);
         buf.putLong(amount).putLong(fee).putLong(timestamp);

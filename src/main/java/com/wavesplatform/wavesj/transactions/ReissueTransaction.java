@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public interface ReissueTransaction extends Transaction, Signable, WithId {
+    public static final byte REISSUE = 5;
+
     byte getChainId();
 
     String getAssetId();

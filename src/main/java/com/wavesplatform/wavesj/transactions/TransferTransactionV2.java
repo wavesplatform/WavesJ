@@ -94,12 +94,17 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(TransferTransaction.TRANSFER).put(Transaction.V2);
         buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);
         putAsset(buf, feeAssetId);
         buf.putLong(timestamp).putLong(amount).putLong(fee);
         putRecipient(buf, senderPublicKey.getChainId(), recipient);
-        putString(buf, attachment.getBase58String());
+        if (attachment != null) {
+            putBytes(buf, attachment.getBytes());
+        } else {
+            buf.put((byte) 0);
+        }
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

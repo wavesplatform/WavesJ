@@ -20,7 +20,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
     private final long quantity;
     private final byte decimals;
     private final boolean reissuable;
-    private final String script;
     private final long fee;
     private final long timestamp;
 
@@ -31,7 +30,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
                               long quantity,
                               byte decimals,
                               boolean reissuable,
-                              String script,
                               long fee,
                               long timestamp) {
         super(senderPublicKey);
@@ -42,20 +40,18 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         this.quantity = quantity;
         this.decimals = decimals;
         this.reissuable = reissuable;
-        this.script = script;
         this.fee = fee;
         this.timestamp = timestamp;
     }
 
     @JsonCreator
-    public IssueTransactionV1(@JsonProperty("senderPublicKey") PrivateKeyAccount senderPublicKey,
+    public IssueTransactionV1(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                               @JsonProperty("chainId") byte chainId,
                               @JsonProperty("name") String name,
                               @JsonProperty("description") String description,
                               @JsonProperty("quantity") long quantity,
                               @JsonProperty("decimals") byte decimals,
                               @JsonProperty("reissuable") boolean reissuable,
-                              @JsonProperty("script") String script,
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("signature") ByteString signature) {
@@ -67,7 +63,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         this.quantity = quantity;
         this.decimals = decimals;
         this.reissuable = reissuable;
-        this.script = script;
         this.fee = fee;
         this.timestamp = timestamp;
     }
@@ -100,10 +95,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         return reissuable;
     }
 
-    public String getScript() {
-        return script;
-    }
-
     public long getFee() {
         return fee;
     }
@@ -114,6 +105,7 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
 
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
+        buf.put(IssueTransaction.ISSUE);
         buf.put(senderPublicKey.getPublicKey());
         putString(buf, name);
         putString(buf, description);

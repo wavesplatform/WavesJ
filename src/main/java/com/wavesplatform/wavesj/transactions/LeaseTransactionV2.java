@@ -73,6 +73,7 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(LeaseTransaction.LEASE).put(Transaction.V2).put((byte) 0);
         buf.put(senderPublicKey.getPublicKey());
         putRecipient(buf, senderPublicKey.getChainId(), recipient);
         buf.putLong(amount).putLong(fee).putLong(timestamp);
@@ -98,6 +99,6 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
             newProofs.add(ByteString.EMPTY);
         }
         newProofs.set(index, proof);
-        return new LeaseTransactionV2(senderPublicKey, recipient, amount, fee, timestamp, Collections.unmodifiableList(newProofs));
+        return new LeaseTransactionV2(senderPublicKey, recipient, amount, fee, timestamp, newProofs);
     }
 }

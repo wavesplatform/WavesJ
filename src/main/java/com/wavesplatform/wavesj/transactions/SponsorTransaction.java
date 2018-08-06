@@ -5,10 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class SponsorTransaction extends TransactionWithBytesHashId {
+public class SponsorTransaction extends TransactionWithProofs {
     public static final byte SPONSOR = 14;
     private PublicKeyAccount senderPublicKey;
     private String assetId;
@@ -21,13 +22,29 @@ public class SponsorTransaction extends TransactionWithBytesHashId {
                               @JsonProperty("assetId") String assetId,
                               @JsonProperty("minAssetFee") long minAssetFee,
                               @JsonProperty("fee") long fee,
-                              @JsonProperty("timestamp") long timestamp) {
+                              @JsonProperty("timestamp") long timestamp,
+                              @JsonProperty("proofs") List<ByteString> proofs) {
+        super(proofs);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.minAssetFee = minAssetFee;
         this.fee = fee;
         this.timestamp = timestamp;
     }
+
+    public SponsorTransaction(PrivateKeyAccount senderPublicKey,
+                                String assetId,
+                                long minAssetFee,
+                                long fee,
+                                long timestamp) {
+        super(senderPublicKey);
+        this.senderPublicKey = senderPublicKey;
+        this.assetId = assetId;
+        this.minAssetFee = minAssetFee;
+        this.fee = fee;
+        this.timestamp = timestamp;
+    }
+
 
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
@@ -52,7 +69,8 @@ public class SponsorTransaction extends TransactionWithBytesHashId {
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
+        buf.put(SponsorTransaction.SPONSOR).put(Transaction.V1)
+                .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(minAssetFee).putLong(fee).putLong(timestamp);
         return ByteArraysUtils.getOnlyUsed(buf);
     }

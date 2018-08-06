@@ -6,11 +6,10 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
-import static com.wavesplatform.wavesj.ByteUtils.putString;
+import static com.wavesplatform.wavesj.ByteUtils.*;
 
 public class IssueTransactionV2 extends TransactionWithProofs implements IssueTransaction {
     public static final byte ISSUE = 3;
@@ -116,6 +115,9 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
 
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
+        buf.put(IssueTransaction.ISSUE);
+        buf.put(Transaction.V2);
+        buf.put(chainId);
         buf.put(senderPublicKey.getPublicKey());
         putString(buf, name);
         putString(buf, description);
@@ -124,6 +126,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee)
                 .putLong(timestamp);
+        putAsset(buf, script);
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 
@@ -146,6 +149,6 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
             newProofs.add(ByteString.EMPTY);
         }
         newProofs.set(index, proof);
-        return new IssueTransactionV2(senderPublicKey, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp, Collections.unmodifiableList(newProofs));
+        return new IssueTransactionV2(senderPublicKey, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp, newProofs);
     }
 }
