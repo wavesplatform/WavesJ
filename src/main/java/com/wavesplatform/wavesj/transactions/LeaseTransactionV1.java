@@ -23,12 +23,12 @@ public class LeaseTransactionV1 extends TransactionWithSignature implements Leas
                               long amount,
                               long fee,
                               long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     @JsonCreator
@@ -38,12 +38,12 @@ public class LeaseTransactionV1 extends TransactionWithSignature implements Leas
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("signature") ByteString signature) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public PublicKeyAccount getSenderPublicKey() {

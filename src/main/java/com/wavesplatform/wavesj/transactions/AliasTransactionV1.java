@@ -23,11 +23,11 @@ public class AliasTransactionV1 extends TransactionWithSignature implements Alia
                               Alias alias,
                               long fee,
                               long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.alias = alias;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     @JsonCreator
@@ -37,11 +37,11 @@ public class AliasTransactionV1 extends TransactionWithSignature implements Alia
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("signature") ByteString signature
     ) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.alias = alias;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     @Override

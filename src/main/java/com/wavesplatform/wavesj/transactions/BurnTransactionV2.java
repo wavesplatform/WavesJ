@@ -6,6 +6,7 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
@@ -24,13 +25,13 @@ public class BurnTransactionV2 extends TransactionWithProofs implements BurnTran
                              long amount,
                              long fee,
                              long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.assetId = assetId;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
     @JsonCreator
@@ -41,7 +42,7 @@ public class BurnTransactionV2 extends TransactionWithProofs implements BurnTran
                              @JsonProperty("fee") long fee,
                              @JsonProperty("timestamp") long timestamp,
                              @JsonProperty("proofs") List<ByteString> proofs) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.assetId = assetId;

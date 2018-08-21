@@ -22,7 +22,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
     private final long timestamp;
 
     public IssueTransactionV1(PrivateKeyAccount senderPublicKey,
-                              byte chainId,
                               String name,
                               String description,
                               long quantity,
@@ -30,7 +29,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
                               boolean reissuable,
                               long fee,
                               long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.name = name;
         this.description = description;
@@ -39,6 +37,7 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     @JsonCreator
@@ -51,7 +50,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("signature") ByteString signature) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.name = name;
         this.description = description;
@@ -60,6 +58,7 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public PublicKeyAccount getSenderPublicKey() {

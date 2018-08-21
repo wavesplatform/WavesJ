@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj;
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
+import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -130,7 +131,7 @@ public class NodeTest {
     public void testSendTransaction() throws IOException {
         Node node = new Node();
 
-        TransferTransactionV1 tx1 = Transactions.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
+        TransferTransactionV2 tx1 = Transactions.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
         String id1 = node.send(tx1);
         assertNotNull(id1);
         assertEquals(id1, tx1.getId().getBase58String());

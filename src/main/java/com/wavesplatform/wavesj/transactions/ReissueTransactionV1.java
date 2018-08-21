@@ -25,29 +25,28 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
                                 @JsonProperty("fee") long fee,
                                 @JsonProperty("timestamp") long timestamp,
                                 @JsonProperty("signature") ByteString signature) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.quantity = quantity;
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public ReissueTransactionV1(PrivateKeyAccount senderPublicKey,
-                                byte chainId,
                                 String assetId,
                                 long quantity,
                                 boolean reissuable,
                                 long fee,
                                 long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.quantity = quantity;
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     public PublicKeyAccount getSenderPublicKey() {

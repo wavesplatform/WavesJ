@@ -6,6 +6,7 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
@@ -25,11 +26,11 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
                               Alias alias,
                               long fee,
                               long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.alias = alias;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
     @JsonCreator
@@ -39,7 +40,7 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("proofs") List<ByteString> proofs
     ) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.alias = alias;
         this.fee = fee;

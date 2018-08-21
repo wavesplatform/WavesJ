@@ -21,37 +21,37 @@ public class Transactions {
         return makeIssueTx(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, System.currentTimeMillis());
     }
 
-    public static ReissueTransactionV1 makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity,
+    public static ReissueTransactionV2 makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity,
                                                      boolean reissuable, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot reissue WAVES");
         }
-        return new ReissueTransactionV1(sender, chainId, assetId, quantity, reissuable, fee, timestamp);
+        return new ReissueTransactionV2(sender, chainId, assetId, quantity, reissuable, fee, timestamp);
     }
 
-    public static ReissueTransactionV1 makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity, boolean reissuable, long fee) {
+    public static ReissueTransactionV2 makeReissueTx(PrivateKeyAccount sender, byte chainId, String assetId, long quantity, boolean reissuable, long fee) {
         return makeReissueTx(sender, chainId, assetId, quantity, reissuable, fee, System.currentTimeMillis());
     }
 
-    public static TransferTransactionV1 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
+    public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
                                                        long fee, String feeAssetId, String attachment, long timestamp) {
-        return new TransferTransactionV1(sender, recipient, amount, assetId, fee, feeAssetId, attachment == null ? ByteString.EMPTY : new ByteString(attachment.getBytes()), timestamp);
+        return new TransferTransactionV2(sender, recipient, amount, assetId, fee, feeAssetId, attachment == null ? ByteString.EMPTY : new ByteString(attachment.getBytes()), timestamp);
     }
 
-    public static TransferTransactionV1 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
+    public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
                                                        long fee, String feeAssetId, String attachment) {
         return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
     }
 
-    public static BurnTransactionV1 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
+    public static BurnTransactionV2 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot burn WAVES");
         }
 
-        return new BurnTransactionV1(sender, assetId, amount, fee, timestamp);
+        return new BurnTransactionV2(sender, chainId, assetId, amount, fee, timestamp);
     }
 
-    public static BurnTransactionV1 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee) {
+    public static BurnTransactionV2 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee) {
         return makeBurnTx(sender, chainId, assetId, amount, fee, System.currentTimeMillis());
     }
 
@@ -70,8 +70,8 @@ public class Transactions {
         return makeSponsorTx(sender, assetId, minAssetFee, fee, System.currentTimeMillis());
     }
 
-    public static LeaseTransactionV1 makeLeaseTx(PrivateKeyAccount sender, String recipient, long amount, long fee, long timestamp) {
-        return new LeaseTransactionV1(sender, recipient, amount, fee, timestamp);
+    public static LeaseTransactionV2 makeLeaseTx(PrivateKeyAccount sender, String recipient, long amount, long fee, long timestamp) {
+        return new LeaseTransactionV2(sender, recipient, amount, fee, timestamp);
     }
 
     public static LeaseTransaction makeLeaseTx(PrivateKeyAccount sender, String recipient, long amount, long fee) {
@@ -79,7 +79,7 @@ public class Transactions {
     }
 
     public static LeaseCancelTransaction makeLeaseCancelTx(PrivateKeyAccount sender, byte chainId, String leaseId, long fee, long timestamp) {
-        return new LeaseCancelTransactionV1(sender, chainId, leaseId, fee, timestamp);
+        return new LeaseCancelTransactionV2(sender, chainId, leaseId, fee, timestamp);
     }
 
     public static LeaseCancelTransaction makeLeaseCancelTx(PrivateKeyAccount sender, byte chainId, String leaseId, long fee) {
@@ -87,7 +87,7 @@ public class Transactions {
     }
 
     public static AliasTransaction makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee, long timestamp) {
-        return new AliasTransactionV1(sender, new Alias(alias, chainId), fee, timestamp);
+        return new AliasTransactionV2(sender, new Alias(alias, chainId), fee, timestamp);
     }
 
     public static AliasTransaction makeAliasTx(PrivateKeyAccount sender, String alias, byte chainId, long fee) {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
@@ -24,7 +25,7 @@ public class SponsorTransaction extends TransactionWithProofs {
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("proofs") List<ByteString> proofs) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.minAssetFee = minAssetFee;
@@ -37,12 +38,12 @@ public class SponsorTransaction extends TransactionWithProofs {
                               long minAssetFee,
                               long fee,
                               long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.minAssetFee = minAssetFee;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
@@ -25,7 +26,7 @@ public class SetScriptTransaction extends TransactionWithProofs {
                                 @JsonProperty("fee") long fee,
                                 @JsonProperty("timestamp") long timestamp,
                                 @JsonProperty("proofs") List<ByteString> proofs) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.script = script;
         this.chainId = chainId;
@@ -38,12 +39,12 @@ public class SetScriptTransaction extends TransactionWithProofs {
                                 byte chainId,
                                 long fee,
                                 long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.script = script;
         this.chainId = chainId;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {

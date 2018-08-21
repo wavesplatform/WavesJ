@@ -10,7 +10,7 @@ import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.LeaseTransaction;
-import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
+import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.CookieSpecs;
@@ -153,13 +153,13 @@ public class Node {
     }
 
     public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, String message) throws IOException {
-        TransferTransactionV1 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, message);
+        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, message);
         return send(tx);
     }
 
     public String transfer(PrivateKeyAccount from, String assetId, String recipient,
                            long amount, long fee, String feeAssetId, String message) throws IOException {
-        TransferTransactionV1 tx = Transactions.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
+        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
         return send(tx);
     }
 
@@ -297,21 +297,16 @@ public class Node {
 
     private HttpUriRequest request(ApiJson obj) throws JsonProcessingException {
         String endpoint;
-        if (obj instanceof ProofedObject) {
-            Object o = ((ProofedObject) obj).getObject();
-            if (o instanceof Transaction) {
-                endpoint = "/transactions/broadcast";
-            } else if (o instanceof Order) {
-                endpoint = "/matcher/orderbook";
-            } else if (o instanceof CancelOrder) {
-                CancelOrder co = (CancelOrder) o;
-                endpoint = "/matcher/orderbook/" + co.getAssetPair().amountAsset + '/' + co.getAssetPair().priceAsset + "/cancel";
-            } else if (o instanceof DeleteOrder) {
-                DeleteOrder d = (DeleteOrder) o;
-                endpoint = "/matcher/orderbook/" + d.getAssetPair().amountAsset + '/' + d.getAssetPair().priceAsset + "/delete";
-            } else {
-                throw new IllegalArgumentException();
-            }
+        if (obj instanceof Transaction) {
+            endpoint = "/transactions/broadcast";
+        } else if (obj instanceof Order) {
+            endpoint = "/matcher/orderbook";
+        } else if (obj instanceof CancelOrder) {
+            CancelOrder co = (CancelOrder) obj;
+            endpoint = "/matcher/orderbook/" + co.getAssetPair().amountAsset + '/' + co.getAssetPair().priceAsset + "/cancel";
+        } else if (obj instanceof DeleteOrder) {
+            DeleteOrder d = (DeleteOrder) obj;
+            endpoint = "/matcher/orderbook/" + d.getAssetPair().amountAsset + '/' + d.getAssetPair().priceAsset + "/delete";
         } else {
             throw new IllegalArgumentException();
         }

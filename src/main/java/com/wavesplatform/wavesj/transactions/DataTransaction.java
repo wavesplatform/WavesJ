@@ -6,6 +6,7 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
@@ -24,7 +25,7 @@ public class DataTransaction extends TransactionWithProofs {
                            @JsonProperty("fee") long fee,
                            @JsonProperty("timestamp") long timestamp,
                            @JsonProperty("proofs") List<ByteString> proofs) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.data = data;
         this.fee = fee;
@@ -35,11 +36,11 @@ public class DataTransaction extends TransactionWithProofs {
                            Collection<DataEntry<?>> data,
                            long fee,
                            long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.data = data;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {

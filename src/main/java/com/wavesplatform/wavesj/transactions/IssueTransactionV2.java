@@ -6,6 +6,7 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
@@ -34,7 +35,6 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
                               String script,
                               long fee,
                               long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.name = name;
@@ -45,6 +45,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
         this.script = script;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
     @JsonCreator
@@ -59,7 +60,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("proofs") List<ByteString> proofs) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.chainId = chainId;
         this.name = name;

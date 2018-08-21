@@ -20,12 +20,12 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
                              long amount,
                              long fee,
                              long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     @JsonCreator
@@ -35,12 +35,12 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
                              @JsonProperty("fee") long fee,
                              @JsonProperty("timestamp") long timestamp,
                              @JsonProperty("signature") ByteString signature) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public PublicKeyAccount getSenderPublicKey() {

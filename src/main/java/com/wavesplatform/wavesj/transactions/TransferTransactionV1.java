@@ -28,7 +28,6 @@ public class TransferTransactionV1 extends TransactionWithSignature implements T
                                  @JsonProperty("attachment") ByteString attachment,
                                  @JsonProperty("timestamp") long timestamp,
                                  @JsonProperty("signature") ByteString signature) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
@@ -37,6 +36,7 @@ public class TransferTransactionV1 extends TransactionWithSignature implements T
         this.feeAssetId = feeAssetId;
         this.attachment = attachment;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public TransferTransactionV1(PrivateKeyAccount senderPublicKey,
@@ -47,7 +47,6 @@ public class TransferTransactionV1 extends TransactionWithSignature implements T
                                  String feeAssetId,
                                  ByteString attachment,
                                  long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
@@ -56,6 +55,7 @@ public class TransferTransactionV1 extends TransactionWithSignature implements T
         this.feeAssetId = feeAssetId;
         this.attachment = attachment;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     public PublicKeyAccount getSenderPublicKey() {

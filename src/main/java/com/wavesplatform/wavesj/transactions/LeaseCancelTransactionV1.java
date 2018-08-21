@@ -22,23 +22,22 @@ public class LeaseCancelTransactionV1 extends TransactionWithSignature implement
                                     @JsonProperty("fee") long fee,
                                     @JsonProperty("timestamp") long timestamp,
                                     @JsonProperty("signature") ByteString signature) {
-        super(signature);
         this.senderPublicKey = senderPublicKey;
         this.leaseId = leaseId;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public LeaseCancelTransactionV1(PrivateKeyAccount senderPublicKey,
-                                    byte chainId,
                                     String leaseId,
                                     long fee,
                                     long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.leaseId = leaseId;
         this.fee = fee;
         this.timestamp = timestamp;
+        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
     public PublicKeyAccount getSenderPublicKey() {

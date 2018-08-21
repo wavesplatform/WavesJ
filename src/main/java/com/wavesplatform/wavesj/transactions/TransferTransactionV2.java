@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
@@ -29,7 +30,7 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
                                  @JsonProperty("attachment") ByteString attachment,
                                  @JsonProperty("timestamp") long timestamp,
                                  @JsonProperty("proofs") List<ByteString> proofs) {
-        super(proofs);
+        setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
@@ -48,7 +49,6 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
                                  String feeAssetId,
                                  ByteString attachment,
                                  long timestamp) {
-        super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.amount = amount;
@@ -57,6 +57,7 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
         this.feeAssetId = feeAssetId;
         this.attachment = attachment;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {

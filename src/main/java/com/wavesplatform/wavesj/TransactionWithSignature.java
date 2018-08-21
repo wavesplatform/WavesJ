@@ -4,15 +4,7 @@ import com.wavesplatform.wavesj.transactions.TransactionWithBytesHashId;
 import org.whispersystems.curve25519.Curve25519;
 
 public abstract class TransactionWithSignature extends TransactionWithBytesHashId {
-    protected final ByteString signature;
-
-    public TransactionWithSignature(ByteString signature) {
-        this.signature = signature;
-    }
-
-    public TransactionWithSignature(PrivateKeyAccount account) {
-        this.signature = new ByteString(account.sign(getBytes()));
-    }
+    protected ByteString signature;
 
     public ByteString getSignature() {
         return signature;
