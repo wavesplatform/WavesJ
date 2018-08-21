@@ -126,7 +126,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
                 .put((byte) (reissuable ? 1 : 0))
                 .putLong(fee)
                 .putLong(timestamp);
-        putAsset(buf, script);
+        putScript(buf, script);
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

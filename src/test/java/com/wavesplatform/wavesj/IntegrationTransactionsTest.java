@@ -55,7 +55,7 @@ public class IntegrationTransactionsTest {
 
         LeaseTransactionV2 tx = new LeaseTransactionV2(sender, signer1.getAddress(), Asset.TOKEN, NORMAL_FEE, System.currentTimeMillis());
 
-        ByteString proof = new ByteString("some proof");
+        ByteString proof = new ByteString("some proof".getBytes());
         LeaseTransactionV2 provenTx = tx.withProof(1, proof);
         assertEquals(2, provenTx.getProofs().size());
         assertEquals(proof, provenTx.getProofs().get(1));

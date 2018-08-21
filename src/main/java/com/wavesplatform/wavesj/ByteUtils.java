@@ -32,7 +32,9 @@ public class ByteUtils {
     public static void putScript(ByteBuffer buffer, String script) {
         byte[] bytes = script == null ? new byte[0] : Base64.decode(script);
         buffer.put((byte) (bytes.length > 0 ? 1 : 0));
-        putBytes(buffer, bytes);
+        if (bytes.length > 0) {
+            putBytes(buffer, bytes);
+        }
     }
 
     public static void putBytes(ByteBuffer buffer, byte[] bytes) {
