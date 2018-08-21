@@ -1,6 +1,6 @@
 package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.transactions.*;
+import com.wavesplatform.wavesj.transactions.LeaseTransactionV2;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -1,6 +1,9 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.Alias;
+import com.wavesplatform.wavesj.Base58;
+import com.wavesplatform.wavesj.ByteString;
+import com.wavesplatform.wavesj.PublicKeyAccount;
 import org.junit.Test;
 
 import java.util.Collections;

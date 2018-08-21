@@ -7,7 +7,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.DataEntry.*;
 import static org.junit.Assert.*;
@@ -50,7 +53,7 @@ public class NodeTest {
         assertEquals(335753, block.getHeight());
         assertEquals(3, block.getVersion());
 
-        for (Transaction tx: block.getTransactions()) {
+        for (Transaction tx : block.getTransactions()) {
             ByteString id = tx.getId();
             Transaction tx1 = node.getTransaction(id.getBase58String());
             assertEquals(id, tx1.getId());
@@ -168,7 +171,7 @@ public class NodeTest {
         // Verify the order appears in the list of all orders
         List<Order> orders = matcher.getOrders(alice);
         boolean found = false;
-        for (Order o: orders) {
+        for (Order o : orders) {
             if (o.getId().equals(order.getId())) {
                 found = true;
             }
@@ -178,14 +181,14 @@ public class NodeTest {
         // Verify the order appears in the list of orders for this asset pair
         orders = matcher.getOrders(alice, MARKET);
         found = false;
-        for (Order o: orders) {
+        for (Order o : orders) {
             if (o.getId().equals(order.getId())) {
                 found = true;
             }
         }
         assertTrue(found);
 
-        for (Order o: orders) {
+        for (Order o : orders) {
             assertNotNull(o.getId());
             assertNotNull(o.getOrderType());
             assertNotNull(o.getStatus());
@@ -218,6 +221,6 @@ public class NodeTest {
         String addr = "3PA1KvFfq9VuJjg45p2ytGgaNjrgnLSgf4r";
         String alias = "blackturtle";
         Node node = new Node("https://nodes.wavesnodes.com/", 'W');
-        assertEquals(node.getAddrByAlias(alias),addr);
+        assertEquals(node.getAddrByAlias(alias), addr);
     }
 }

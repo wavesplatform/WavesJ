@@ -1,20 +1,16 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.Base58;
+import com.wavesplatform.wavesj.ByteString;
+import com.wavesplatform.wavesj.PublicKeyAccount;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
-import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static org.junit.Assert.assertEquals;
 
 public class SetScriptTransactionTest {
-    SetScriptTransaction tx = new SetScriptTransaction(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), null, (byte) 'T' , 100000, 1526983936610L, Collections.singletonList(new ByteString("tcTr672rQ5gXvcA9xCGtQpkHC8sAY1TDYqDcQG7hQZAeHcvvHFo565VEv1iD1gVa3ZuGjYS7hDpuTnQBfY2dUhY")));
+    SetScriptTransaction tx = new SetScriptTransaction(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), null, (byte) 'T', 100000, 1526983936610L, Collections.singletonList(new ByteString("tcTr672rQ5gXvcA9xCGtQpkHC8sAY1TDYqDcQG7hQZAeHcvvHFo565VEv1iD1gVa3ZuGjYS7hDpuTnQBfY2dUhY")));
 
     @Test
     public void bytesBytesTest() {
