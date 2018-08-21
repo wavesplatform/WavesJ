@@ -20,7 +20,7 @@ public class SponsorTransaction extends TransactionWithProofs {
     @JsonCreator
     public SponsorTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                               @JsonProperty("assetId") String assetId,
-                              @JsonProperty("minAssetFee") long minAssetFee,
+                              @JsonProperty("minSponsoredAssetFee") long minAssetFee,
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("proofs") List<ByteString> proofs) {
@@ -33,10 +33,10 @@ public class SponsorTransaction extends TransactionWithProofs {
     }
 
     public SponsorTransaction(PrivateKeyAccount senderPublicKey,
-                                String assetId,
-                                long minAssetFee,
-                                long fee,
-                                long timestamp) {
+                              String assetId,
+                              long minAssetFee,
+                              long fee,
+                              long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
@@ -83,5 +83,30 @@ public class SponsorTransaction extends TransactionWithProofs {
     @Override
     public byte getVersion() {
         return Transaction.V1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SponsorTransaction that = (SponsorTransaction) o;
+
+        if (getMinAssetFee() != that.getMinAssetFee()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getAssetId() != null ? getAssetId().equals(that.getAssetId()) : that.getAssetId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+        result = 31 * result + (int) (getMinAssetFee() ^ (getMinAssetFee() >>> 32));
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

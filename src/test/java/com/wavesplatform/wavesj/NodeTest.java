@@ -98,7 +98,7 @@ public class NodeTest {
         Node node = new Node();
 
         BinaryEntry bin = new BinaryEntry("This data was proudly published using WavesJ (https://github.com/wavesplatform/wavesj)",
-                Base58.decode("WavesJrocks"));
+                new ByteString("WavesJrocks"));
         BooleanEntry bool = new BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false);
         LongEntry integer = new LongEntry("\u0414\u043B\u0438\u043D\u0430 \u0437\u0438\u043C\u044B \u0432 \u041C\u043E\u0441\u043A\u0432\u0435", 160L);
         StringEntry string = new StringEntry("", "");

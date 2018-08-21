@@ -3,7 +3,6 @@ package com.wavesplatform.wavesj.matcher;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wavesplatform.wavesj.*;
-import org.whispersystems.curve25519.Curve25519;
 
 import java.nio.ByteBuffer;
 

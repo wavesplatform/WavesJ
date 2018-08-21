@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putString;
@@ -14,7 +13,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
     public static final byte ISSUE = 3;
 
     private final PublicKeyAccount senderPublicKey;
-    private final byte chainId;
     private final String name;
     private final String description;
     private final long quantity;
@@ -34,7 +32,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
                               long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
         this.name = name;
         this.description = description;
         this.quantity = quantity;
@@ -46,7 +43,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
 
     @JsonCreator
     public IssueTransactionV1(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                              @JsonProperty("chainId") byte chainId,
                               @JsonProperty("name") String name,
                               @JsonProperty("description") String description,
                               @JsonProperty("quantity") long quantity,
@@ -57,7 +53,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
                               @JsonProperty("signature") ByteString signature) {
         super(signature);
         this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
         this.name = name;
         this.description = description;
         this.quantity = quantity;
@@ -69,10 +64,6 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
 
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
-    }
-
-    public byte getChainId() {
-        return chainId;
     }
 
     public String getName() {
@@ -125,5 +116,36 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
     @Override
     public byte getVersion() {
         return Transaction.V1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IssueTransactionV1 that = (IssueTransactionV1) o;
+
+        if (getQuantity() != that.getQuantity()) return false;
+        if (getDecimals() != that.getDecimals()) return false;
+        if (isReissuable() != that.isReissuable()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
+        return getDescription() != null ? getDescription().equals(that.getDescription()) : that.getDescription() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
+        result = 31 * result + (int) (getQuantity() ^ (getQuantity() >>> 32));
+        result = 31 * result + (int) getDecimals();
+        result = 31 * result + (isReissuable() ? 1 : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

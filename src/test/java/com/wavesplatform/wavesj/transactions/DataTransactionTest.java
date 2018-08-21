@@ -15,7 +15,7 @@ public class DataTransactionTest {
     {
         data.add(new DataEntry.LongEntry("int", 24L));
         data.add(new DataEntry.BooleanEntry("bool", true));
-        data.add(new DataEntry.BinaryEntry("blob", Base64.decode("YWxpY2U=")));
+        data.add(new DataEntry.BinaryEntry("blob", new ByteString(Base64.decode("YWxpY2U="))));
     }
 
     DataTransaction tx = new DataTransaction(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), data, 100000, 1526911531530L, Collections.singletonList(new ByteString("32mNYSefBTrkVngG5REkmmGAVv69ZvNhpbegmnqDReMTmXNyYqbECPgHgXrX2UwyKGLFS45j7xDFyPXjF8jcfw94")));

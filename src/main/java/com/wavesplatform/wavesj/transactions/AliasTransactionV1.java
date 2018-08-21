@@ -82,4 +82,27 @@ public class AliasTransactionV1 extends TransactionWithSignature implements Alia
     public byte getType() {
         return ALIAS;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AliasTransactionV1 that = (AliasTransactionV1) o;
+
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getAlias() != null ? getAlias().equals(that.getAlias()) : that.getAlias() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getAlias() != null ? getAlias().hashCode() : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
+    }
 }

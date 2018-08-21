@@ -22,4 +22,19 @@ public class ByteString {
     public byte[] getBytes() {
         return Base58.decode(base58String);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ByteString that = (ByteString) o;
+
+        return getBase58String() != null ? getBase58String().equals(that.getBase58String()) : that.getBase58String() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return getBase58String() != null ? getBase58String().hashCode() : 0;
+    }
 }

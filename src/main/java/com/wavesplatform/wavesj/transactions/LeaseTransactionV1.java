@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putRecipient;
@@ -19,7 +18,6 @@ public class LeaseTransactionV1 extends TransactionWithSignature implements Leas
     private final long fee;
     private final long timestamp;
 
-    @JsonCreator
     public LeaseTransactionV1(@JsonProperty("senderPublicKey") PrivateKeyAccount senderPublicKey,
                               @JsonProperty("recipient") String recipient,
                               @JsonProperty("amount") long amount,
@@ -86,5 +84,30 @@ public class LeaseTransactionV1 extends TransactionWithSignature implements Leas
     @Override
     public byte getVersion() {
         return Transaction.V2;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LeaseTransactionV1 that = (LeaseTransactionV1) o;
+
+        if (getAmount() != that.getAmount()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getRecipient() != null ? getRecipient().equals(that.getRecipient()) : that.getRecipient() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getRecipient() != null ? getRecipient().hashCode() : 0);
+        result = 31 * result + (int) (getAmount() ^ (getAmount() >>> 32));
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

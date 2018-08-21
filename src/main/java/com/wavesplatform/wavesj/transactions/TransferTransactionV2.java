@@ -117,4 +117,37 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
     public byte getVersion() {
         return Transaction.V2;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TransferTransactionV2 that = (TransferTransactionV2) o;
+
+        if (getAmount() != that.getAmount()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        if (getRecipient() != null ? !getRecipient().equals(that.getRecipient()) : that.getRecipient() != null)
+            return false;
+        if (getAssetId() != null ? !getAssetId().equals(that.getAssetId()) : that.getAssetId() != null) return false;
+        if (getFeeAssetId() != null ? !getFeeAssetId().equals(that.getFeeAssetId()) : that.getFeeAssetId() != null)
+            return false;
+        return getAttachment() != null ? getAttachment().equals(that.getAttachment()) : that.getAttachment() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getRecipient() != null ? getRecipient().hashCode() : 0);
+        result = 31 * result + (int) (getAmount() ^ (getAmount() >>> 32));
+        result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (getFeeAssetId() != null ? getFeeAssetId().hashCode() : 0);
+        result = 31 * result + (getAttachment() != null ? getAttachment().hashCode() : 0);
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
+    }
 }

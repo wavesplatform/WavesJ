@@ -35,10 +35,14 @@ import java.util.Map;
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
 
-    private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {};
-    private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {};
-    private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {};
-    private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {};
+    private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {
+    };
+    private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {
+    };
+    private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
+    };
+    private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {
+    };
 
     private final URI uri;
     private final WavesJsonMapper wavesJsonMapper;

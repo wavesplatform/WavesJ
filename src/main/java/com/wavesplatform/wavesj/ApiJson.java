@@ -1,3 +1,4 @@
 package com.wavesplatform.wavesj;
 
-public interface ApiJson { }
+public interface ApiJson {
+}

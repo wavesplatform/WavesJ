@@ -6,12 +6,11 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 
-import static com.wavesplatform.wavesj.ByteUtils.*;
+import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public class ReissueTransactionV1 extends TransactionWithSignature implements ReissueTransaction {
 
     private PublicKeyAccount senderPublicKey;
-    private byte chainId;
     private String assetId;
     private long quantity;
     private boolean reissuable;
@@ -20,7 +19,6 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
 
     @JsonCreator
     public ReissueTransactionV1(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                                @JsonProperty("chainId") byte chainId,
                                 @JsonProperty("assetId") String assetId,
                                 @JsonProperty("quantity") long quantity,
                                 @JsonProperty("reissuable") boolean reissuable,
@@ -29,7 +27,6 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
                                 @JsonProperty("signature") ByteString signature) {
         super(signature);
         this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
         this.assetId = assetId;
         this.quantity = quantity;
         this.reissuable = reissuable;
@@ -46,7 +43,6 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
                                 long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
         this.assetId = assetId;
         this.quantity = quantity;
         this.reissuable = reissuable;
@@ -56,10 +52,6 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
 
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
-    }
-
-    public byte getChainId() {
-        return chainId;
     }
 
     public String getAssetId() {
@@ -100,5 +92,32 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
     @Override
     public byte getVersion() {
         return Transaction.V1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ReissueTransactionV1 that = (ReissueTransactionV1) o;
+
+        if (getQuantity() != that.getQuantity()) return false;
+        if (isReissuable() != that.isReissuable()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getAssetId() != null ? getAssetId().equals(that.getAssetId()) : that.getAssetId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+        result = 31 * result + (int) (getQuantity() ^ (getQuantity() >>> 32));
+        result = 31 * result + (isReissuable() ? 1 : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

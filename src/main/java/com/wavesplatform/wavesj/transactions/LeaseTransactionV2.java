@@ -6,7 +6,6 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
@@ -21,12 +20,11 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
     private final long fee;
     private final long timestamp;
 
-    @JsonCreator
     public LeaseTransactionV2(@JsonProperty("senderPublicKey") PrivateKeyAccount senderPublicKey,
-                            @JsonProperty("recipient") String recipient,
-                            @JsonProperty("amount") long amount,
-                            @JsonProperty("fee") long fee,
-                            @JsonProperty("timestamp") long timestamp) {
+                              @JsonProperty("recipient") String recipient,
+                              @JsonProperty("amount") long amount,
+                              @JsonProperty("fee") long fee,
+                              @JsonProperty("timestamp") long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
@@ -37,11 +35,11 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
 
     @JsonCreator
     public LeaseTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                            @JsonProperty("recipient") String recipient,
-                            @JsonProperty("amount") long amount,
-                            @JsonProperty("fee") long fee,
-                            @JsonProperty("timestamp") long timestamp,
-                            @JsonProperty("proofs") List<ByteString> proofs) {
+                              @JsonProperty("recipient") String recipient,
+                              @JsonProperty("amount") long amount,
+                              @JsonProperty("fee") long fee,
+                              @JsonProperty("timestamp") long timestamp,
+                              @JsonProperty("proofs") List<ByteString> proofs) {
         super(proofs);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
@@ -100,5 +98,30 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
         }
         newProofs.set(index, proof);
         return new LeaseTransactionV2(senderPublicKey, recipient, amount, fee, timestamp, newProofs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LeaseTransactionV2 that = (LeaseTransactionV2) o;
+
+        if (getAmount() != that.getAmount()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getRecipient() != null ? getRecipient().equals(that.getRecipient()) : that.getRecipient() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getRecipient() != null ? getRecipient().hashCode() : 0);
+        result = 31 * result + (int) (getAmount() ^ (getAmount() >>> 32));
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

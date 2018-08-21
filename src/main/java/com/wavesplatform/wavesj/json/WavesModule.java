@@ -11,9 +11,10 @@ public class WavesModule extends SimpleModule {
     public WavesModule(byte chainId, ObjectMapper objectMapper) {
         addDeserializer(PublicKeyAccount.class, new PublicKeyAccountDeser(chainId));
         addDeserializer(ByteString.class, new ByteStringDeser());
-        addDeserializer(Alias.class, new AliasDeser());
+        addDeserializer(Alias.class, new AliasDeser(chainId));
         addDeserializer(Order.Type.class, new OrderTypeDeser());
         addDeserializer(Order.Status.class, new OrderStatusDeser());
+        addDeserializer(Transaction.class, new TransactionDeserializer(objectMapper));
 
         addSerializer(PublicKeyAccount.class, new PublicKeyAccountSer());
         addSerializer(ByteString.class, new ByteStringSer());

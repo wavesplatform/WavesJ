@@ -1,6 +1,5 @@
 package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.transactions.TransactionWithBytesHashId;
 import org.whispersystems.curve25519.Curve25519;
 
 public abstract class ObjectWithSignature implements Signable {

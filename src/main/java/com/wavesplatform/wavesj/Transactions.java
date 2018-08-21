@@ -48,7 +48,7 @@ public class Transactions {
             throw new IllegalArgumentException("Cannot burn WAVES");
         }
 
-        return new BurnTransactionV1(sender, chainId, assetId, amount, fee, timestamp);
+        return new BurnTransactionV1(sender, assetId, amount, fee, timestamp);
     }
 
     public static BurnTransactionV1 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee) {

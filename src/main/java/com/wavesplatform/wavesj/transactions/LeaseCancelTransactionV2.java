@@ -83,4 +83,29 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
     public byte getVersion() {
         return Transaction.V2;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LeaseCancelTransactionV2 that = (LeaseCancelTransactionV2) o;
+
+        if (getChainId() != that.getChainId()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getLeaseId() != null ? getLeaseId().equals(that.getLeaseId()) : that.getLeaseId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (int) getChainId();
+        result = 31 * result + (getLeaseId() != null ? getLeaseId().hashCode() : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
+    }
 }

@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 public class IssueTransactionTest {
 
-    IssueTransactionV1 txV1 = new IssueTransactionV1(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), (byte) 'T', "Gigacoin", "Gigacoin", 10000000000L, (byte) 8, true, 100000000, 1526287561757L, new ByteString("28kE1uN1pX2bwhzr9UHw5UuB9meTFEDFgeunNgy6nZWpHX4pzkGYotu8DhQ88AdqUG6Yy5wcXgHseKPBUygSgRMJ"));
+    IssueTransactionV1 txV1 = new IssueTransactionV1(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), "Gigacoin", "Gigacoin", 10000000000L, (byte) 8, true, 100000000, 1526287561757L, new ByteString("28kE1uN1pX2bwhzr9UHw5UuB9meTFEDFgeunNgy6nZWpHX4pzkGYotu8DhQ88AdqUG6Yy5wcXgHseKPBUygSgRMJ"));
     IssueTransactionV2 txV2 = new IssueTransactionV2(new PublicKeyAccount("FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z", (byte) 'T'), (byte) 'T', "Gigacoin", "Gigacoin", 10000000000L, (byte) 8, true, null, 100000000, 1526287561757L, Collections.singletonList(new ByteString("28kE1uN1pX2bwhzr9UHw5UuB9meTFEDFgeunNgy6nZWpHX4pzkGYotu8DhQ88AdqUG6Yy5wcXgHseKPBUygSgRMJ")));
 
     @Test

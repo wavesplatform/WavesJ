@@ -41,4 +41,24 @@ public class PublicKeyAccount implements Account {
         buf.put(checksum, 0, 4);
         return buf.array();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PublicKeyAccount that = (PublicKeyAccount) o;
+
+        if (getChainId() != that.getChainId()) return false;
+        if (!Arrays.equals(getPublicKey(), that.getPublicKey())) return false;
+        return getAddress() != null ? getAddress().equals(that.getAddress()) : that.getAddress() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) getChainId();
+        result = 31 * result + Arrays.hashCode(getPublicKey());
+        result = 31 * result + (getAddress() != null ? getAddress().hashCode() : 0);
+        return result;
+    }
 }

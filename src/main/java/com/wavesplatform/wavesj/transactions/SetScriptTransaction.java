@@ -90,4 +90,29 @@ public class SetScriptTransaction extends TransactionWithProofs {
     public byte getVersion() {
         return Transaction.V1;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SetScriptTransaction that = (SetScriptTransaction) o;
+
+        if (getChainId() != that.getChainId()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getScript() != null ? getScript().equals(that.getScript()) : that.getScript() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getScript() != null ? getScript().hashCode() : 0);
+        result = 31 * result + (int) getChainId();
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
+    }
 }

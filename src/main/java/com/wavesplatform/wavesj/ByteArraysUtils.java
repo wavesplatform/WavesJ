@@ -9,6 +9,7 @@ public class ByteArraysUtils {
         System.arraycopy(array2, 0, joinedArray, array1.length, array2.length);
         return joinedArray;
     }
+
     public static byte[] getOnlyUsed(ByteBuffer buf) {
         byte[] bytes = new byte[buf.position()];
         buf.position(0);

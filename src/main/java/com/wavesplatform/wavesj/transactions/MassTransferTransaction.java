@@ -87,9 +87,9 @@ public class MassTransferTransaction extends TransactionWithProofs {
 
         List<Transfer> tr = new ArrayList<Transfer>(transfers.size());
         for (Transfer t : transfers) {
-            String rc = putRecipient(buf, senderPublicKey.getChainId(), t.recipient);
-            buf.putLong(t.amount);
-            tr.add(new Transfer(rc, t.amount));
+            String rc = putRecipient(buf, senderPublicKey.getChainId(), t.getRecipient());
+            buf.putLong(t.getAmount());
+            tr.add(new Transfer(rc, t.getAmount()));
         }
         buf.putLong(timestamp).putLong(fee);
         putBytes(buf, attachment.getBytes());
@@ -105,5 +105,33 @@ public class MassTransferTransaction extends TransactionWithProofs {
     @Override
     public byte getVersion() {
         return Transaction.V1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MassTransferTransaction that = (MassTransferTransaction) o;
+
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        if (getAssetId() != null ? !getAssetId().equals(that.getAssetId()) : that.getAssetId() != null) return false;
+        if (getTransfers() != null ? !getTransfers().equals(that.getTransfers()) : that.getTransfers() != null)
+            return false;
+        return getAttachment() != null ? getAttachment().equals(that.getAttachment()) : that.getAttachment() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+        result = 31 * result + (getTransfers() != null ? getTransfers().hashCode() : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (getAttachment() != null ? getAttachment().hashCode() : 0);
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

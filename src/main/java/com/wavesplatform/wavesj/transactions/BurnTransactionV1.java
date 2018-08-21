@@ -10,29 +10,26 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public class BurnTransactionV1 extends TransactionWithSignature implements BurnTransaction {
     private final PublicKeyAccount senderPublicKey;
-    private final byte chainId;
     private final String assetId;
     private final long amount;
     private final long fee;
     private final long timestamp;
 
     public BurnTransactionV1(PrivateKeyAccount senderPublicKey,
-                             byte chainId,
                              String assetId,
                              long amount,
                              long fee,
                              long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
         this.assetId = assetId;
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
     }
+
     @JsonCreator
     public BurnTransactionV1(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                             @JsonProperty("chainId") byte chainId,
                              @JsonProperty("assetId") String assetId,
                              @JsonProperty("amount") long amount,
                              @JsonProperty("fee") long fee,
@@ -40,7 +37,6 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
                              @JsonProperty("signature") ByteString signature) {
         super(signature);
         this.senderPublicKey = senderPublicKey;
-        this.chainId = chainId;
         this.assetId = assetId;
         this.amount = amount;
         this.fee = fee;
@@ -49,10 +45,6 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
 
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
-    }
-
-    public byte getChainId() {
-        return chainId;
     }
 
     public String getAssetId() {
@@ -88,5 +80,30 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
     @Override
     public byte getVersion() {
         return Transaction.V1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BurnTransactionV1 that = (BurnTransactionV1) o;
+
+        if (getAmount() != that.getAmount()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getAssetId() != null ? getAssetId().equals(that.getAssetId()) : that.getAssetId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+        result = 31 * result + (int) (getAmount() ^ (getAmount() >>> 32));
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

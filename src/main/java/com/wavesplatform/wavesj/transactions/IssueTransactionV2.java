@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
 public class IssueTransactionV2 extends TransactionWithProofs implements IssueTransaction {
@@ -150,5 +149,41 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
         }
         newProofs.set(index, proof);
         return new IssueTransactionV2(senderPublicKey, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp, newProofs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IssueTransactionV2 that = (IssueTransactionV2) o;
+
+        if (getChainId() != that.getChainId()) return false;
+        if (getQuantity() != that.getQuantity()) return false;
+        if (getDecimals() != that.getDecimals()) return false;
+        if (isReissuable() != that.isReissuable()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
+        if (getDescription() != null ? !getDescription().equals(that.getDescription()) : that.getDescription() != null)
+            return false;
+        return getScript() != null ? getScript().equals(that.getScript()) : that.getScript() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (int) getChainId();
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
+        result = 31 * result + (int) (getQuantity() ^ (getQuantity() >>> 32));
+        result = 31 * result + (int) getDecimals();
+        result = 31 * result + (isReissuable() ? 1 : 0);
+        result = 31 * result + (getScript() != null ? getScript().hashCode() : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }

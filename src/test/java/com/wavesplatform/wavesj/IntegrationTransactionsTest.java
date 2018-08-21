@@ -40,7 +40,7 @@ public class IntegrationTransactionsTest {
 
         List<DataEntry<?>> data = new LinkedList<DataEntry<?>>();
         data.add(new DataEntry.BooleanEntry("\u05D5\u05EA\u05D9\u05D9\u05E8\u05D5\u05EA", false));
-        data.add(new DataEntry.BinaryEntry("blob", Base64.decode("base64:FlappyBirdie063Q")));
+        data.add(new DataEntry.BinaryEntry("blob", new ByteString(Base64.decode("base64:FlappyBirdie063Q"))));
         data.add(new DataEntry.LongEntry("Wave your hand that many times", 721010468593883L));
         data.add(new DataEntry.StringEntry("My Poem", "Oh waves!"));
         check(Transactions.makeDataTx(acc, data, SMALL_FEE));

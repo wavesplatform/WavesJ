@@ -1,8 +1,7 @@
 package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.transactions.*;
+import com.wavesplatform.wavesj.transactions.TransactionWithBytesHashId;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

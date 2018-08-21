@@ -6,7 +6,6 @@ import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
@@ -33,6 +32,7 @@ public class BurnTransactionV2 extends TransactionWithProofs implements BurnTran
         this.fee = fee;
         this.timestamp = timestamp;
     }
+
     @JsonCreator
     public BurnTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                              @JsonProperty("chainId") byte chainId,
@@ -103,5 +103,32 @@ public class BurnTransactionV2 extends TransactionWithProofs implements BurnTran
         }
         newProofs.set(index, proof);
         return new BurnTransactionV2(senderPublicKey, chainId, assetId, amount, fee, timestamp, newProofs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BurnTransactionV2 that = (BurnTransactionV2) o;
+
+        if (getChainId() != that.getChainId()) return false;
+        if (getAmount() != that.getAmount()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
+            return false;
+        return getAssetId() != null ? getAssetId().equals(that.getAssetId()) : that.getAssetId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
+        result = 31 * result + (int) getChainId();
+        result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+        result = 31 * result + (int) (getAmount() ^ (getAmount() >>> 32));
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
     }
 }
