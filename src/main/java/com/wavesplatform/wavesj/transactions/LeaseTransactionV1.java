@@ -18,11 +18,11 @@ public class LeaseTransactionV1 extends TransactionWithSignature implements Leas
     private final long fee;
     private final long timestamp;
 
-    public LeaseTransactionV1(@JsonProperty("senderPublicKey") PrivateKeyAccount senderPublicKey,
-                              @JsonProperty("recipient") String recipient,
-                              @JsonProperty("amount") long amount,
-                              @JsonProperty("fee") long fee,
-                              @JsonProperty("timestamp") long timestamp) {
+    public LeaseTransactionV1(PrivateKeyAccount senderPublicKey,
+                              String recipient,
+                              long amount,
+                              long fee,
+                              long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;

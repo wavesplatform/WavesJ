@@ -6,6 +6,5 @@ public interface Signable {
     @JsonIgnore
     byte[] getBytes();
 
-    @JsonIgnore
     PublicKeyAccount getSenderPublicKey();
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
@@ -103,12 +104,17 @@ public abstract class DataEntry<T> {
             }
 
             @Override
-            public void serialize(BinaryEntry value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            public void serialize(BinaryEntry value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
                 gen.writeStartObject();
                 gen.writeStringField("key", value.getKey());
                 gen.writeStringField("value", Base64.encode(value.getValue().getBytes()));
                 gen.writeStringField("type", value.getType());
                 gen.writeEndObject();
+            }
+
+            @Override
+            public void serializeWithType(BinaryEntry value, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
+                serialize(value, gen, serializers);
             }
         }
     }

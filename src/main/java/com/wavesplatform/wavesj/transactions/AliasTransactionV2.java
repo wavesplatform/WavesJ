@@ -21,10 +21,10 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
         return new ByteString(hash(ByteArraysUtils.addAll(new byte[]{ALIAS}, alias.getBytes())));
     }
 
-    public AliasTransactionV2(@JsonProperty("senderPublicKey") PrivateKeyAccount senderPublicKey,
-                              @JsonProperty("alias") Alias alias,
-                              @JsonProperty("fee") long fee,
-                              @JsonProperty("timestamp") long timestamp) {
+    public AliasTransactionV2(PrivateKeyAccount senderPublicKey,
+                              Alias alias,
+                              long fee,
+                              long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.alias = alias;

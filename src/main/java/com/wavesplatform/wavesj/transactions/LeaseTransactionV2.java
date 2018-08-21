@@ -20,11 +20,11 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
     private final long fee;
     private final long timestamp;
 
-    public LeaseTransactionV2(@JsonProperty("senderPublicKey") PrivateKeyAccount senderPublicKey,
-                              @JsonProperty("recipient") String recipient,
-                              @JsonProperty("amount") long amount,
-                              @JsonProperty("fee") long fee,
-                              @JsonProperty("timestamp") long timestamp) {
+    public LeaseTransactionV2(PrivateKeyAccount senderPublicKey,
+                              String recipient,
+                              long amount,
+                              long fee,
+                              long timestamp) {
         super(senderPublicKey);
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
