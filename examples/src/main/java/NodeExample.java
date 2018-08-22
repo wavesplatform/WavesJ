@@ -1,5 +1,6 @@
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.TransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class NodeExample {
 
         // Offline object signing
         //
-        TransferTransactionV1 tx = Transactions.makeTransferTx(alice, bob,
+        TransferTransaction tx = Transactions.makeTransferTx(alice, bob,
                 1 * Asset.TOKEN, WAVES, FEE, WAVES,
                 "Here's for the coffee");
         // tx.getEndpoint() == "/assets/broadcast/transfer" is the server endpoint to send this object to.

@@ -68,32 +68,32 @@ public class SpreadBot {
 
         // Read order book
         OrderBook book = matcher.getOrderBook(market);
-        if (book.bids.size() <= 0) {
+        if (book.getBids().size() <= 0) {
             System.out.println("There are no bids, skipping this round");
             return;
         }
-        if (book.asks.size() <= 0) {
+        if (book.getAsks().size() <= 0) {
             System.out.println("There are no asks, skipping this round");
             return;
         }
 
         // Determine buy and sell prices
-        long bestBid = book.bids.get(0).getPrice();
-        long bestAsk = book.asks.get(0).getPrice();
+        long bestBid = book.getBids().get(0).getPrice();
+        long bestAsk = book.getAsks().get(0).getPrice();
         System.out.printf("Spread %d : %d\n", bestBid, bestAsk);
         long meanPrice = (bestBid + bestAsk) / 2;
         long buyPrice = (long) (meanPrice * (1 - halfSpread));
         long sellPrice = (long) (meanPrice * (1 + halfSpread));
 
         // Find out how much we want to buy, and file an order
-        long priceAssetAvail = node.getBalance(account.getAddress(), market.priceAsset) - 2 * fee;
+        long priceAssetAvail = node.getBalance(account.getAddress(), market.getPriceAsset()) - 2 * fee;
         if (priceAssetAvail > 0) {
             long buyOrderSize = Math.min(priceAssetAvail, maxOrderSize) * Asset.TOKEN / buyPrice;
             fileOrder(Order.Type.BUY, buyPrice, buyOrderSize);
         }
 
         // Same for sell order
-        long amountAssetAvail = node.getBalance(account.getAddress(), market.amountAsset) - 2 * fee;
+        long amountAssetAvail = node.getBalance(account.getAddress(), market.getAmountAsset()) - 2 * fee;
         if (amountAssetAvail > 0) {
             long sellOrderSize = Math.min(amountAssetAvail, maxOrderSize * Asset.TOKEN / sellPrice);
             fileOrder(Order.Type.SELL, sellPrice, sellOrderSize);
