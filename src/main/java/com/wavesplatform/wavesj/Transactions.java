@@ -135,10 +135,10 @@ public class Transactions {
 
     public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, com.wavesplatform.wavesj.matcher.Order.Type orderType,
                                     AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
-        if (isWaves(assetPair.amountAsset) && isWaves(assetPair.priceAsset)) {
+        if (isWaves(assetPair.getAmountAsset()) && isWaves(assetPair.getPriceAsset())) {
             throw new IllegalArgumentException("Both spendAsset and receiveAsset are WAVES");
         }
-        return new Order(orderType, assetPair, amount, price, timestamp, 0, Order.Status.ACCEPTED,
+        return new Order(orderType, assetPair, amount, price, timestamp,
                 expiration, matcherFee, account, new PublicKeyAccount(matcherKey, account.getChainId()));
     }
 

@@ -1,8 +1,6 @@
 package com.wavesplatform.wavesj.json.deser;
 
-import com.wavesplatform.wavesj.Asset;
-import com.wavesplatform.wavesj.ByteString;
-import com.wavesplatform.wavesj.PublicKeyAccount;
+import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.junit.Test;
@@ -17,6 +15,12 @@ public class TransferTransactionDeserTest extends TransactionDeserTest {
     @Test
     public void V1DeserializeTest() throws IOException {
         deserializationTest("{\"type\": 4,\"id\": \"FLszEaqasJptohmP6zrXodBwjaEYq4jRP2BzdPPjvukk\",\"sender\": \"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\": \"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\": 100000,\"timestamp\": 1526552510868,\"signature\": \"eaV1i3hEiXyYQd6DQY7EnPg9XzpAvB9VA3bnpin2qJe4G36GZXaGnYKCgSf9xiQ61DcAwcBFzjSXh6FwCgazzFz\",\"version\": 1,\"recipient\": \"3My3KZgFQ3CrVHgz6vGRt8687sH4oAA1qp8\",\"assetId\": null,\"feeAssetId\": null,\"feeAsset\": null,\"amount\": 1900000,\"attachment\": \"4t2Xazb2SX\"}", txV1, TransferTransactionV1.class);
+    }
+
+    @Test
+    public void V1DeserializeTest2() throws IOException {
+        TransactionWithSignature deserialized = (TransactionWithSignature) mapper.readValue("{\"type\":4,\"id\":\"2D8FxS6mrqwzaPkMkyefhZK3zp5itjJVEKeBt1xTgwJ2\",\"sender\":\"3MwKaQvkniYhY7uMt6CDzubSFZ9ke52GHTG\",\"senderPublicKey\":\"JBMg1USzm9pL3b4q1fQYPNxRJRG8Sto4WNpgwJAnV9gY\",\"fee\":100000,\"timestamp\":1534935016512,\"signature\":\"5us8hrQnvNL3fx8tHhFDMCbdwBYXzaTF1PanSTNJB3zqhPyb5SCD6YpRafq9mCMrnY1QDRJCx7buCGn66ue39YfD\",\"version\":1,\"recipient\":\"3NCC7CuD9GJpZzNENMyczFVtHTtJ972rrTg\",\"assetId\":null,\"feeAssetId\":null,\"feeAsset\":null,\"amount\":100000000,\"attachment\":\"3k9wwt7nZn\"}", Transaction.class);
+        assert(deserialized.verifySignature());
     }
 
     @Test

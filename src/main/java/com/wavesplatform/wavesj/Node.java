@@ -260,12 +260,12 @@ public class Node {
     }
 
     public OrderBook getOrderBook(AssetPair assetPair) throws IOException {
-        String path = "/matcher/orderbook/" + assetPair.amountAsset + '/' + assetPair.priceAsset;
+        String path = "/matcher/orderbook/" + assetPair.getAmountAsset() + '/' + assetPair.getPriceAsset();
         return parse(exec(request(path)), ORDER_BOOK);
     }
 
     public OrderStatusInfo getOrderStatus(String orderId, AssetPair assetPair) throws IOException {
-        String path = "/matcher/orderbook/" + assetPair.amountAsset + '/' + assetPair.priceAsset + '/' + orderId;
+        String path = "/matcher/orderbook/" + assetPair.getAmountAsset() + '/' + assetPair.getPriceAsset() + '/' + orderId;
         return parse(exec(request(path)), ORDER_STATUS);
     }
 
@@ -275,7 +275,7 @@ public class Node {
 
     public List<Order> getOrders(PrivateKeyAccount account, AssetPair market) throws IOException {
         return getOrders(account, String.format("/matcher/orderbook/%s/%s/publicKey/%s",
-                market.amountAsset, market.priceAsset, Base58.encode(account.getPublicKey())));
+                market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
     }
 
     private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {
@@ -301,13 +301,13 @@ public class Node {
             endpoint = "/transactions/broadcast";
         } else if (obj instanceof Order) {
             endpoint = "/matcher/orderbook";
-        } else if (obj instanceof CancelOrder) {
-            CancelOrder co = (CancelOrder) obj;
-            endpoint = "/matcher/orderbook/" + co.getAssetPair().amountAsset + '/' + co.getAssetPair().priceAsset + "/cancel";
         } else if (obj instanceof DeleteOrder) {
             DeleteOrder d = (DeleteOrder) obj;
-            endpoint = "/matcher/orderbook/" + d.getAssetPair().amountAsset + '/' + d.getAssetPair().priceAsset + "/delete";
-        } else {
+            endpoint = "/matcher/orderbook/" + d.getAssetPair().getAmountAsset() + '/' + d.getAssetPair().getPriceAsset() + "/delete";
+        } else if (obj instanceof CancelOrder) {
+            CancelOrder co = (CancelOrder) obj;
+            endpoint = "/matcher/orderbook/" + co.getAssetPair().getAmountAsset() + '/' + co.getAssetPair().getPriceAsset() + "/cancel";
+        } else  {
             throw new IllegalArgumentException();
         }
         HttpPost request = new HttpPost(uri.resolve(endpoint));

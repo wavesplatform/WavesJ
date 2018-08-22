@@ -4,7 +4,6 @@ import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,9 +26,9 @@ public class NodeTest {
     private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC);
 
     private static final PrivateKeyAccount alice =
-            PrivateKeyAccount.fromPrivateKey("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
+            PrivateKeyAccount.fromPrivateKey("3ivuUQ7cCVxF3AtaLJ8nbdfEDD53EH3JyLn5ipgvo99v", Account.TESTNET);
     private static final PrivateKeyAccount bob =
-            PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET);
+            PrivateKeyAccount.fromPrivateKey("ABvpFcUobz1kN4tQeBcHA1WSMdwC6WSPhwCFv1MDZwPc", Account.TESTNET);
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
@@ -76,20 +75,21 @@ public class NodeTest {
     }
 
     @Test
-    @Ignore
     public void testTransfer() throws IOException {
         Node node = new Node();
-        String txId = node.transfer(alice, bob.getAddress(), AMOUNT, FEE, "Hi Bob!");
+
+        long now = System.currentTimeMillis();
+        String txId = node.send(new TransferTransactionV1(alice, bob.getAddress(), AMOUNT, null, FEE * 5, null, new ByteString("Hi Bob!".getBytes()), now));
         assertNotNull(txId);
 
-        txId = node.transfer(alice, "", bob.getAddress(), AMOUNT, FEE, null, "One more");
+        txId = node.send(new TransferTransactionV1(alice, bob.getAddress(), AMOUNT, "", FEE * 5, null, new ByteString("One more".getBytes()), now + 1));
         assertNotNull(txId);
 
         // transfer back so that Alice's balance is not drained
-        txId = node.transfer(bob, null, alice.getAddress(), AMOUNT, FEE, Asset.WAVES, "Thanks, Alice");
+        txId = node.send(new TransferTransactionV1(bob, alice.getAddress(), AMOUNT, null, FEE * 5, null, new ByteString("Thanks, Alice".getBytes()), now + 2));
         assertNotNull(txId);
 
-        txId = node.transfer(bob, Asset.WAVES, "alice", AMOUNT, FEE, "", "Thanks again");
+        txId = node.send(new TransferTransactionV1(bob, alice.getAddress(), AMOUNT, Asset.WAVES, FEE * 5, null, new ByteString("Thanks again".getBytes()), now + 3));
         assertNotNull(txId);
     }
 
@@ -136,7 +136,7 @@ public class NodeTest {
     public void testScript() throws IOException {
         Node node = new Node();
 
-        String setScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 4);
+        String setScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 5);
         assertNotNull(setScriptId);
 
         String compiledScript = node.compileScript("");
@@ -144,11 +144,10 @@ public class NodeTest {
     }
 
     @Test
-    @Ignore
     public void testSendTransaction() throws IOException {
         Node node = new Node();
 
-        TransferTransactionV2 tx1 = Transactions.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE, Asset.WAVES, "To Bob");
+        TransferTransactionV2 tx1 = Transactions.makeTransferTx(alice, bob.getAddress(), AMOUNT, Asset.WAVES, FEE * 5, Asset.WAVES, "To Bob");
         String id1 = node.send(tx1);
         assertNotNull(id1);
         assertEquals(id1, tx1.getId().getBase58String());
@@ -177,13 +176,13 @@ public class NodeTest {
         assertNotNull(order.getId());
         assertEquals(Order.Type.SELL, order.getOrderType());
         assertEquals(Order.Status.ACCEPTED, order.getStatus());
-        assertEquals(Asset.WAVES, order.getAssetPair().amountAsset);
-        assertEquals(WBTC, order.getAssetPair().priceAsset);
+        assertEquals(Asset.WAVES, order.getAssetPair().getAmountAsset());
+        assertEquals(WBTC, order.getAssetPair().getPriceAsset());
         assertEquals(1 * Asset.TOKEN, order.getAmount());
         assertEquals(1, order.getPrice());
 
         // Check order status
-        String status = matcher.getOrderStatus(order.getId().getBase58String(), MARKET).status.toString();
+        String status = matcher.getOrderStatus(order.getId().getBase58String(), MARKET).getStatus().toString();
         assertEquals("ACCEPTED", status);
 
         // Verify the order appears in the list of all orders

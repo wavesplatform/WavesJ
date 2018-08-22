@@ -1,59 +1,24 @@
 package com.wavesplatform.wavesj.matcher;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.AssetPair;
+import com.wavesplatform.wavesj.ByteString;
+import com.wavesplatform.wavesj.PrivateKeyAccount;
+import com.wavesplatform.wavesj.PublicKeyAccount;
 
-import java.nio.ByteBuffer;
-
-import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
-
-public class DeleteOrder extends ObjectWithSignature implements ApiJson {
-    private PublicKeyAccount sender;
-    private AssetPair assetPair;
-    private String orderId;
-
+public class DeleteOrder extends CancelOrder {
     public DeleteOrder(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
-        super(sender);
-        this.sender = sender;
-        this.assetPair = assetPair;
-        this.orderId = orderId;
+        super(sender, assetPair, orderId);
     }
 
-    @JsonCreator
+    public DeleteOrder(PrivateKeyAccount sender, AssetPair assetPair, long timestamp) {
+        super(sender, assetPair, timestamp);
+    }
+
     public DeleteOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId, ByteString signature) {
-        super(signature);
-        this.sender = sender;
-        this.assetPair = assetPair;
-        this.orderId = orderId;
+        super(sender, assetPair, orderId, signature);
     }
 
-    public PublicKeyAccount getSender() {
-        return sender;
-    }
-
-    @JsonIgnore
-    public AssetPair getAssetPair() {
-        return assetPair;
-    }
-
-    public String getOrderId() {
-        return orderId;
-    }
-
-
-    @Override
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey()).put(Base58.decode(orderId));
-        byte[] bytes = new byte[buf.position()];
-        buf.position(0);
-        buf.get(bytes);
-        return bytes;
-    }
-
-    @Override
-    public PublicKeyAccount getSenderPublicKey() {
-        return sender;
+    public DeleteOrder(PublicKeyAccount sender, AssetPair assetPair, long timestamp, ByteString signature) {
+        super(sender, assetPair, timestamp, signature);
     }
 }

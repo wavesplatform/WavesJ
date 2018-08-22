@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import static com.wavesplatform.wavesj.Asset.normalize;
 
 public class AssetPair {
-    public final String amountAsset;
-    public final String priceAsset;
+    private String amountAsset;
+    private String priceAsset;
 
     @JsonCreator
     public AssetPair(
@@ -26,7 +26,11 @@ public class AssetPair {
         return String.format("AssetPair[%s to %s]", amountAsset, priceAsset);
     }
 
-    public Object toJsonObject() {
-        return new AssetPair(Asset.toJsonObject(amountAsset), Asset.toJsonObject(priceAsset), null);
+    public String getAmountAsset() {
+        return amountAsset;
+    }
+
+    public String getPriceAsset() {
+        return priceAsset;
     }
 }

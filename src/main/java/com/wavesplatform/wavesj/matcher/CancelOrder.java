@@ -12,21 +12,38 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
     private final PublicKeyAccount sender;
     private final AssetPair assetPair;
     private final String orderId;
+    private final Long timestamp;
 
-    @JsonCreator
     public CancelOrder(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
-        super(sender);
         this.sender = sender;
         this.assetPair = assetPair;
         this.orderId = orderId;
+        this.timestamp = null;
+        this.signature = new ByteString(sender.sign(getBytes()));
     }
 
-    @JsonCreator
+    public CancelOrder(PrivateKeyAccount sender, AssetPair assetPair, long timestamp) {
+        this.sender = sender;
+        this.assetPair = assetPair;
+        this.orderId = null;
+        this.timestamp = timestamp;
+        this.signature = new ByteString(sender.sign(getBytes()));
+    }
+
     public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId, ByteString signature) {
-        super(signature);
         this.sender = sender;
         this.assetPair = assetPair;
         this.orderId = orderId;
+        this.timestamp = null;
+        this.signature = signature;
+    }
+
+    public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, long timestamp, ByteString signature) {
+        this.sender = sender;
+        this.assetPair = assetPair;
+        this.orderId = null;
+        this.timestamp = timestamp;
+        this.signature = signature;
     }
 
     public PublicKeyAccount getSender() {
@@ -42,14 +59,20 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
         return orderId;
     }
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(sender.getPublicKey()).put(Base58.decode(orderId));
-        byte[] bytes = new byte[buf.position()];
-        buf.position(0);
-        buf.get(bytes);
-        return bytes;
+        buf.put(sender.getPublicKey());
+        if (orderId != null) {
+            buf.put(Base58.decode(orderId));
+        } else {
+            buf.putLong(timestamp);
+        }
+        return ByteArraysUtils.getOnlyUsed(buf);
     }
 
     @Override

@@ -5,8 +5,12 @@ public class ByteString {
 
     public ByteString(String base58String) throws IllegalArgumentException {
         // to check valid base58 string
-        Base58.decode(base58String);
-        this.base58String = base58String;
+        if (base58String != null) {
+            Base58.decode(base58String);
+            this.base58String = base58String;
+        } else {
+            this.base58String = EMPTY.base58String;
+        }
     }
 
     public ByteString(byte[] bytes) {
