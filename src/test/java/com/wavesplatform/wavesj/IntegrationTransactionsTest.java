@@ -1,6 +1,7 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.transactions.LeaseTransactionV2;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class IntegrationTransactionsTest {
     private static final Node node = new Node();
 
     @Test
+    @Ignore
     public void test() {
         PrivateKeyAccount acc = PrivateKeyAccount.fromPrivateKey("CMLwxbMZJMztyTJ6Zkos66cgU7DybfFJfyJtTVpme54t", Account.TESTNET);
         String recipient = "3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA";

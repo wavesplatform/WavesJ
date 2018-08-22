@@ -111,7 +111,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 }
                 break;
             default:
-                throw new IllegalArgumentException();
+                t = UnknownTransaction.class;
         }
 
         return (Transaction) objectMapper.treeToValue(treeNode, t);
