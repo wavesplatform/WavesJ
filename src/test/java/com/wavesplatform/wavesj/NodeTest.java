@@ -4,6 +4,7 @@ import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -18,6 +19,7 @@ import java.util.List;
 import static com.wavesplatform.wavesj.DataEntry.*;
 import static org.junit.Assert.*;
 
+@Ignore
 public class NodeTest {
     private static final long AMOUNT = 1 * Asset.TOKEN;
     private static final long FEE = 100000;

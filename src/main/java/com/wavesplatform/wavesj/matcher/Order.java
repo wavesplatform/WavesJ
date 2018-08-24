@@ -35,16 +35,16 @@ public class Order extends ObjectWithSignature implements ApiJson {
         @JsonCreator
         public static Status fromString(String json) {
             if (json == null) return null;
-            json = json.intern();
-            if (json == "Accepted" || json == "OrderAccepted") {
+            String upper = json.toUpperCase();
+            if (upper.equals("ACCEPTED") || upper.equals("ORDERACCEPTED")) {
                 return ACCEPTED;
-            } else if (json == "Filled") {
+            } else if (upper.equals("FILLED")) {
                 return FILLED;
-            } else if (json == "PartiallyFilled") {
+            } else if (upper.equals("PARTIALLYFILLED")) {
                 return PARTIALLY_FILLED;
-            } else if (json == "Cancelled") {
+            } else if (upper.equals("CANCELLED")) {
                 return CANCELED;
-            } else if (json == "NotFound") {
+            } else if (upper.equals("NOTFOUND")) {
                 return NOT_FOUND;
             } else {
                 throw new IllegalArgumentException("Bad status value: " + json);

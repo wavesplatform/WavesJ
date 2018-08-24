@@ -38,7 +38,7 @@ public class ExchangeTransaction extends TransactionWithSignature {
         this.fee = fee;
         this.buyOrder = buyOrder;
         this.sellOrder = sellOrder;
-        this.senderPublicKey = senderPublicKey;
+        this.senderPublicKey = new PublicKeyAccount(senderPublicKey.getPublicKey(), senderPublicKey.getChainId());
         this.timestamp = timestamp;
         this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
@@ -59,7 +59,7 @@ public class ExchangeTransaction extends TransactionWithSignature {
         this.fee = fee;
         this.buyOrder = buyOrder;
         this.sellOrder = sellOrder;
-        this.senderPublicKey = buyOrder.getSenderPublicKey();
+        this.senderPublicKey = buyOrder.getMatcherPublicKey();
         this.timestamp = timestamp;
         this.signature = signature;
     }
