@@ -24,7 +24,10 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
     public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
         TreeNode treeNode = jsonParser.getCodec().readTree(jsonParser);
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
-        int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
+        int version = 1;
+        if (treeNode.get("version") != null) {
+            objectMapper.treeToValue(treeNode.get("version"), Integer.class);
+        }
 
         Class t = null;
         switch (type) {
@@ -99,6 +102,9 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 break;
             case SponsorTransaction.SPONSOR:
                 t = SponsorTransaction.class;
+                break;
+            case ExchangeTransaction.EXCHANGE:
+                t = ExchangeTransaction.class;
                 break;
             case TransferTransaction.TRANSFER:
                 switch (version) {

@@ -94,6 +94,33 @@ public class Order extends ObjectWithSignature implements ApiJson {
         this.signature = new ByteString(senderPublicKey.sign(getBytes()));
     }
 
+    public Order(
+            Order.Type orderType,
+            AssetPair assetPair,
+            long amount,
+            long price,
+            long timestamp,
+            long expiration,
+            long matcherFee,
+            PublicKeyAccount senderPublicKey,
+            PublicKeyAccount matcherKey,
+            ByteString signature) {
+        this.orderType = orderType;
+        this.assetPair = assetPair;
+        this.amount = amount;
+        this.price = price;
+        this.timestamp = timestamp;
+
+        this.status = Status.ACCEPTED;
+        this.filled = 0;
+        this.expiration = expiration;
+        this.matcherFee = matcherFee;
+        this.senderPublicKey = senderPublicKey;
+        this.matcherPublicKey = matcherKey;
+        this.signature = signature;
+        this.id = new ByteString(hash(getBytes()));
+    }
+
     @JsonCreator
     public Order(
             @JsonProperty("id") String id,
@@ -186,5 +213,20 @@ public class Order extends ObjectWithSignature implements ApiJson {
     @JsonIgnore
     public boolean isActive() {
         return status.isActive();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Order order = (Order) o;
+
+        return getId() != null ? getId().equals(order.getId()) : order.getId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId() != null ? getId().hashCode() : 0;
     }
 }
