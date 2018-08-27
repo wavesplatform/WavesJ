@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode1.wavesnodes.com";
@@ -186,7 +184,7 @@ public class Node {
         return send(tx);
     }
 
-    public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
+    public String data(PrivateKeyAccount from, Collection<? extends DataEntry<?>> data, long fee) throws IOException {
         Transaction tx = Transaction.makeDataTx(from, data, fee);
         return send(tx);
     }

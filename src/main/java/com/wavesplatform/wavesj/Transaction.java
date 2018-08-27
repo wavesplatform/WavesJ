@@ -190,8 +190,12 @@ public class Transaction {
 
     private static void putScript(ByteBuffer buffer, String script) {
         byte[] bytes = script == null ? new byte[0] : Base64.decode(script);
-        buffer.put((byte) (bytes.length > 0 ? 1 : 0));
-        putBytes(buffer, bytes);
+        if (bytes.length <= 0) {
+            buffer.put((byte) 0);
+        } else {
+            buffer.put((byte) 1);
+            putBytes(buffer, bytes);
+        }
     }
 
     private static void putBytes(ByteBuffer buffer, byte[] bytes) {
@@ -231,7 +235,7 @@ public class Transaction {
                 .putLong(timestamp);
         putScript(buf, script);
 
-       return new Transaction(sender, buf,"/transactions/broadcast",
+        return new Transaction(sender, buf,"/transactions/broadcast",
                 "type", ISSUE,
                 "version", V2,
                 "senderPublicKey", Base58.encode(sender.getPublicKey()),
@@ -441,7 +445,7 @@ public class Transaction {
         return makeMassTransferTx(sender, assetId, transfers, fee, attachment, System.currentTimeMillis());
     }
 
-    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<DataEntry<?>> data, long fee, long timestamp) {
+    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<? extends DataEntry<?>> data, long fee, long timestamp) {
         int datalen = KBYTE;
         for (DataEntry<?> e: data) {
             datalen += e.size();
@@ -464,7 +468,7 @@ public class Transaction {
                 "timestamp", timestamp);
     }
 
-    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<DataEntry<?>> data, long fee) {
+    public static Transaction makeDataTx(PublicKeyAccount sender, Collection<? extends DataEntry<?>> data, long fee) {
         return makeDataTx(sender, data, fee, System.currentTimeMillis());
     }
 
