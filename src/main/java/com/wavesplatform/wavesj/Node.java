@@ -28,9 +28,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
