@@ -221,28 +221,30 @@ public class PrivateKeyAccount extends PublicKeyAccount {
     }
 
     /**
-     * Signs a transaction and returns Base58-encoded signature.
-     * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease transaction:
+     * Signs a object and returns Base58-encoded signature.
+     * <p>Example usage of this method in a multisig scenario where 3 signers are to sign a lease object:
      * <code>
-     *     PublicKeyAccount leaser = ...
-     *     PrivateKeyAccount signer = ...
-     *     Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned transaction
-     *     tx = tx.setProof(0, signer.sign(tx));  // sets the signature as proof 0
-     *     node.send(tx);
+     * PublicKeyAccount leaser = ...
+     * PrivateKeyAccount signer = ...
+     * Transaction tx = makeLeaseTx(leaser, recipient, amount, fee);  // produces unsigned object
+     * tx = tx.setProof(0, signer.sign(tx));  // sets the signature as proof 0
+     * node.send(tx);
      * </code>
-     * @param tx transaction to sign
+     *
+     * @param tx object to sign
      * @return Base58-encoded signature
      */
     public String sign(Transaction tx) {
-        return sign(tx.bytes);
+        return sign(tx.getBytes());
     }
 
-    String sign(byte[] bytes) {
+    public String sign(byte[] bytes) {
         return Base58.encode(cipher.calculateSignature(getPrivateKey(), bytes));
     }
 
     /**
      * Generates a 15-word random seed. This method implements the BIP-39 algorithm with 160 bits of entropy.
+     *
      * @return the seed as a String
      */
     public static String generateSeed() {
@@ -251,11 +253,11 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         byte[] rhash = hash(bytes, 0, 20, SHA256);
         bytes[20] = rhash[0];
         BigInteger rand = new BigInteger(bytes);
-        BigInteger mask = new BigInteger(new byte[] {0, 0, 7, -1}); // 11 lower bits
+        BigInteger mask = new BigInteger(new byte[]{0, 0, 7, -1}); // 11 lower bits
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 15; i++) {
             sb.append(i > 0 ? ' ' : "")
-              .append(SEED_WORDS[rand.and(mask).intValue()]);
+                    .append(SEED_WORDS[rand.and(mask).intValue()]);
             rand = rand.shiftRight(11);
         }
         return sb.toString();
@@ -270,7 +272,7 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         // private key from account seed & chainId
         byte[] hashedSeed = hash(accountSeed, 0, accountSeed.length, SHA256);
         byte[] privateKey = Arrays.copyOf(hashedSeed, 32);
-        privateKey[0]  &= 248;
+        privateKey[0] &= 248;
         privateKey[31] &= 127;
         privateKey[31] |= 64;
 
@@ -281,5 +283,23 @@ public class PrivateKeyAccount extends PublicKeyAccount {
         byte[] publicKey = new byte[32];
         curve_sigs.curve25519_keygen(publicKey, privateKey);
         return publicKey;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        PrivateKeyAccount that = (PrivateKeyAccount) o;
+
+        return Arrays.equals(getPrivateKey(), that.getPrivateKey());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(getPrivateKey());
+        return result;
     }
 }

@@ -10,15 +10,15 @@ public abstract class Asset {
 
     public static final long MILLI = 100000L;
 
-    static String normalize(String assetId) {
+    static public String normalize(String assetId) {
         return assetId == null || assetId.isEmpty() ? Asset.WAVES : assetId;
     }
 
-    static boolean isWaves(String assetId) {
+    static public boolean isWaves(String assetId) {
         return WAVES.equals(normalize(assetId));
     }
 
-    static String toJsonObject(String assetId) {
+    static public String toJsonObject(String assetId) {
         return isWaves(assetId) ? null : assetId;
     }
 }

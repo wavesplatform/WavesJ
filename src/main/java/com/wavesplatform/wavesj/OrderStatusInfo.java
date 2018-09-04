@@ -1,15 +1,12 @@
 package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wavesplatform.wavesj.matcher.Order;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderStatusInfo {
-
-
-    public final long filled;
-    public final Order.Status status;
+    private long filled;
+    private Order.Status status;
 
     @JsonCreator
     private OrderStatusInfo(
@@ -18,5 +15,13 @@ public class OrderStatusInfo {
 
         this.status = status;
         this.filled = filled;
+    }
+
+    public long getFilled() {
+        return filled;
+    }
+
+    public Order.Status getStatus() {
+        return status;
     }
 }

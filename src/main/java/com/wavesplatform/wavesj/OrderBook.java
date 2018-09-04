@@ -1,21 +1,29 @@
 package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wavesplatform.wavesj.matcher.AmountAndPrice;
+import com.wavesplatform.wavesj.matcher.Order;
 
 import java.util.Collections;
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBook {
-    public final List<Order> bids, asks;
+    private List<AmountAndPrice> bids, asks;
 
     @JsonCreator
     private OrderBook(
-            @JsonProperty("bids") List<Order> bids,
-            @JsonProperty("asks") List<Order> asks) {
+            @JsonProperty("bids") List<AmountAndPrice> bids,
+            @JsonProperty("asks") List<AmountAndPrice> asks) {
         this.bids = Collections.unmodifiableList(bids);
         this.asks = Collections.unmodifiableList(asks);
+    }
+
+    public List<AmountAndPrice> getBids() {
+        return bids;
+    }
+
+    public List<AmountAndPrice> getAsks() {
+        return asks;
     }
 }

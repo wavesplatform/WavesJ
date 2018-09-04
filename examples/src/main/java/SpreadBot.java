@@ -1,4 +1,5 @@
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.matcher.Order;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,7 +22,7 @@ public class SpreadBot {
                 PrivateKeyAccount.fromPrivateKey("25Um7fKYkySZnweUEVAn9RLtxN5xHRd7iqpqYSMNQEeT", Account.TESTNET),
                 new AssetPair(Asset.WAVES, "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe"),
                 "https://testnode2.wavesnodes.com",
-                "https://testnode2.wavesnodes.com");
+                "https://testnode2.wavesnodes.com",  'T');
     }
 
     public static SpreadBot mainnetInstance() throws IOException, URISyntaxException {
@@ -32,14 +33,14 @@ public class SpreadBot {
                         0, Account.MAINNET),
                 new AssetPair(Asset.WAVES, "8LQW8f7P5d5PZM7GtZEBgaqRPGSzS3DfPuiXrURJ4AJS"),
                 nodeUrl + ":6886",
-                nodeUrl);
+                nodeUrl, 'W');
     }
 
-    private SpreadBot(PrivateKeyAccount account, AssetPair market, String matcherUrl, String nodeUrl) throws IOException, URISyntaxException {
+    private SpreadBot(PrivateKeyAccount account, AssetPair market, String matcherUrl, String nodeUrl, char chainId) throws IOException, URISyntaxException {
         this.account = account;
         this.market = market;
-        this.node = new Node(nodeUrl);
-        this.matcher = new Node(matcherUrl);
+        this.node = new Node(nodeUrl, chainId);
+        this.matcher = new Node(matcherUrl, chainId);
         this.matcherKey = matcher.getMatcherKey();
     }
 
@@ -51,8 +52,8 @@ public class SpreadBot {
     private String fileOrder(Order.Type type, long price, long amount) throws IOException, InterruptedException {
         long expiration = System.currentTimeMillis() + Math.max(period, 61000); // matcher requires expiration > 1 min in the future
         Order order = matcher.createOrder(account, matcherKey, market, type, price, amount, expiration, fee);
-        System.out.printf("Filed order %s to %s %d at %d\n", order.id, type, amount, price);
-        return order.id;
+        System.out.printf("Filed order %s to %s %d at %d\n", order.getId(), type, amount, price);
+        return order.getId().getBase58String();
     }
 
     private void round() throws IOException, InterruptedException {
@@ -61,38 +62,38 @@ public class SpreadBot {
         // Cancel all orders filed at our market
         for (Order order: matcher.getOrders(account, market)) {
             if (order.isActive()) {
-                cancelOrder(order.id);
+                cancelOrder(order.getId().getBase58String());
             }
         }
 
         // Read order book
         OrderBook book = matcher.getOrderBook(market);
-        if (book.bids.size() <= 0) {
+        if (book.getBids().size() <= 0) {
             System.out.println("There are no bids, skipping this round");
             return;
         }
-        if (book.asks.size() <= 0) {
+        if (book.getAsks().size() <= 0) {
             System.out.println("There are no asks, skipping this round");
             return;
         }
 
         // Determine buy and sell prices
-        long bestBid = book.bids.get(0).price;
-        long bestAsk = book.asks.get(0).price;
+        long bestBid = book.getBids().get(0).getPrice();
+        long bestAsk = book.getAsks().get(0).getPrice();
         System.out.printf("Spread %d : %d\n", bestBid, bestAsk);
         long meanPrice = (bestBid + bestAsk) / 2;
         long buyPrice = (long) (meanPrice * (1 - halfSpread));
         long sellPrice = (long) (meanPrice * (1 + halfSpread));
 
         // Find out how much we want to buy, and file an order
-        long priceAssetAvail = node.getBalance(account.getAddress(), market.priceAsset) - 2 * fee;
+        long priceAssetAvail = node.getBalance(account.getAddress(), market.getPriceAsset()) - 2 * fee;
         if (priceAssetAvail > 0) {
             long buyOrderSize = Math.min(priceAssetAvail, maxOrderSize) * Asset.TOKEN / buyPrice;
             fileOrder(Order.Type.BUY, buyPrice, buyOrderSize);
         }
 
         // Same for sell order
-        long amountAssetAvail = node.getBalance(account.getAddress(), market.amountAsset) - 2 * fee;
+        long amountAssetAvail = node.getBalance(account.getAddress(), market.getAmountAsset()) - 2 * fee;
         if (amountAssetAvail > 0) {
             long sellOrderSize = Math.min(amountAssetAvail, maxOrderSize * Asset.TOKEN / sellPrice);
             fileOrder(Order.Type.SELL, sellPrice, sellOrderSize);

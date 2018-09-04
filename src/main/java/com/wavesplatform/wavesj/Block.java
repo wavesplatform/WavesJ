@@ -1,25 +1,22 @@
 package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class represents a block.
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Block {
-    public final int version;
-    public final long timestamp;
-    public final String signature;
-    public final int size;
-    public final long fee;
-    public final int height;
-    public final List<Map<String, Object>> transactions;
+    private final int version;
+    private final long timestamp;
+    private final String signature;
+    private final int size;
+    private final long fee;
+    private final int height;
+    private final Collection<Transaction> transactions;
 
     @JsonCreator
     private Block(
@@ -29,14 +26,41 @@ public class Block {
             @JsonProperty("blocksize") int size,
             @JsonProperty("fee") long fee,
             @JsonProperty("height") int height,
-            @JsonProperty("transactions") List<Map<String, Object>> transactions)
-    {
+            @JsonProperty("transactions") Collection<Transaction> transactions) {
         this.version = version;
         this.timestamp = timestamp;
         this.signature = signature;
         this.size = size;
         this.fee = fee;
         this.height = height;
-        this.transactions = Collections.unmodifiableList(transactions);
+        this.transactions = transactions != null ? Collections.unmodifiableCollection(transactions) : null;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public long getFee() {
+        return fee;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public Collection<Transaction> getTransactions() {
+        return transactions;
     }
 }
