@@ -1,3 +1,7 @@
+## 0.10
+- All existed transactions was realized as objects
+- Block now contains parsed transactions objects
+
 ## 0.9
 - Added network timeouts to Node so that requests do not hang
 - Support for aliases in transfers and leases
