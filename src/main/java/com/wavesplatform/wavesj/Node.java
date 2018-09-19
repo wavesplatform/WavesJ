@@ -13,6 +13,7 @@ import com.wavesplatform.wavesj.transactions.LeaseTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -44,19 +45,13 @@ public class Node {
 
     private final URI uri;
     private final WavesJsonMapper wavesJsonMapper;
-    private final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(
-            RequestConfig.custom()
-                    .setSocketTimeout(5000)
-                    .setConnectTimeout(5000)
-                    .setConnectionRequestTimeout(5000)
-                    .setCookieSpec(CookieSpecs.STANDARD)
-                    .build())
-            .build();
+    private final HttpClient client;
 
     public Node() {
         try {
             this.uri = new URI(DEFAULT_NODE);
             this.wavesJsonMapper = new WavesJsonMapper((byte) 'T');
+            this.client = createDefaultClient();
         } catch (URISyntaxException e) {
             // should not happen
             throw new RuntimeException(e);
@@ -66,6 +61,25 @@ public class Node {
     public Node(String uri, char chainId) throws URISyntaxException {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
+        this.client = createDefaultClient();
+    }
+
+    public Node(String uri, char chainId, HttpClient httpClient) throws URISyntaxException {
+        this.uri = new URI(uri);
+        this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
+        this.client = httpClient;
+    }
+
+    private HttpClient createDefaultClient()
+    {
+        return HttpClients.custom().setDefaultRequestConfig(
+            RequestConfig.custom()
+                    .setSocketTimeout(5000)
+                    .setConnectTimeout(5000)
+                    .setConnectionRequestTimeout(5000)
+                    .setCookieSpec(CookieSpecs.STANDARD)
+                    .build())
+            .build();
     }
 
     public String getVersion() throws IOException {
