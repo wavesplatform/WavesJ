@@ -40,6 +40,8 @@ public class Node {
     };
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
     };
+    private static final TypeReference<Map<String, Long>> RESERVED = new TypeReference<Map<String, Long>>() {
+    };
     private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {
     };
 
@@ -128,6 +130,10 @@ public class Node {
      */
     public Block getBlock(int height) throws IOException {
         return wavesJsonMapper.convertValue(send("/blocks/at/" + height), Block.class);
+    }
+
+    public BlockHeaders getBlockHeaders(int height) throws IOException {
+        return wavesJsonMapper.convertValue(send("/blocks/headers/at/" + height), BlockHeaders.class);
     }
 
     /**
@@ -266,6 +272,7 @@ public class Node {
         return parse(exec(request(tx)), "status").asText();
     }
 
+    @Deprecated
     public String deleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
         ApiJson tx = Transactions.makeDeleteOrder(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
@@ -297,6 +304,25 @@ public class Node {
         String signature = account.sign(buf.array());
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
         return parse(r, ORDER_LIST);
+    }
+
+    public Map<String, Long> getTradableBalance(AssetPair pair, String address) throws IOException {
+        String path = String.format("/matcher/orderbook/%s/%s/tradableBalance/%s", pair.getAmountAsset(), pair.getPriceAsset(), address);
+        HttpResponse r = exec(request(path));
+        return parse(r, RESERVED);
+    }
+
+    private Map<String, Long> getReserved(PrivateKeyAccount account, String path) throws IOException {
+        long timestamp = System.currentTimeMillis();
+        ByteBuffer buf = ByteBuffer.allocate(40);
+        buf.put(account.getPublicKey()).putLong(timestamp);
+        String signature = account.sign(buf.array());
+        HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
+        return parse(r, RESERVED);
+    }
+
+    public Map<String, Long> getReservedBalance(PrivateKeyAccount account) throws IOException {
+        return getReserved(account, String.format("/matcher/balance/reserved/%s", Base58.encode(account.getPublicKey())));
     }
 
     private <T> HttpUriRequest request(String path, String... headers) {
