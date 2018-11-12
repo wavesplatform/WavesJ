@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -132,8 +131,15 @@ public class Node {
         return wavesJsonMapper.convertValue(send("/blocks/at/" + height), Block.class);
     }
 
-    public BlockHeaders getBlockHeaders(int height) throws IOException {
-        return wavesJsonMapper.convertValue(send("/blocks/headers/at/" + height), BlockHeaders.class);
+    /**
+     * Returns block header at given height.
+     *
+     * @param height blockchain height
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public BlockHeader getBlockHeader(int height) throws IOException {
+        return wavesJsonMapper.convertValue(send("/blocks/headers/at/" + height), BlockHeader.class);
     }
 
     /**
@@ -312,17 +318,13 @@ public class Node {
         return parse(r, RESERVED);
     }
 
-    private Map<String, Long> getReserved(PrivateKeyAccount account, String path) throws IOException {
+    public Map<String, Long> getReservedBalance(PrivateKeyAccount account) throws IOException {
         long timestamp = System.currentTimeMillis();
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
         String signature = account.sign(buf.array());
-        HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
+        HttpResponse r = exec(request(String.format("/matcher/balance/reserved/%s", Base58.encode(account.getPublicKey())), "Timestamp", String.valueOf(timestamp), "Signature", signature));
         return parse(r, RESERVED);
-    }
-
-    public Map<String, Long> getReservedBalance(PrivateKeyAccount account) throws IOException {
-        return getReserved(account, String.format("/matcher/balance/reserved/%s", Base58.encode(account.getPublicKey())));
     }
 
     private <T> HttpUriRequest request(String path, String... headers) {

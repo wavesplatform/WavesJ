@@ -12,7 +12,7 @@ import java.util.Map;
  * This class represents a block.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BlockHeaders {
+public class BlockHeader {
     private final int version;
     private final long timestamp;
     private final String signature;
@@ -23,7 +23,7 @@ public class BlockHeaders {
     private final int transactionCount;
 
     @JsonCreator
-    private BlockHeaders(
+    private BlockHeader(
             @JsonProperty("version") int version,
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("signature") String signature,
