@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -39,6 +38,8 @@ public class Node {
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {
     };
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
+    };
+    private static final TypeReference<Map<String, Long>> RESERVED = new TypeReference<Map<String, Long>>() {
     };
     private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {
     };
@@ -128,6 +129,17 @@ public class Node {
      */
     public Block getBlock(int height) throws IOException {
         return wavesJsonMapper.convertValue(send("/blocks/at/" + height), Block.class);
+    }
+
+    /**
+     * Returns block header at given height.
+     *
+     * @param height blockchain height
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public BlockHeader getBlockHeader(int height) throws IOException {
+        return wavesJsonMapper.convertValue(send("/blocks/headers/at/" + height), BlockHeader.class);
     }
 
     /**
@@ -266,6 +278,7 @@ public class Node {
         return parse(exec(request(tx)), "status").asText();
     }
 
+    @Deprecated
     public String deleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
         ApiJson tx = Transactions.makeDeleteOrder(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
@@ -297,6 +310,21 @@ public class Node {
         String signature = account.sign(buf.array());
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
         return parse(r, ORDER_LIST);
+    }
+
+    public Map<String, Long> getTradableBalance(AssetPair pair, String address) throws IOException {
+        String path = String.format("/matcher/orderbook/%s/%s/tradableBalance/%s", pair.getAmountAsset(), pair.getPriceAsset(), address);
+        HttpResponse r = exec(request(path));
+        return parse(r, RESERVED);
+    }
+
+    public Map<String, Long> getReservedBalance(PrivateKeyAccount account) throws IOException {
+        long timestamp = System.currentTimeMillis();
+        ByteBuffer buf = ByteBuffer.allocate(40);
+        buf.put(account.getPublicKey()).putLong(timestamp);
+        String signature = account.sign(buf.array());
+        HttpResponse r = exec(request(String.format("/matcher/balance/reserved/%s", Base58.encode(account.getPublicKey())), "Timestamp", String.valueOf(timestamp), "Signature", signature));
+        return parse(r, RESERVED);
     }
 
     private <T> HttpUriRequest request(String path, String... headers) {

@@ -10,7 +10,7 @@ public class OrderStatusInfo {
 
     @JsonCreator
     private OrderStatusInfo(
-            @JsonProperty("filled") long filled,
+            @JsonProperty("filledAmount") long filled,
             @JsonProperty("status") Order.Status status) {
 
         this.status = status;
