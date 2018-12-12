@@ -5,6 +5,7 @@ import com.wavesplatform.wavesj.ByteString;
 import com.wavesplatform.wavesj.PrivateKeyAccount;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 
+@Deprecated
 public class DeleteOrder extends CancelOrder {
     public DeleteOrder(PrivateKeyAccount sender, AssetPair assetPair, String orderId) {
         super(sender, assetPair, orderId);

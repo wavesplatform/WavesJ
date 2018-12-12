@@ -16,6 +16,11 @@ public class Transactions {
         return new IssueTransactionV2(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp);
     }
 
+    public static IssueTransactionV1 makeIssueV1Tx(PrivateKeyAccount sender, byte chainId, String name, String description,
+                                                 long quantity, byte decimals, boolean reissuable, String script, long fee, long timestamp) {
+        return new IssueTransactionV1(sender, name, description, quantity, decimals, reissuable, fee, timestamp);
+    }
+
     public static IssueTransactionV2 makeIssueTx(PrivateKeyAccount sender, byte chainId, String name, String description, long quantity,
                                                  byte decimals, boolean reissuable, String script, long fee) {
         return makeIssueTx(sender, chainId, name, description, quantity, decimals, reissuable, script, fee, System.currentTimeMillis());
