@@ -27,6 +27,12 @@ public class ByteString {
         return Base58.decode(base58String);
     }
 
+
+    @Override
+    public String toString(){
+        return this.getBase58String();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

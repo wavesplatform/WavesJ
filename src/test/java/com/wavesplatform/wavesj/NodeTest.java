@@ -56,11 +56,11 @@ public class NodeTest {
     public void testBlocksAndTransactions() throws IOException {
         Node node = new Node();
 
-        Block block = node.getBlock(359827);
+        Block block = node.getBlock(398485);
         assertNotNull(block);
-        assertEquals(359827, block.getHeight());
+        assertEquals(398485, block.getHeight());
         assertEquals(3, block.getVersion());
-        assertEquals(13, block.getTransactions().size());
+        assertEquals(2, block.getTransactions().size());
 
         for (Transaction tx : block.getTransactions()) {
             ByteString id = tx.getId();
@@ -138,7 +138,7 @@ public class NodeTest {
     public void testScript() throws IOException {
         Node node = new Node();
 
-        String setScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 5);
+        String setScriptId = node.setScript(alice, "", Account.TESTNET, FEE * 10);
         assertNotNull(setScriptId);
 
         String compiledScript = node.compileScript("");
@@ -239,7 +239,7 @@ public class NodeTest {
     public void testAliasGet() throws IOException, URISyntaxException {
         String addr = "3PA1KvFfq9VuJjg45p2ytGgaNjrgnLSgf4r";
         String alias = "blackturtle";
-        Node node = new Node("https://nodes.wavesnodes.com/", 'W');
+        Node node = new Node("https://nodes.wavesplatform.com/", 'W');
         assertEquals(node.getAddrByAlias(alias), addr);
     }
 }

@@ -37,6 +37,12 @@ public class Node {
     };
     private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {
     };
+    private static final TypeReference<List<BlockHeader>> BLOCK_HEADER_LIST = new TypeReference<List<BlockHeader>>() {
+    };
+    private static final TypeReference<Map<String, Long>> ASSET_DISTRIBUTION = new TypeReference<Map<String, Long>>() {
+    };
+    private static final TypeReference<List<AssetBalance>> ASSET_BALANCE_LIST = new TypeReference<List<AssetBalance>>() {
+    };
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
     };
     private static final TypeReference<Map<String, Long>> RESERVED = new TypeReference<Map<String, Long>>() {
@@ -65,9 +71,21 @@ public class Node {
         this.client = createDefaultClient();
     }
 
+    public Node(String uri, byte chainId) throws URISyntaxException {
+        this.uri = new URI(uri);
+        this.wavesJsonMapper = new WavesJsonMapper(chainId);
+        this.client = createDefaultClient();
+    }
+
     public Node(String uri, char chainId, HttpClient httpClient) throws URISyntaxException {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
+        this.client = httpClient;
+    }
+
+    public Node(String uri, byte chainId, HttpClient httpClient) throws URISyntaxException {
+        this.uri = new URI(uri);
+        this.wavesJsonMapper = new WavesJsonMapper(chainId);
         this.client = httpClient;
     }
 
@@ -105,6 +123,24 @@ public class Node {
                 : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
     }
 
+
+    public Map<String, Long> getAssetDistribution(String assetId) throws IOException {
+        String path = String.format("/assets/%s/distribution", assetId);
+        HttpResponse r = exec(request(path));
+        return parse(r, ASSET_DISTRIBUTION);
+    }
+
+    public Map<String, Long> getAssetDistributionByHeight(String assetId, Integer height) throws IOException {
+        String path = String.format("/assets/%s/distribution/%d", assetId, height);
+        HttpResponse r = exec(request(path));
+        return parse(r, ASSET_DISTRIBUTION);
+    }
+
+    public List<AssetBalance> getAssetsBalance(String address) throws IOException {
+        return wavesJsonMapper.convertValue(send("/assets/balance/" + address, "balances"), ASSET_BALANCE_LIST);
+    }
+
+
     /**
      * Returns object by its ID.
      *
@@ -140,6 +176,31 @@ public class Node {
      */
     public BlockHeader getBlockHeader(int height) throws IOException {
         return wavesJsonMapper.convertValue(send("/blocks/headers/at/" + height), BlockHeader.class);
+    }
+
+
+    /**
+     * Returns last block header
+     *
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public BlockHeader getLastBlockHeader() throws IOException {
+        return wavesJsonMapper.convertValue(send("/blocks/headers/last"), BlockHeader.class);
+    }
+
+    /**
+     * Returns seq of block headers
+     *
+     * @param from start block
+     * @param to end block
+     * @return sequences of block objects without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public List<BlockHeader> getBlockHeaderSeq(int from, int to) throws IOException {
+        String path = String.format("/blocks/headers/seq/%s/%s", from,to);
+        HttpResponse r = exec(request(path));
+        return parse(r, BLOCK_HEADER_LIST);
     }
 
     /**
@@ -303,14 +364,21 @@ public class Node {
                 market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
     }
 
-    private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {
-        long timestamp = System.currentTimeMillis();
+    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) throws  IOException {
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
         String signature = account.sign(buf.array());
+        return signature;
+    }
+
+    private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {
+        long timestamp = System.currentTimeMillis();
+        String signature = getOrderHistorySignature(account, timestamp);
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
         return parse(r, ORDER_LIST);
     }
+
+
 
     public Map<String, Long> getTradableBalance(AssetPair pair, String address) throws IOException {
         String path = String.format("/matcher/orderbook/%s/%s/tradableBalance/%s", pair.getAmountAsset(), pair.getPriceAsset(), address);
