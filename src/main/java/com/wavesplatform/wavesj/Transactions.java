@@ -133,7 +133,7 @@ public class Transactions {
         return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
     }
 
-    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, com.wavesplatform.wavesj.matcher.Order.Type orderType,
+    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
                                     AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
         if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
             throw new IllegalArgumentException("spendAsset and receiveAsset should not be equal");
@@ -145,6 +145,22 @@ public class Transactions {
     public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
                                     AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
         return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
+    }
+
+    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account) {
+        return makeOrderCancelTx(account, System.currentTimeMillis());
+    }
+
+    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, long timestamp) {
+        return new CancelOrder(account, timestamp);
+    }
+
+    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair) {
+        return makeOrderCancelTx(account, assetPair, System.currentTimeMillis());
+    }
+
+    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, long timestamp) {
+        return new CancelOrder(account, assetPair, timestamp);
     }
 
     public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
