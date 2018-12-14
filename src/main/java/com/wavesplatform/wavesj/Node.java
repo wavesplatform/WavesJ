@@ -53,12 +53,14 @@ public class Node {
     private final URI uri;
     private final WavesJsonMapper wavesJsonMapper;
     private final HttpClient client;
+    private final byte chainId;
 
     public Node() {
         try {
             this.uri = new URI(DEFAULT_NODE);
             this.wavesJsonMapper = new WavesJsonMapper((byte) 'T');
             this.client = createDefaultClient();
+            this.chainId = (byte) 'T';
         } catch (URISyntaxException e) {
             // should not happen
             throw new RuntimeException(e);
@@ -69,36 +71,39 @@ public class Node {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
         this.client = createDefaultClient();
+        this.chainId = (byte) chainId;
     }
 
     public Node(String uri, byte chainId) throws URISyntaxException {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper(chainId);
         this.client = createDefaultClient();
+        this.chainId = chainId;
     }
 
     public Node(String uri, char chainId, HttpClient httpClient) throws URISyntaxException {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
         this.client = httpClient;
+        this.chainId = (byte) chainId;
     }
 
     public Node(String uri, byte chainId, HttpClient httpClient) throws URISyntaxException {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper(chainId);
         this.client = httpClient;
+        this.chainId =  chainId;
     }
 
-    private HttpClient createDefaultClient()
-    {
+    private HttpClient createDefaultClient() {
         return HttpClients.custom().setDefaultRequestConfig(
-            RequestConfig.custom()
-                    .setSocketTimeout(5000)
-                    .setConnectTimeout(5000)
-                    .setConnectionRequestTimeout(5000)
-                    .setCookieSpec(CookieSpecs.STANDARD)
-                    .build())
-            .build();
+                RequestConfig.custom()
+                        .setSocketTimeout(5000)
+                        .setConnectTimeout(5000)
+                        .setConnectionRequestTimeout(5000)
+                        .setCookieSpec(CookieSpecs.STANDARD)
+                        .build())
+                .build();
     }
 
     public String getVersion() throws IOException {
@@ -130,8 +135,14 @@ public class Node {
         return parse(r, ASSET_DISTRIBUTION);
     }
 
-    public Map<String, Long> getAssetDistributionByHeight(String assetId, Integer height) throws IOException {
-        String path = String.format("/assets/%s/distribution/%d", assetId, height);
+    public Map<String, Long> getAssetDistributionByHeight(String assetId, Integer height, Integer limit) throws IOException {
+        String path = String.format("/assets/%s/distribution/%d/limit/%d", assetId, height, limit);
+        HttpResponse r = exec(request(path));
+        return parse(r, ASSET_DISTRIBUTION);
+    }
+
+    public Map<String, Long> getAssetDistributionByHeight(String assetId, Integer height, Integer limit, String after) throws IOException {
+        String path = String.format("/assets/%s/distribution/%d/limit/%d?after=%s", assetId, height, limit, after);
         HttpResponse r = exec(request(path));
         return parse(r, ASSET_DISTRIBUTION);
     }
@@ -193,12 +204,12 @@ public class Node {
      * Returns seq of block headers
      *
      * @param from start block
-     * @param to end block
+     * @param to   end block
      * @return sequences of block objects without transactions
      * @throws IOException if no block exists at the given height
      */
     public List<BlockHeader> getBlockHeaderSeq(int from, int to) throws IOException {
-        String path = String.format("/blocks/headers/seq/%s/%s", from,to);
+        String path = String.format("/blocks/headers/seq/%s/%s", from, to);
         HttpResponse r = exec(request(path));
         return parse(r, BLOCK_HEADER_LIST);
     }
@@ -339,6 +350,16 @@ public class Node {
         return parse(exec(request(tx)), "status").asText();
     }
 
+    public String cancelOrdersbyPair(PrivateKeyAccount account, AssetPair assetPair) throws IOException {
+        ApiJson tx = Transactions.makeOrderCancelTx(account, assetPair);
+        return parse(exec(request(tx)), "status").asText();
+    }
+
+    public String cancelAllOrders(PrivateKeyAccount account) throws IOException {
+        ApiJson tx = Transactions.makeOrderCancelTx(account);
+        return parse(exec(request(tx)), "status").asText();
+    }
+
     @Deprecated
     public String deleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
         ApiJson tx = Transactions.makeDeleteOrder(account, assetPair, orderId);
@@ -364,7 +385,7 @@ public class Node {
                 market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
     }
 
-    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) throws  IOException {
+    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
         String signature = account.sign(buf.array());
@@ -377,7 +398,6 @@ public class Node {
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
         return parse(r, ORDER_LIST);
     }
-
 
 
     public Map<String, Long> getTradableBalance(AssetPair pair, String address) throws IOException {
@@ -414,8 +434,11 @@ public class Node {
             endpoint = "/matcher/orderbook/" + d.getAssetPair().getAmountAsset() + '/' + d.getAssetPair().getPriceAsset() + "/delete";
         } else if (obj instanceof CancelOrder) {
             CancelOrder co = (CancelOrder) obj;
-            endpoint = "/matcher/orderbook/" + co.getAssetPair().getAmountAsset() + '/' + co.getAssetPair().getPriceAsset() + "/cancel";
-        } else  {
+            if (co.getAssetPair() == null) {
+                endpoint = "/matcher/orderbook/cancel";
+            } else
+                endpoint = "/matcher/orderbook/" + co.getAssetPair().getAmountAsset() + '/' + co.getAssetPair().getPriceAsset() + "/cancel";
+        } else {
             throw new IllegalArgumentException();
         }
         HttpPost request = new HttpPost(uri.resolve(endpoint));

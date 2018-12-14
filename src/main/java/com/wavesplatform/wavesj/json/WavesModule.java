@@ -8,7 +8,7 @@ import com.wavesplatform.wavesj.json.ser.*;
 import com.wavesplatform.wavesj.matcher.Order;
 
 public class WavesModule extends SimpleModule {
-    public WavesModule(byte chainId, ObjectMapper objectMapper) {
+    public WavesModule(byte chainId, WavesJsonMapper objectMapper) {
         addDeserializer(PublicKeyAccount.class, new PublicKeyAccountDeser(chainId));
         addDeserializer(ByteString.class, new ByteStringDeser());
         addDeserializer(Alias.class, new AliasDeser(chainId));

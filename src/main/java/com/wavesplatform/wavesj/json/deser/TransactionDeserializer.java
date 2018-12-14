@@ -6,16 +6,18 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wavesplatform.wavesj.Transaction;
+import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.io.IOException;
 
 public class TransactionDeserializer extends StdDeserializer<Transaction> {
 
-    private ObjectMapper objectMapper;
+    private WavesJsonMapper objectMapper;
 
-    public TransactionDeserializer(ObjectMapper objectMapper) {
+    public TransactionDeserializer(WavesJsonMapper objectMapper) {
         super(Transaction.class);
         this.objectMapper = objectMapper;
     }
@@ -25,10 +27,12 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         TreeNode treeNode = jsonParser.getCodec().readTree(jsonParser);
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
-
-        if (treeNode.get("version") != null) {
-            objectMapper.treeToValue(treeNode.get("version"), Integer.class);
+        byte chainId = objectMapper.getChainId();
+        if (treeNode.get("chainId") != null) {
+            chainId = objectMapper.treeToValue(treeNode.get("chainId"), Byte.class);
         }
+        // todo omfg remove after 0.15.4 release
+        ((ObjectNode)treeNode).put("chainId", chainId);
 
         Class t = null;
         switch (type) {

@@ -22,6 +22,14 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
         this.signature = new ByteString(sender.sign(getBytes()));
     }
 
+    public CancelOrder(PrivateKeyAccount sender, long timestamp) {
+        this.sender = sender;
+        this.assetPair = null;
+        this.orderId = null;
+        this.timestamp = timestamp;
+        this.signature = new ByteString(sender.sign(getBytes()));
+    }
+
     public CancelOrder(PrivateKeyAccount sender, AssetPair assetPair, long timestamp) {
         this.sender = sender;
         this.assetPair = assetPair;
