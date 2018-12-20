@@ -168,6 +168,33 @@ public class Node {
     }
 
     /**
+     * Returns transactions by address with limit.
+     * @param address address
+     * @param limit transactions limit
+     * @return list of transactions
+     * @throws IOException if something going wrong
+     */
+    public List<Transaction> getAddressTransactions(String address, int limit) throws IOException {
+        return getAddressTransactions(address, limit, null);
+    }
+
+    /**
+     * Returns transactions by address with limit after passed transaction id.
+     * @param address address
+     * @param limit transactions limit
+     * @param after separate transaction id
+     * @return list of transactions
+     * @throws IOException if something going wrong
+     */
+    public List<Transaction> getAddressTransactions(String address, int limit, String after) throws IOException {
+        String requestUrl = String.format("/transactions/address/%s/limit/%d", address, limit);
+        if (after != null) {
+            requestUrl += String.format("?after=%s", after);
+        }
+        return wavesJsonMapper.<List<List<Transaction>>>convertValue(send(requestUrl),new TypeReference<List<List<Transaction>>>(){}).get(0);
+    }
+
+    /**
      * Returns block at given height.
      *
      * @param height blockchain height

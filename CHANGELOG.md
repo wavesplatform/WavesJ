@@ -1,3 +1,12 @@
+## 0.13.1
+
+- Address transaction method was added
+
+## 0.13
+
+- Batch cancel method was added
+- Transaction ids calculation was fixed
+
 ## 0.10
 - All existed transactions was realized as objects
 - Block now contains parsed transactions objects
