@@ -29,7 +29,8 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
         byte chainId = objectMapper.getChainId();
         if (treeNode.get("chainId") != null) {
-            chainId = objectMapper.treeToValue(treeNode.get("chainId"), Byte.class);
+            Byte _chainId = objectMapper.treeToValue(treeNode.get("chainId"), Byte.class);
+            if (_chainId != null) chainId = _chainId;
         }
         // todo omfg remove after 0.15.4 release
         ((ObjectNode)treeNode).put("chainId", chainId);

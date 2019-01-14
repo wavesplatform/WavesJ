@@ -41,6 +41,8 @@ public class Node {
     };
     private static final TypeReference<Map<String, Long>> ASSET_DISTRIBUTION = new TypeReference<Map<String, Long>>() {
     };
+    private static final TypeReference<AssetDistribution> ASSET_DISTRIBUTION_BY_HEIGHT = new TypeReference<AssetDistribution>() {
+    };
     private static final TypeReference<List<AssetBalance>> ASSET_BALANCE_LIST = new TypeReference<List<AssetBalance>>() {
     };
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
@@ -135,16 +137,16 @@ public class Node {
         return parse(r, ASSET_DISTRIBUTION);
     }
 
-    public Map<String, Long> getAssetDistributionByHeight(String assetId, Integer height, Integer limit) throws IOException {
+    public AssetDistribution getAssetDistributionByHeight(String assetId, Integer height, Integer limit) throws IOException {
         String path = String.format("/assets/%s/distribution/%d/limit/%d", assetId, height, limit);
         HttpResponse r = exec(request(path));
-        return parse(r, ASSET_DISTRIBUTION);
+        return parse(r, ASSET_DISTRIBUTION_BY_HEIGHT);
     }
 
-    public Map<String, Long> getAssetDistributionByHeight(String assetId, Integer height, Integer limit, String after) throws IOException {
+    public AssetDistribution getAssetDistributionByHeight(String assetId, Integer height, Integer limit, String after) throws IOException {
         String path = String.format("/assets/%s/distribution/%d/limit/%d?after=%s", assetId, height, limit, after);
         HttpResponse r = exec(request(path));
-        return parse(r, ASSET_DISTRIBUTION);
+        return parse(r, ASSET_DISTRIBUTION_BY_HEIGHT);
     }
 
     public List<AssetBalance> getAssetsBalance(String address) throws IOException {
