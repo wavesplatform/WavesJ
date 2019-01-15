@@ -1,3 +1,8 @@
+## 0.13.2
+
+- Asset distribution method was added
+- Burn chain id serialization was fixed
+
 ## 0.13.1
 
 - Address transaction method was added
