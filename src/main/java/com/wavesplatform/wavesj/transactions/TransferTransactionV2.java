@@ -5,12 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class TransferTransactionV2 extends TransactionWithProofs implements TransferTransaction {
+public class TransferTransactionV2 extends TransactionWithProofs<TransferTransactionV2> implements TransferTransaction {
     private final PublicKeyAccount senderPublicKey;
     private final String recipient;
     private final long amount;
@@ -24,7 +25,7 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
     public TransferTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                                  @JsonProperty("recipient") String recipient,
                                  @JsonProperty("amount") long amount,
-                                 @JsonProperty("assetId") String assetId,
+                                 @JsonProperty("address") String assetId,
                                  @JsonProperty("fee") long fee,
                                  @JsonProperty("feeAssetId") String feeAssetId,
                                  @JsonProperty("attachment") ByteString attachment,
@@ -117,6 +118,11 @@ public class TransferTransactionV2 extends TransactionWithProofs implements Tran
     @Override
     public byte getVersion() {
         return Transaction.V2;
+    }
+
+    public TransferTransactionV2 withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new TransferTransactionV2(senderPublicKey,recipient, amount, assetId, fee, feeAssetId, attachment, timestamp, newProofs);
     }
 
     @Override

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class CancelOrderTest {
+public class CancelOrderV1Test {
     CancelOrder cancelOrder = new CancelOrder(PrivateKeyAccount.fromPrivateKey("CrppxhgtZZNd5wcVMwsudWJ78ZKLqETR8AmhtjeKDFZU", (byte) 'T'), new AssetPair("PHCN", "Aqy7PRU"), "H93RaJ6D9YxEWNJiiMsej23NVHLrxu6kMyFb7CgX2DZW");
 
     @Test

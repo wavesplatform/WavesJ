@@ -19,7 +19,7 @@ public class ReissueTransactionV1 extends TransactionWithSignature implements Re
 
     @JsonCreator
     public ReissueTransactionV1(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                                @JsonProperty("assetId") String assetId,
+                                @JsonProperty("address") String assetId,
                                 @JsonProperty("quantity") long quantity,
                                 @JsonProperty("reissuable") boolean reissuable,
                                 @JsonProperty("fee") long fee,

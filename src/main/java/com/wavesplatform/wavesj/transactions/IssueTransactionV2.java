@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class IssueTransactionV2 extends TransactionWithProofs implements IssueTransaction {
+public class IssueTransactionV2 extends TransactionWithProofs<IssueTransactionV2> implements IssueTransaction {
     public static final byte ISSUE = 3;
 
     private final PublicKeyAccount senderPublicKey;
@@ -141,14 +141,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
     }
 
     public IssueTransactionV2 withProof(int index, ByteString proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<ByteString> newProofs = new ArrayList<ByteString>(proofs);
-        for (int i = newProofs.size(); i <= index; i++) {
-            newProofs.add(ByteString.EMPTY);
-        }
-        newProofs.set(index, proof);
+        List<ByteString> newProofs = updateProofs(index, proof);
         return new IssueTransactionV2(senderPublicKey, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp, newProofs);
     }
 

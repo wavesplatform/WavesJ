@@ -3,7 +3,6 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.matcher.AmountAndPrice;
-import com.wavesplatform.wavesj.matcher.Order;
 
 import java.util.Collections;
 import java.util.List;

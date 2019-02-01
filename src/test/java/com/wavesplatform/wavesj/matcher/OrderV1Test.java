@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class OrderTest {
-    Order ord1 = new Order(Order.Type.BUY, new AssetPair("PHCN", "Aqy7PRU"), 1583290045643L, 3411800000000L, 1534932075909L, 1536178324108L, 4272607605316276L, PrivateKeyAccount.fromPrivateKey("CrppxhgtZZNd5wcVMwsudWJ78ZKLqETR8AmhtjeKDFZU", (byte)'T'), new PublicKeyAccount("G67KDhqHdjNNb2tnHRgNbDppQEM9ySXdiBip577n2Xoj", (byte)'T'));
+public class OrderV1Test {
+    OrderV1 ord1 = new OrderV1(OrderV1.Type.BUY, new AssetPair("PHCN", "Aqy7PRU"), 1583290045643L, 3411800000000L, 1534932075909L, 1536178324108L, 4272607605316276L, PrivateKeyAccount.fromPrivateKey("CrppxhgtZZNd5wcVMwsudWJ78ZKLqETR8AmhtjeKDFZU", (byte)'T'), new PublicKeyAccount("G67KDhqHdjNNb2tnHRgNbDppQEM9ySXdiBip577n2Xoj", (byte)'T'));
 
     @Test
     public void bytesTest() {

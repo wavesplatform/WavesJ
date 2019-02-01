@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class SponsorTransaction extends TransactionWithProofs {
+public class SponsorTransaction extends TransactionWithProofs<Transaction> {
     public static final byte SPONSOR = 14;
     private PublicKeyAccount senderPublicKey;
     private String assetId;
@@ -20,7 +20,7 @@ public class SponsorTransaction extends TransactionWithProofs {
 
     @JsonCreator
     public SponsorTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                              @JsonProperty("assetId") String assetId,
+                              @JsonProperty("address") String assetId,
                               @JsonProperty("minSponsoredAssetFee") long minAssetFee,
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
@@ -109,5 +109,11 @@ public class SponsorTransaction extends TransactionWithProofs {
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
+    }
+
+    @Override
+    public Transaction withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new SponsorTransaction(senderPublicKey, assetId, minAssetFee,fee,timestamp, newProofs);
     }
 }

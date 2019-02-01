@@ -12,6 +12,7 @@ public interface Transaction extends ApiJson, Signable {
 
     /**
      * Transaction ID.
+     * @return transaction id in ByteString format
      */
     @JsonIgnore
     public ByteString getId();

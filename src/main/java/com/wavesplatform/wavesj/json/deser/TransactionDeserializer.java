@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wavesplatform.wavesj.Transaction;
@@ -109,8 +108,8 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             case SponsorTransaction.SPONSOR:
                 t = SponsorTransaction.class;
                 break;
-            case ExchangeTransaction.EXCHANGE:
-                t = ExchangeTransaction.class;
+            case ExchangeTransactionV1.EXCHANGE:
+                t = ExchangeTransactionV1.class;
                 break;
             case TransferTransaction.TRANSFER:
                 switch (version) {

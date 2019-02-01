@@ -22,7 +22,7 @@ public class TransferTransactionV1 extends TransactionWithSignature implements T
     public TransferTransactionV1(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                                  @JsonProperty("recipient") String recipient,
                                  @JsonProperty("amount") long amount,
-                                 @JsonProperty("assetId") String assetId,
+                                 @JsonProperty("address") String assetId,
                                  @JsonProperty("fee") long fee,
                                  @JsonProperty("feeAssetId") String feeAssetId,
                                  @JsonProperty("attachment") ByteString attachment,

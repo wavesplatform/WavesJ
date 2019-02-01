@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class ReissueTransactionV2 extends TransactionWithProofs implements ReissueTransaction {
+public class ReissueTransactionV2 extends TransactionWithProofs<ReissueTransactionV2> implements ReissueTransaction {
     public static final byte REISSUE = 5;
 
     private PublicKeyAccount senderPublicKey;
@@ -24,7 +24,7 @@ public class ReissueTransactionV2 extends TransactionWithProofs implements Reiss
     @JsonCreator
     public ReissueTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                                 @JsonProperty("chainId") byte chainId,
-                                @JsonProperty("assetId") String assetId,
+                                @JsonProperty("address") String assetId,
                                 @JsonProperty("quantity") long quantity,
                                 @JsonProperty("reissuable") boolean reissuable,
                                 @JsonProperty("fee") long fee,
@@ -132,5 +132,11 @@ public class ReissueTransactionV2 extends TransactionWithProofs implements Reiss
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
+    }
+
+    @Override
+    public ReissueTransactionV2 withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new ReissueTransactionV2(senderPublicKey, chainId, assetId, quantity, reissuable, fee, timestamp, newProofs);
     }
 }

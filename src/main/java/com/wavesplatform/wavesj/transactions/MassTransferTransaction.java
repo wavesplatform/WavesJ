@@ -12,7 +12,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class MassTransferTransaction extends TransactionWithProofs {
+public class MassTransferTransaction extends TransactionWithProofs<MassTransferTransaction> {
     public static final byte MASS_TRANSFER = 11;
 
     private final PublicKeyAccount senderPublicKey;
@@ -24,7 +24,7 @@ public class MassTransferTransaction extends TransactionWithProofs {
 
     @JsonCreator
     public MassTransferTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                                   @JsonProperty("assetId") String assetId,
+                                   @JsonProperty("address") String assetId,
                                    @JsonProperty("transfers") Collection<Transfer> transfers,
                                    @JsonProperty("fee") long fee,
                                    @JsonProperty("attachment") ByteString attachment,
@@ -134,5 +134,11 @@ public class MassTransferTransaction extends TransactionWithProofs {
         result = 31 * result + (getAttachment() != null ? getAttachment().hashCode() : 0);
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
+    }
+
+    @Override
+    public MassTransferTransaction withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new MassTransferTransaction(senderPublicKey, assetId, transfers, fee, attachment, timestamp, newProofs);
     }
 }

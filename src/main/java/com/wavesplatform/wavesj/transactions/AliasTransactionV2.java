@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class AliasTransactionV2 extends TransactionWithProofs implements AliasTransaction {
+public class AliasTransactionV2 extends TransactionWithProofs<AliasTransactionV2> implements AliasTransaction {
     private final PublicKeyAccount senderPublicKey;
     private final Alias alias;
     private final long fee;
@@ -87,14 +87,7 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
     }
 
     public AliasTransactionV2 withProof(int index, ByteString proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<ByteString> newProofs = new ArrayList<ByteString>(proofs);
-        for (int i = newProofs.size(); i <= index; i++) {
-            newProofs.add(ByteString.EMPTY);
-        }
-        newProofs.set(index, proof);
+        List<ByteString> newProofs = updateProofs(index, proof);
         return new AliasTransactionV2(senderPublicKey, alias, fee, timestamp, newProofs);
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class SetScriptTransaction extends TransactionWithProofs {
+public class SetScriptTransaction extends TransactionWithProofs<SetScriptTransaction> {
     public static final byte SET_SCRIPT = 13;
 
     private PublicKeyAccount senderPublicKey;
@@ -115,5 +115,11 @@ public class SetScriptTransaction extends TransactionWithProofs {
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
+    }
+
+    @Override
+    public SetScriptTransaction withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new SetScriptTransaction(senderPublicKey, script, chainId, fee, timestamp, newProofs);
     }
 }

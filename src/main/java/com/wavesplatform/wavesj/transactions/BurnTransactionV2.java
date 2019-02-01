@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class BurnTransactionV2 extends TransactionWithProofs implements BurnTransaction {
+public class BurnTransactionV2 extends TransactionWithProofs<BurnTransactionV2> implements BurnTransaction {
     private final PublicKeyAccount senderPublicKey;
     private final byte chainId;
     private final String assetId;
@@ -94,15 +94,9 @@ public class BurnTransactionV2 extends TransactionWithProofs implements BurnTran
         return Transaction.V2;
     }
 
+    @Override
     public BurnTransactionV2 withProof(int index, ByteString proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<ByteString> newProofs = new ArrayList<ByteString>(proofs);
-        for (int i = newProofs.size(); i <= index; i++) {
-            newProofs.add(ByteString.EMPTY);
-        }
-        newProofs.set(index, proof);
+        List<ByteString> newProofs = updateProofs(index, proof);
         return new BurnTransactionV2(senderPublicKey, chainId, assetId, amount, fee, timestamp, newProofs);
     }
 

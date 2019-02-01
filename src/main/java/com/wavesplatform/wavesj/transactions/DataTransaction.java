@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class DataTransaction extends TransactionWithProofs {
+public class DataTransaction extends TransactionWithProofs<DataTransaction> {
     public static final byte DATA = 12;
 
     private final PublicKeyAccount senderPublicKey;
@@ -64,6 +65,14 @@ public class DataTransaction extends TransactionWithProofs {
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 
+    @Override
+    public DataTransaction withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new DataTransaction(senderPublicKey,data, fee, timestamp, newProofs);
+    }
+
+
+
     public Collection<DataEntry<?>> getData() {
         return data;
     }
@@ -108,4 +117,7 @@ public class DataTransaction extends TransactionWithProofs {
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
     }
+
+
+
 }

@@ -1,6 +1,6 @@
 package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.matcher.OrderV1;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
@@ -50,6 +50,15 @@ public class NodeTest {
         assertEquals(wavesBalance, node.getBalance(address, null));
         assertEquals(wavesBalance, node.getBalance(address, ""));
         assertEquals(wavesBalance, node.getBalance(address, Asset.WAVES));
+    }
+
+    @Test
+    public void testBlock() throws IOException, URISyntaxException {
+        Node node = new Node("https://nodes.wavesplatform.com", 'W');
+        Block b = node.getBlock(1350761);
+        for (Transaction t : b.getTransactions()){
+            System.out.println(t.getType());
+        }
     }
 
     @Test
@@ -170,14 +179,14 @@ public class NodeTest {
         assertNotNull(orderBook);
 
         // Create an order
-        Order order = matcher.createOrder(alice, matcherKey,
-                MARKET, Order.Type.SELL,
+        OrderV1 order = matcher.createOrder(alice, matcherKey,
+                MARKET, OrderV1.Type.SELL,
                 1, 1 * Asset.TOKEN,
                 System.currentTimeMillis() + 65000,
                 MFEE);
         assertNotNull(order.getId());
-        assertEquals(Order.Type.SELL, order.getOrderType());
-        assertEquals(Order.Status.ACCEPTED, order.getStatus());
+        assertEquals(OrderV1.Type.SELL, order.getOrderType());
+        assertEquals(OrderV1.Status.ACCEPTED, order.getStatus());
         assertEquals(Asset.WAVES, order.getAssetPair().getAmountAsset());
         assertEquals(WBTC, order.getAssetPair().getPriceAsset());
         assertEquals(1 * Asset.TOKEN, order.getAmount());
@@ -188,9 +197,9 @@ public class NodeTest {
         assertEquals("ACCEPTED", status);
 
         // Verify the order appears in the list of all orders
-        List<Order> orders = matcher.getOrders(alice);
+        List<OrderV1> orders = matcher.getOrders(alice);
         boolean found = false;
-        for (Order o : orders) {
+        for (OrderV1 o : orders) {
             if (o.getId().equals(order.getId())) {
                 found = true;
             }
@@ -200,14 +209,14 @@ public class NodeTest {
         // Verify the order appears in the list of orders for this asset pair
         orders = matcher.getOrders(alice, MARKET);
         found = false;
-        for (Order o : orders) {
+        for (OrderV1 o : orders) {
             if (o.getId().equals(order.getId())) {
                 found = true;
             }
         }
         assertTrue(found);
 
-        for (Order o : orders) {
+        for (OrderV1 o : orders) {
             assertNotNull(o.getId());
             assertNotNull(o.getOrderType());
             assertNotNull(o.getStatus());

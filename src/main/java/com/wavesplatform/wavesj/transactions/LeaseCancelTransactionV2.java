@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class LeaseCancelTransactionV2 extends TransactionWithProofs implements LeaseCancelTransaction {
+public class LeaseCancelTransactionV2 extends TransactionWithProofs<LeaseCancelTransactionV2> implements LeaseCancelTransaction {
     public static final byte LEASE_CANCEL = 9;
 
     private final PublicKeyAccount senderPublicKey;
@@ -108,5 +108,11 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
+    }
+
+    @Override
+    public LeaseCancelTransactionV2 withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new LeaseCancelTransactionV2(senderPublicKey, chainId, leaseId, fee, timestamp, newProofs);
     }
 }
