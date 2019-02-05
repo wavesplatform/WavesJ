@@ -32,7 +32,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             if (_chainId != null) chainId = _chainId;
         }
         // todo omfg remove after 0.15.4 release
-        ((ObjectNode)treeNode).put("chainId", chainId);
+        ((ObjectNode) treeNode).put("chainId", chainId);
 
         Class t = null;
         switch (type) {
@@ -109,7 +109,14 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 t = SponsorTransaction.class;
                 break;
             case ExchangeTransactionV1.EXCHANGE:
-                t = ExchangeTransactionV1.class;
+                switch (version) {
+                    case Transaction.V1:
+                        t = ExchangeTransactionV1.class;
+                        break;
+                    case Transaction.V2:
+                        t = ExchangeTransactionV2.class;
+                        break;
+                }
                 break;
             case TransferTransaction.TRANSFER:
                 switch (version) {

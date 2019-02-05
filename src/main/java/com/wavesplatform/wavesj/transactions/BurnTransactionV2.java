@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class BurnTransactionV2 extends TransactionWithProofs<BurnTransactionV2> 
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     @JsonCreator
@@ -76,7 +75,7 @@ public class BurnTransactionV2 extends TransactionWithProofs<BurnTransactionV2> 
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(BurnTransaction.BURN).put(Transaction.V2).put(chainId)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))

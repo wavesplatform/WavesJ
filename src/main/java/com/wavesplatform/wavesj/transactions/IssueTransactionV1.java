@@ -37,7 +37,7 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
+        this.signature = new ByteString(senderPublicKey.sign(getBodyBytes()));
     }
 
     @JsonCreator
@@ -93,7 +93,7 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         return timestamp;
     }
 
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
         buf.put(IssueTransaction.ISSUE);
         buf.put(senderPublicKey.getPublicKey());

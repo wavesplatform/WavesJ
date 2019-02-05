@@ -1,11 +1,15 @@
 package com.wavesplatform.wavesj.matcher;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.wavesplatform.wavesj.ApiJson;
-import com.wavesplatform.wavesj.Signable;
+import com.wavesplatform.wavesj.*;
+
+import java.util.List;
 
 public interface Order  extends Signable, ApiJson {
+    byte V1 = 1;
+    byte V2 = 2;
 
     enum Type {
         BUY, SELL;
@@ -16,8 +20,8 @@ public interface Order  extends Signable, ApiJson {
         }
 
         @JsonCreator
-        public static OrderV2.Type fromString(String json) {
-            return json == null ? null : OrderV2.Type.valueOf(json.toUpperCase());
+        public static Order.Type fromString(String json) {
+            return json == null ? null : Order.Type.valueOf(json.toUpperCase());
         }
     }
 
@@ -42,9 +46,39 @@ public interface Order  extends Signable, ApiJson {
                 throw new IllegalArgumentException("Bad status value: " + json);
             }
         }
-
         public boolean isActive() {
             return this == ACCEPTED || this == PARTIALLY_FILLED;
         }
     }
+
+    /**
+     * Transaction ID.
+     * @return transaction id in ByteString format
+     */
+    @JsonIgnore
+    ByteString getId();
+
+    Order.Type getOrderType();
+
+    long getAmount();
+
+    long getPrice();
+
+    long getFilled();
+
+    long getTimestamp();
+
+    Order.Status getStatus();
+
+    AssetPair getAssetPair();
+
+    long getExpiration();
+
+    long getMatcherFee() ;
+
+    PublicKeyAccount getMatcherPublicKey();
+
+    byte getVersion();
+
+    List<ByteString> getProofs();
 }

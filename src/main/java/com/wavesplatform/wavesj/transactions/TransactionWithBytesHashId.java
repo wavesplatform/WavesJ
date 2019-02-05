@@ -7,6 +7,6 @@ import static com.wavesplatform.wavesj.ByteUtils.hash;
 
 public abstract class TransactionWithBytesHashId implements Transaction {
     public ByteString getId() {
-        return new ByteString(hash(getBytes()));
+        return new ByteString(hash(getBodyBytes()));
     }
 }

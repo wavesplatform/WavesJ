@@ -2,9 +2,12 @@ package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.transactions.TransactionWithBytesHashId;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public abstract class TransactionWithProofs<T extends Transaction> extends TransactionWithBytesHashId {
     public static final int MAX_PROOF_COUNT = 8;
@@ -34,5 +37,17 @@ public abstract class TransactionWithProofs<T extends Transaction> extends Trans
         }
         newProofs.set(index, proof);
         return newProofs;
+    }
+
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(getBodyBytes())
+                .put((byte) 1) //proofs version
+                .putShort((short) getProofs().size());
+        getProofs().forEach(p -> buf
+                .putShort((short) p.getBytes().length)
+                .put(p.getBytes()));
+        return ByteArraysUtils.getOnlyUsed(buf);
     }
 }

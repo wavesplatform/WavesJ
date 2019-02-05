@@ -1,8 +1,6 @@
 package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.matcher.CancelOrder;
-import com.wavesplatform.wavesj.matcher.DeleteOrder;
-import com.wavesplatform.wavesj.matcher.OrderV1;
+import com.wavesplatform.wavesj.matcher.*;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.util.Collection;
@@ -133,16 +131,16 @@ public class Transactions {
         return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
     }
 
-    public static OrderV1 makeOrderTx(PrivateKeyAccount account, String matcherKey, OrderV1.Type orderType,
-                                      AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
+    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                    AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
         if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
             throw new IllegalArgumentException("spendAsset and receiveAsset should not be equal");
         }
-        return new OrderV1(orderType, assetPair, amount, price, timestamp,
-                expiration, matcherFee, account, new PublicKeyAccount(matcherKey, account.getChainId()));
+        return new OrderV2(account, new PublicKeyAccount(matcherKey, account.getChainId()), orderType, assetPair, amount, price, timestamp,
+                expiration, matcherFee, Order.V2);
     }
 
-    public static OrderV1 makeOrderTx(PrivateKeyAccount account, String matcherKey, OrderV1.Type orderType,
+    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
                                       AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
         return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
     }

@@ -1,8 +1,9 @@
 package com.wavesplatform.wavesj.transactions;
 
-import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.Signable;
+import com.wavesplatform.wavesj.Transaction;
+import com.wavesplatform.wavesj.WithId;
 import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.matcher.OrderV1;
 
 public interface ExchangeTransaction extends Transaction, Signable, WithId  {
     byte EXCHANGE = 7;
@@ -11,5 +12,7 @@ public interface ExchangeTransaction extends Transaction, Signable, WithId  {
     long getPrice();
     long getBuyMatcherFee();
     long getSellMatcherFee();
+    Order getOrder1();
+    Order getOrder2();
 
 }

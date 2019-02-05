@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class AliasTransactionV2 extends TransactionWithProofs<AliasTransactionV2
         this.alias = alias;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     @JsonCreator
@@ -68,7 +67,7 @@ public class AliasTransactionV2 extends TransactionWithProofs<AliasTransactionV2
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(ALIAS).put(Transaction.V2).put(senderPublicKey.getPublicKey());
         putBytes(buf, alias.getBytes());

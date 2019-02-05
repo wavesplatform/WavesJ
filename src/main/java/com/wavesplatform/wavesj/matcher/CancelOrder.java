@@ -1,6 +1,5 @@
 package com.wavesplatform.wavesj.matcher;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wavesplatform.wavesj.*;
 
@@ -19,7 +18,7 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
         this.assetPair = assetPair;
         this.orderId = orderId;
         this.timestamp = null;
-        this.signature = new ByteString(sender.sign(getBytes()));
+        this.signature = new ByteString(sender.sign(getBodyBytes()));
     }
 
     public CancelOrder(PrivateKeyAccount sender, long timestamp) {
@@ -27,7 +26,7 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
         this.assetPair = null;
         this.orderId = null;
         this.timestamp = timestamp;
-        this.signature = new ByteString(sender.sign(getBytes()));
+        this.signature = new ByteString(sender.sign(getBodyBytes()));
     }
 
     public CancelOrder(PrivateKeyAccount sender, AssetPair assetPair, long timestamp) {
@@ -35,7 +34,7 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
         this.assetPair = assetPair;
         this.orderId = null;
         this.timestamp = timestamp;
-        this.signature = new ByteString(sender.sign(getBytes()));
+        this.signature = new ByteString(sender.sign(getBodyBytes()));
     }
 
     public CancelOrder(PublicKeyAccount sender, AssetPair assetPair, String orderId, ByteString signature) {
@@ -72,7 +71,7 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(sender.getPublicKey());
         if (orderId != null) {
@@ -80,6 +79,14 @@ public class CancelOrder extends ObjectWithSignature implements ApiJson {
         } else {
             buf.putLong(timestamp);
         }
+        return ByteArraysUtils.getOnlyUsed(buf);
+    }
+
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(getBodyBytes())
+                .put(signature.getBytes());
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class IssueTransactionV2 extends TransactionWithProofs<IssueTransactionV2
         this.script = script;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     @JsonCreator
@@ -113,7 +112,7 @@ public class IssueTransactionV2 extends TransactionWithProofs<IssueTransactionV2
         return timestamp;
     }
 
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
         buf.put(IssueTransaction.ISSUE);
         buf.put(Transaction.V2);

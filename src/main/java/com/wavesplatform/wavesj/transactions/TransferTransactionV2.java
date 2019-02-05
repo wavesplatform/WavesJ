@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class TransferTransactionV2 extends TransactionWithProofs<TransferTransac
         this.feeAssetId = feeAssetId;
         this.attachment = attachment;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -94,7 +93,7 @@ public class TransferTransactionV2 extends TransactionWithProofs<TransferTransac
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(TransferTransaction.TRANSFER).put(Transaction.V2);
         buf.put(senderPublicKey.getPublicKey());

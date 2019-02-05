@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +40,7 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
         this.data = data;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -49,7 +48,7 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         int datalen = KBYTE;
         for (DataEntry<?> e : data) {
             datalen += e.size();
@@ -62,6 +61,18 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
             e.write(buf);
         }
         buf.putLong(timestamp).putLong(fee);
+        return ByteArraysUtils.getOnlyUsed(buf);
+    }
+
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf.put(getBodyBytes())
+                .put((byte) 1) //proofs version
+                .putShort((short) getProofs().size());
+        getProofs().forEach(p -> buf
+                .putShort((short) p.getBytes().length)
+                .put(p.getBytes()));
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

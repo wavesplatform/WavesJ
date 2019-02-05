@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
-import com.wavesplatform.wavesj.matcher.OrderV1;
+import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.LeaseTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.apache.http.HttpResponse;
@@ -28,14 +28,16 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
 
     private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {
     };
-    private static final TypeReference<List<OrderV1>> ORDER_LIST = new TypeReference<List<OrderV1>>() {
+    private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {
     };
     private static final TypeReference<List<BlockHeader>> BLOCK_HEADER_LIST = new TypeReference<List<BlockHeader>>() {
     };
@@ -384,14 +386,14 @@ public class Node {
         return parse(exec(request("/matcher"))).asText();
     }
 
-    public OrderV1 createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, OrderV1.Type orderType,
+    public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
                                long price, long amount, long expiration, long matcherFee) throws IOException {
-        OrderV1 tx = Transactions.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
+        Order tx = Transactions.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
         JsonNode tree = parse(exec(request(tx)));
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
         message.put("status", tree.get("status").asText());
-        return wavesJsonMapper.treeToValue(tree.get("message"), OrderV1.class);
+        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
     }
 
     public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
@@ -425,11 +427,11 @@ public class Node {
         return parse(exec(request(path)), ORDER_STATUS);
     }
 
-    public List<OrderV1> getOrders(PrivateKeyAccount account) throws IOException {
+    public List<Order> getOrders(PrivateKeyAccount account) throws IOException {
         return getOrders(account, "/matcher/orderbook/" + Base58.encode(account.getPublicKey()));
     }
 
-    public List<OrderV1> getOrders(PrivateKeyAccount account, AssetPair market) throws IOException {
+    public List<Order> getOrders(PrivateKeyAccount account, AssetPair market) throws IOException {
         return getOrders(account, String.format("/matcher/orderbook/%s/%s/publicKey/%s",
                 market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
     }
@@ -441,7 +443,7 @@ public class Node {
         return signature;
     }
 
-    private List<OrderV1> getOrders(PrivateKeyAccount account, String path) throws IOException {
+    private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {
         long timestamp = System.currentTimeMillis();
         String signature = getOrderHistorySignature(account, timestamp);
         HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
@@ -476,7 +478,7 @@ public class Node {
         String endpoint;
         if (obj instanceof Transaction) {
             endpoint = "/transactions/broadcast";
-        } else if (obj instanceof OrderV1) {
+        } else if (obj instanceof Order) {
             endpoint = "/matcher/orderbook";
         } else if (obj instanceof DeleteOrder) {
             DeleteOrder d = (DeleteOrder) obj;

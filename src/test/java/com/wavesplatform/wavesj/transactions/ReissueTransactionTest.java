@@ -16,7 +16,7 @@ public class ReissueTransactionTest {
 
     @Test
     public void bytesV1BytesTest() {
-        assertEquals("v28eNU7Ymezfbiqh3RPDacGgmL5zmrd4KHWiu2rhCSqKW6SFRvhAn9zshcrRCDXAWnsXRxwmj879dqizpSnqP7vCrKxH7Ukr8Vhbggv4GthAbXTwGFawfrWWCt", Base58.encode(txV1.getBytes()));
+        assertEquals("v28eNU7Ymezfbiqh3RPDacGgmL5zmrd4KHWiu2rhCSqKW6SFRvhAn9zshcrRCDXAWnsXRxwmj879dqizpSnqP7vCrKxH7Ukr8Vhbggv4GthAbXTwGFawfrWWCt", Base58.encode(txV1.getBodyBytes()));
     }
 
     @Test
@@ -26,7 +26,7 @@ public class ReissueTransactionTest {
 
     @Test
     public void bytesV2BytesTest() {
-        assertEquals("GJ4bKV5tSXgcBC53FcdTV2Uz4ooC45aKYN4R9head7ArXsmGUCxyDSquAUtPmvrnaEFWFdVRX95bzXQoMZYLDUiT33ak8f2y3jWXNH3oyjrZmuiPbJyYTYybi4oXJ", Base58.encode(txV2.getBytes()));
+        assertEquals("GJ4bKV5tSXgcBC53FcdTV2Uz4ooC45aKYN4R9head7ArXsmGUCxyDSquAUtPmvrnaEFWFdVRX95bzXQoMZYLDUiT33ak8f2y3jWXNH3oyjrZmuiPbJyYTYybi4oXJ", Base58.encode(txV2.getBodyBytes()));
     }
 
     @Test

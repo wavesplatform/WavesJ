@@ -39,7 +39,7 @@ public class LeaseCancelTransactionV1 extends TransactionWithSignature implement
         this.leaseId = leaseId;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
+        this.signature = new ByteString(senderPublicKey.sign(getBodyBytes()));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -59,7 +59,7 @@ public class LeaseCancelTransactionV1 extends TransactionWithSignature implement
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(LeaseCancelTransaction.LEASE_CANCEL);
         buf.put(senderPublicKey.getPublicKey())

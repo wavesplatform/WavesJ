@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.matcher.OrderV2;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -19,16 +18,16 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
     private final long buyMatcherFee;
     private final long sellMatcherFee;
     private final long fee;
-    private final OrderV2 buyOrder;
-    private final OrderV2 sellOrder;
+    private final Order buyOrder;
+    private final Order sellOrder;
     private final PublicKeyAccount senderPublicKey;
     private final long timestamp;
 
     public ExchangeTransactionV2(PrivateKeyAccount senderPublicKey,
+                                 Order buyOrder,
+                                 Order sellOrder,
                                  long amount,
                                  long price,
-                                 OrderV2 buyOrder,
-                                 OrderV2 sellOrder,
                                  long buyMatcherFee,
                                  long sellMatcherFee,
                                  long fee,
@@ -42,13 +41,13 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
         this.sellOrder = sellOrder;
         this.senderPublicKey = new PublicKeyAccount(senderPublicKey.getPublicKey(), senderPublicKey.getChainId());
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
-    public ExchangeTransactionV2(long amount,
+    public ExchangeTransactionV2(Order buyOrder,
+                                 Order sellOrder,
+                                 long amount,
                                  long price,
-                                 OrderV2 buyOrder,
-                                 OrderV2 sellOrder,
                                  long buyMatcherFee,
                                  long sellMatcherFee,
                                  long fee,
@@ -68,10 +67,10 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
 
     @JsonCreator
     public ExchangeTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
+                                 @JsonProperty("order1") Order buyOrder,
+                                 @JsonProperty("order2") Order sellOrder,
                                  @JsonProperty("amount") long amount,
                                  @JsonProperty("price") long price,
-                                 @JsonProperty("order1") OrderV2 buyOrder,
-                                 @JsonProperty("order2") OrderV2 sellOrder,
                                  @JsonProperty("buyMatcherFee") long buyMatcherFee,
                                  @JsonProperty("sellMatcherFee") long sellMatcherFee,
                                  @JsonProperty("fee") long fee,
@@ -110,30 +109,28 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
         return fee;
     }
 
-    public OrderV2 getOrder1() {
+    public Order getOrder1() {
         return buyOrder;
     }
 
-    public OrderV2 getOrder2() {
+    public Order getOrder2() {
         return sellOrder;
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put((byte) 0)
-                .putInt(ExchangeTransactionV2.EXCHANGE)
-                .put(Transaction.V2)
-                .putInt(buyOrder.getBytes().length)
-                .put(buyOrder.getBytes())
-                .putInt(1) //proofs version
-                .putInt(buyOrder.getProofs().size());
-        buyOrder.getProofs().forEach(p -> buf.put(p.getBytes()));
-        buf.putInt(sellOrder.getBytes().length)
-                .put(sellOrder.getBytes())
-                .putInt(1) //proofs version
-                .putInt(sellOrder.getProofs().size());
-        sellOrder.getProofs().forEach(p -> buf.put(p.getBytes()));
+                .put(ExchangeTransactionV2.EXCHANGE)
+                .put(Transaction.V2);
+        buf.putInt(buyOrder.getBytes().length);
+        if (buyOrder.getVersion() == Order.V1)
+            buf.put((byte) 1);
+        buf.put(buyOrder.getBytes());
+        buf.putInt(sellOrder.getBytes().length);
+        if (sellOrder.getVersion() == Order.V1)
+            buf.put((byte) 1);
+        buf.put(sellOrder.getBytes());
         buf.putLong(price)
                 .putLong(amount)
                 .putLong(buyMatcherFee)
@@ -155,8 +152,9 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
 
     @Override
     public byte getVersion() {
-        return 1;
+        return Transaction.V2;
     }
+
 
     @Override
     public long getTimestamp() {
@@ -198,6 +196,6 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
     @Override
     public ExchangeTransactionV2 withProof(int index, ByteString proof) {
         List<ByteString> newProofs = updateProofs(index, proof);
-        return new ExchangeTransactionV2(senderPublicKey, amount, price, buyOrder, sellOrder, buyMatcherFee, sellMatcherFee, fee, timestamp, newProofs);
+        return new ExchangeTransactionV2(senderPublicKey, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, timestamp, newProofs);
     }
 }

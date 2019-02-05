@@ -16,7 +16,7 @@ public class LeaseCancelTransactionTest {
 
     @Test
     public void bytesV1BytesTest() {
-        assertEquals("URuZWvAEPdjNuAJQ7huAC21xMvWbaSdsYB7BGbKVG4qWwZfmfGnmuhiu53U8iNjw8cF6V1dfLNGkdP5p7KVmuVLFr5LpYPwcknzMUdoBcELV5G", Base58.encode(txV1.getBytes()));
+        assertEquals("URuZWvAEPdjNuAJQ7huAC21xMvWbaSdsYB7BGbKVG4qWwZfmfGnmuhiu53U8iNjw8cF6V1dfLNGkdP5p7KVmuVLFr5LpYPwcknzMUdoBcELV5G", Base58.encode(txV1.getBodyBytes()));
     }
 
     @Test
@@ -26,7 +26,7 @@ public class LeaseCancelTransactionTest {
 
     @Test
     public void bytesV2BytesTest() {
-        assertEquals("9ScU6Wx17Vqw6zjXMGMudEVKFyEHuNH8775MDW8P9H7uUoLn5Xvx7aGMCCFRp5jyHL62mKspzr8547kYzmQ6q6b6qyjXCVxHZsdRNj614244JbzKp", Base58.encode(txV2.getBytes()));
+        assertEquals("9ScU6Wx17Vqw6zjXMGMudEVKFyEHuNH8775MDW8P9H7uUoLn5Xvx7aGMCCFRp5jyHL62mKspzr8547kYzmQ6q6b6qyjXCVxHZsdRNj614244JbzKp", Base58.encode(txV2.getBodyBytes()));
     }
 
     @Test

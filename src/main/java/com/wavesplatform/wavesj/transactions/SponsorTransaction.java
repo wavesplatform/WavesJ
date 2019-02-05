@@ -43,7 +43,7 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
         this.minAssetFee = minAssetFee;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
 
@@ -68,7 +68,7 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(SponsorTransaction.SPONSOR).put(Transaction.V1)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))

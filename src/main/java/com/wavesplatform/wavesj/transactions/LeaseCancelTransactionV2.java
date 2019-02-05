@@ -44,7 +44,7 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs<LeaseCancelT
         this.leaseId = leaseId;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -68,7 +68,7 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs<LeaseCancelT
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(LeaseCancelTransaction.LEASE_CANCEL).put(Transaction.V2).put(chainId);
         buf.put(senderPublicKey.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(leaseId));

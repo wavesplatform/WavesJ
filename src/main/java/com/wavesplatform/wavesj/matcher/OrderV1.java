@@ -3,42 +3,42 @@ package com.wavesplatform.wavesj.matcher;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
 
 public class OrderV1 extends ObjectWithSignature implements Order {
-    public ByteString getId() {
-        return id;
-    }
 
-    private final Order.Type orderType;
+
+    private final Type orderType;
     private final long amount;
     private final long price;
     private final long filled;
     private final long timestamp;
-    private final OrderV1.Status status;
+    private final Status status;
     private final AssetPair assetPair;
     private final long expiration;
     private final long matcherFee;
     private final PublicKeyAccount senderPublicKey;
     private final PublicKeyAccount matcherPublicKey;
     private final ByteString id;
+    private final List<ByteString> proofs;
 
     public OrderV1(
-            Order.Type orderType,
+            PrivateKeyAccount senderPublicKey,
+            PublicKeyAccount matcherKey,
+            Type orderType,
             AssetPair assetPair,
             long amount,
             long price,
             long timestamp,
             long expiration,
-            long matcherFee,
-            PrivateKeyAccount senderPublicKey,
-            PublicKeyAccount matcherKey) {
+            long matcherFee) {
         this.orderType = orderType;
         this.assetPair = assetPair;
         this.amount = amount;
@@ -50,20 +50,27 @@ public class OrderV1 extends ObjectWithSignature implements Order {
         this.matcherFee = matcherFee;
         this.senderPublicKey = senderPublicKey;
         this.matcherPublicKey = matcherKey;
-        this.id = new ByteString(hash(getBytes()));
-        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
+        this.id = new ByteString(hash(getBodyBytes()));
+        this.signature = new ByteString(senderPublicKey.sign(getBodyBytes()));
+        this.proofs = setProofs(this.signature);
+    }
+
+    private List<ByteString> setProofs(ByteString signature) {
+        List<ByteString> p = new ArrayList<>();
+        p.add(signature);
+        return p;
     }
 
     public OrderV1(
-            Order.Type orderType,
+            PublicKeyAccount senderPublicKey,
+            PublicKeyAccount matcherKey,
+            Type orderType,
             AssetPair assetPair,
             long amount,
             long price,
             long timestamp,
             long expiration,
             long matcherFee,
-            PublicKeyAccount senderPublicKey,
-            PublicKeyAccount matcherKey,
             ByteString signature) {
         this.orderType = orderType;
         this.assetPair = assetPair;
@@ -78,24 +85,26 @@ public class OrderV1 extends ObjectWithSignature implements Order {
         this.senderPublicKey = senderPublicKey;
         this.matcherPublicKey = matcherKey;
         this.signature = signature;
-        this.id = new ByteString(hash(getBytes()));
+        this.id = new ByteString(hash(getBodyBytes()));
+        this.proofs = setProofs(signature);
     }
 
     @JsonCreator
     public OrderV1(
             @JsonProperty("id") String id,
-            @JsonProperty("type") Order.Type orderType,
+            @JsonProperty("type") Type orderType,
+            @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
+            @JsonProperty("matcherKey") PublicKeyAccount matcherKey,
             @JsonProperty("assetPair") AssetPair assetPair,
             @JsonProperty("amount") long amount,
             @JsonProperty("price") long price,
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("filled") long filled,
-            @JsonProperty("status") Order.Status status,
+            @JsonProperty("status") Status status,
             @JsonProperty("expiration") long expiration,
             @JsonProperty("matcherFee") long matcherFee,
-            @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-            @JsonProperty("matcherKey") PublicKeyAccount matcherKey,
-            @JsonProperty("signature") ByteString signature) {
+            @JsonProperty("signature") ByteString signature,
+            @JsonProperty("proofs") List<ByteString> proofs) {
         this.orderType = orderType;
         this.assetPair = assetPair;
         this.amount = amount;
@@ -113,10 +122,11 @@ public class OrderV1 extends ObjectWithSignature implements Order {
         } else {
             this.id = null;
         }
+        this.proofs = proofs;
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(senderPublicKey.getPublicKey()).put(matcherPublicKey.getPublicKey());
         putAsset(buf, assetPair.getAmountAsset());
@@ -126,53 +136,91 @@ public class OrderV1 extends ObjectWithSignature implements Order {
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 
-    public Order.Type getOrderType() {
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf
+                .put(getBodyBytes())
+                .put(getSignature().getBytes());
+        return ByteArraysUtils.getOnlyUsed(buf);
+    }
+
+    @Override
+    public ByteString getId() {
+        return new ByteString(hash(getBodyBytes()));
+    }
+
+    @Override
+    public Type getOrderType() {
         return orderType;
     }
 
+    @Override
     public long getAmount() {
         return amount;
     }
 
+    @Override
     public long getPrice() {
         return price;
     }
 
+    @Override
     public long getFilled() {
         return filled;
     }
 
+    @Override
     public long getTimestamp() {
         return timestamp;
     }
 
-    public Order.Status getStatus() {
+    @Override
+    public Status getStatus() {
         return status;
     }
 
+    @Override
     public AssetPair getAssetPair() {
         return assetPair;
     }
 
+    @Override
     public long getExpiration() {
         return expiration;
     }
 
+    @Override
     public long getMatcherFee() {
         return matcherFee;
     }
 
+    @Override
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
     }
 
+    @Override
     public PublicKeyAccount getMatcherPublicKey() {
         return matcherPublicKey;
     }
 
+    @Override
+    public byte getVersion() {
+        return Order.V1;
+    }
+
+    @Override
+    public List<ByteString> getProofs() {
+        List<ByteString> p = new ArrayList<>();
+        p.add(getSignature());
+        return p;
+    }
+
+
     @JsonIgnore
     public boolean isActive() {
-        return status.isActive();
+        return getStatus().isActive();
     }
 
     @Override

@@ -17,7 +17,7 @@ public class AliasTransactionTest {
 
     @Test
     public void bytesV1BytesTest() {
-        assertEquals("eQ67RAW8YJXcFYmBzJCBRHAnf6UyhP1nFr9ipcLSqaeFAhQFh5MHdSYdEKPnWk436ocN1Zx9nNKUPJ6nixKW", Base58.encode(txV1.getBytes()));
+        assertEquals("eQ67RAW8YJXcFYmBzJCBRHAnf6UyhP1nFr9ipcLSqaeFAhQFh5MHdSYdEKPnWk436ocN1Zx9nNKUPJ6nixKW", Base58.encode(txV1.getBodyBytes()));
     }
 
     @Test
@@ -27,7 +27,7 @@ public class AliasTransactionTest {
 
     @Test
     public void bytesV2BytesTest() {
-        assertEquals("3dYnf1F6RzFvE1tWjMxjvesXRc9EV7KfXz8n666arFT2Ks1pFrWQo2AZ4DHMV6MVTJoNV1qQG5TdJQF8qzQfdW", Base58.encode(txV2.getBytes()));
+        assertEquals("3dYnf1F6RzFvE1tWjMxjvesXRc9EV7KfXz8n666arFT2Ks1pFrWQo2AZ4DHMV6MVTJoNV1qQG5TdJQF8qzQfdW", Base58.encode(txV2.getBodyBytes()));
     }
 
     @Test

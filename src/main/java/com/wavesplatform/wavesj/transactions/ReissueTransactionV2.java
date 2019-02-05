@@ -54,7 +54,7 @@ public class ReissueTransactionV2 extends TransactionWithProofs<ReissueTransacti
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -86,7 +86,7 @@ public class ReissueTransactionV2 extends TransactionWithProofs<ReissueTransacti
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(ReissueTransaction.REISSUE).put(Transaction.V2).put(chainId)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)

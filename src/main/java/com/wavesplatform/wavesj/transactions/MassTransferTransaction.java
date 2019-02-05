@@ -51,7 +51,7 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
         this.fee = fee;
         this.attachment = attachment;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -79,7 +79,7 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(5 * KBYTE);
         buf.put(MassTransferTransaction.MASS_TRANSFER).put(Transaction.V1);
         buf.put(senderPublicKey.getPublicKey());

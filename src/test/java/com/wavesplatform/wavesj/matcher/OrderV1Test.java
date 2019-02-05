@@ -9,11 +9,16 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class OrderV1Test {
-    OrderV1 ord1 = new OrderV1(OrderV1.Type.BUY, new AssetPair("PHCN", "Aqy7PRU"), 1583290045643L, 3411800000000L, 1534932075909L, 1536178324108L, 4272607605316276L, PrivateKeyAccount.fromPrivateKey("CrppxhgtZZNd5wcVMwsudWJ78ZKLqETR8AmhtjeKDFZU", (byte)'T'), new PublicKeyAccount("G67KDhqHdjNNb2tnHRgNbDppQEM9ySXdiBip577n2Xoj", (byte)'T'));
+    private Order ord1 = new OrderV1(
+            PrivateKeyAccount.fromPrivateKey("CrppxhgtZZNd5wcVMwsudWJ78ZKLqETR8AmhtjeKDFZU", (byte)'T'),
+            new PublicKeyAccount("G67KDhqHdjNNb2tnHRgNbDppQEM9ySXdiBip577n2Xoj", (byte)'T'),
+            Order.Type.BUY,
+            new AssetPair("PHCN", "Aqy7PRU"),
+            1583290045643L, 3411800000000L, 1534932075909L, 1536178324108L, 4272607605316276L);
 
     @Test
     public void bytesTest() {
-        assertEquals("qjMXAJL38hGRZxmn9Rrf9EdspTdHegtWXBDQy7FzZJePFmzQ2qoYZW6TAppssXXpbQPzpsiPFEJvkUzJ6BBhv6tg21o8QZ4JQB3P7MuUFB9v43ofpZmnZbJ2oX8q99YhDij33zvk5XWHCYceqAJKXtXn9SWh9", Base58.encode(ord1.getBytes()));
+        assertEquals("qjMXAJL38hGRZxmn9Rrf9EdspTdHegtWXBDQy7FzZJePFmzQ2qoYZW6TAppssXXpbQPzpsiPFEJvkUzJ6BBhv6tg21o8QZ4JQB3P7MuUFB9v43ofpZmnZbJ2oX8q99YhDij33zvk5XWHCYceqAJKXtXn9SWh9", Base58.encode(ord1.getBodyBytes()));
     }
 
     @Test

@@ -44,7 +44,7 @@ public class SetScriptTransaction extends TransactionWithProofs<SetScriptTransac
         this.chainId = chainId;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -68,7 +68,7 @@ public class SetScriptTransaction extends TransactionWithProofs<SetScriptTransac
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
         ByteBuffer buf = ByteBuffer.allocate(KBYTE + rawScript.length);
         buf.put(SetScriptTransaction.SET_SCRIPT).put(Transaction.V1).put(chainId);

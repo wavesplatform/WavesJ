@@ -3,7 +3,6 @@ package com.wavesplatform.wavesj.matcher;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
@@ -13,58 +12,14 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class OrderV2 extends ObjectWithProofs implements ApiJson {
-    public ByteString getId() {
-        return id;
-    }
+public class OrderV2 extends ObjectWithProofs implements Order {
 
-    public enum Type {
-        BUY, SELL;
-
-        @JsonValue
-        public String toJson() {
-            return toString().toLowerCase();
-        }
-
-        @JsonCreator
-        public static Type fromString(String json) {
-            return json == null ? null : Type.valueOf(json.toUpperCase());
-        }
-    }
-
-    public enum Status {
-        ACCEPTED, FILLED, PARTIALLY_FILLED, CANCELED, NOT_FOUND;
-
-        @JsonCreator
-        public static Status fromString(String json) {
-            if (json == null) return null;
-            String upper = json.toUpperCase();
-            if (upper.equals("ACCEPTED") || upper.equals("ORDERACCEPTED")) {
-                return ACCEPTED;
-            } else if (upper.equals("FILLED")) {
-                return FILLED;
-            } else if (upper.equals("PARTIALLYFILLED")) {
-                return PARTIALLY_FILLED;
-            } else if (upper.equals("CANCELLED")) {
-                return CANCELED;
-            } else if (upper.equals("NOTFOUND")) {
-                return NOT_FOUND;
-            } else {
-                throw new IllegalArgumentException("Bad status value: " + json);
-            }
-        }
-
-        public boolean isActive() {
-            return this == ACCEPTED || this == PARTIALLY_FILLED;
-        }
-    }
-
-    private final OrderV2.Type orderType;
+    private final Order.Type orderType;
     private final long amount;
     private final long price;
     private final long filled;
     private final long timestamp;
-    private final OrderV2.Status status;
+    private final Order.Status status;
     private final AssetPair assetPair;
     private final long expiration;
     private final long matcherFee;
@@ -74,41 +29,42 @@ public class OrderV2 extends ObjectWithProofs implements ApiJson {
     private final byte version;
 
     public OrderV2(
-            Type orderType,
+            PrivateKeyAccount senderPublicKey,
+            PublicKeyAccount matcherKey,
+            Order.Type orderType,
             AssetPair assetPair,
             long amount,
             long price,
             long timestamp,
             long expiration,
             long matcherFee,
-            PrivateKeyAccount senderPublicKey,
-            PublicKeyAccount matcherKey, byte version) {
+            byte version) {
         this.orderType = orderType;
         this.assetPair = assetPair;
         this.amount = amount;
         this.price = price;
         this.timestamp = timestamp;
         this.version = version;
-        this.status = Status.ACCEPTED;
+        this.status = Order.Status.ACCEPTED;
         this.filled = 0;
         this.expiration = expiration;
         this.matcherFee = matcherFee;
         this.senderPublicKey = senderPublicKey;
         this.matcherPublicKey = matcherKey;
-        this.id = new ByteString(hash(getBytes()));
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.id = new ByteString(hash(getBodyBytes()));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public OrderV2(
-            Type orderType,
+            PublicKeyAccount senderPublicKey,
+            PublicKeyAccount matcherKey,
+            Order.Type orderType,
             AssetPair assetPair,
             long amount,
             long price,
             long timestamp,
             long expiration,
             long matcherFee,
-            PublicKeyAccount senderPublicKey,
-            PublicKeyAccount matcherKey,
             byte version,
             List<ByteString> proofs) {
         setProofs(proofs);
@@ -119,25 +75,25 @@ public class OrderV2 extends ObjectWithProofs implements ApiJson {
         this.price = price;
         this.timestamp = timestamp;
 
-        this.status = Status.ACCEPTED;
+        this.status = Order.Status.ACCEPTED;
         this.filled = 0;
         this.expiration = expiration;
         this.matcherFee = matcherFee;
         this.senderPublicKey = senderPublicKey;
         this.matcherPublicKey = matcherKey;
-        this.id = new ByteString(hash(getBytes()));
+        this.id = new ByteString(hash(getBodyBytes()));
     }
 
     @JsonCreator
     public OrderV2(
             @JsonProperty("id") String id,
-            @JsonProperty("type") Type orderType,
+            @JsonProperty("type") Order.Type orderType,
             @JsonProperty("assetPair") AssetPair assetPair,
             @JsonProperty("amount") long amount,
             @JsonProperty("price") long price,
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("filled") long filled,
-            @JsonProperty("status") Status status,
+            @JsonProperty("status") Order.Status status,
             @JsonProperty("expiration") long expiration,
             @JsonProperty("matcherFee") long matcherFee,
             @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
@@ -165,9 +121,9 @@ public class OrderV2 extends ObjectWithProofs implements ApiJson {
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
-        buf.put(Transaction.V2);
+        buf.put(Order.V2);
         buf.put(senderPublicKey.getPublicKey()).put(matcherPublicKey.getPublicKey());
         putAsset(buf, assetPair.getAmountAsset());
         putAsset(buf, assetPair.getPriceAsset());
@@ -176,52 +132,83 @@ public class OrderV2 extends ObjectWithProofs implements ApiJson {
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 
-    public OrderV2.Type getOrderType() {
+    @Override
+    public byte[] getBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        buf
+                .put(getBodyBytes())
+                .put((byte) 1) //proofs version
+                .putShort((short) getProofs().size());
+        getProofs().forEach(p -> buf
+                .putShort((short) p.getBytes().length)
+                .put(p.getBytes()));
+        return ByteArraysUtils.getOnlyUsed(buf);
+    }
+
+    @Override
+    public List<ByteString> getProofs() {
+        return proofs;
+    }
+
+
+    @Override
+    public Order.Type getOrderType() {
         return orderType;
     }
 
+    @Override
     public long getAmount() {
         return amount;
     }
 
+    @Override
     public long getPrice() {
         return price;
     }
 
+    @Override
     public long getFilled() {
         return filled;
     }
 
+    @Override
     public long getTimestamp() {
         return timestamp;
     }
 
+    @Override
     public OrderV2.Status getStatus() {
         return status;
     }
 
+    @Override
     public AssetPair getAssetPair() {
         return assetPair;
     }
 
+    @Override
     public long getExpiration() {
         return expiration;
     }
 
+    @Override
     public long getMatcherFee() {
         return matcherFee;
     }
 
+    @Override
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
     }
 
+    @Override
     public PublicKeyAccount getMatcherPublicKey() {
         return matcherPublicKey;
     }
 
+    @Override
     public byte getVersion() {
-        return version;
+        return Order.V2;
     }
 
     @JsonIgnore
@@ -239,7 +226,7 @@ public class OrderV2 extends ObjectWithProofs implements ApiJson {
             newProofs.add(ByteString.EMPTY);
         }
         newProofs.set(index, proof);
-        return new OrderV2(orderType, assetPair, amount, price, timestamp, expiration, matcherFee, senderPublicKey, matcherPublicKey, (byte) 2, newProofs);
+        return new OrderV2(senderPublicKey, matcherPublicKey, orderType, assetPair, amount, price, timestamp, expiration, matcherFee, (byte) 2, newProofs);
     }
 
     @Override
@@ -250,6 +237,11 @@ public class OrderV2 extends ObjectWithProofs implements ApiJson {
         OrderV2 order = (OrderV2) o;
 
         return getId() != null ? getId().equals(order.getId()) : order.getId() == null;
+    }
+
+    @Override
+    public ByteString getId() {
+        return new ByteString(hash(getBodyBytes()));
     }
 
     @Override
