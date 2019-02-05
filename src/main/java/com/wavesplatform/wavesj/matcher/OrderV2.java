@@ -212,6 +212,7 @@ public class OrderV2 extends ObjectWithProofs implements Order {
     }
 
     @JsonIgnore
+    @Override
     public boolean isActive() {
         return status.isActive();
     }

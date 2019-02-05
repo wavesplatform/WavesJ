@@ -219,6 +219,7 @@ public class OrderV1 extends ObjectWithSignature implements Order {
 
 
     @JsonIgnore
+    @Override
     public boolean isActive() {
         return getStatus().isActive();
     }
