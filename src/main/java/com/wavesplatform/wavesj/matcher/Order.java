@@ -81,4 +81,6 @@ public interface Order  extends Signable, ApiJson {
     byte getVersion();
 
     List<ByteString> getProofs();
+
+    boolean isActive();
 }

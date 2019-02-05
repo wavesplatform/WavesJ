@@ -1,6 +1,7 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.ExchangeTransaction;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
@@ -34,6 +35,26 @@ public class NodeTest {
 
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
+
+    @Test
+    public void xxx() throws IOException {
+        Node node = new Node();
+
+        PrivateKeyAccount matcher =
+                PrivateKeyAccount.fromPrivateKey("AhbRqksPZWwgoBrD8YqfPzN9uJZjHMaXvfWe7PDpHZoB", Account.TESTNET);
+        String matcherKey = Base58.encode(matcher.getPublicKey());
+        long matcherFee = 300000L;
+
+        AssetPair pair = new AssetPair("CR7DB15TWwnr3xE9CYJx6EMJGjGqDEbwxB6AsKch5FGM","3tEgksr86ooPVKyQHZEiAJhwnMWDmos68AFhbXNjBJjL");
+        Order buyOrder = Transactions.makeOrderTx(alice, matcherKey, Order.Type.BUY, pair, 50000, 10000,
+                System.currentTimeMillis() + 60*60*1000, 300000, System.currentTimeMillis());
+        Order sellOrder = Transactions.makeOrderTx(bob, matcherKey, Order.Type.SELL, pair, 50000, 10000,
+                System.currentTimeMillis() + 60*60*1000, 300000, System.currentTimeMillis());
+
+        String exchangeTxId = node.exchangeTransactio(matcher, buyOrder, sellOrder, 10000, 50000,
+                matcherFee,matcherFee,matcherFee);
+    }
+
 
     @Test
     public void testGetters() throws IOException {

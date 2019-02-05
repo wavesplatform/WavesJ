@@ -297,6 +297,11 @@ public class Node {
         return parse(exec(request(path)), key);
     }
 
+    public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, ByteString attachment) throws IOException {
+        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, attachment);
+        return send(tx);
+    }
+
     public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, String message) throws IOException {
         TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, message);
         return send(tx);
@@ -344,6 +349,11 @@ public class Node {
 
     public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
         return send(Transactions.makeDataTx(from, data, fee));
+    }
+
+    public String exchangeTransactio(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
+                                     long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
+        return send(Transactions.makeExchangeTransactionV2(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
     }
 
 

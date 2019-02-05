@@ -41,6 +41,16 @@ public class Transactions {
         return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
     }
 
+    public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
+                                                       long fee, String feeAssetId, ByteString attachment) {
+        return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
+    }
+
+    public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
+                                                       long fee, String feeAssetId, ByteString attachment, long timestamp) {
+        return new TransferTransactionV2(sender, recipient, amount, assetId, fee, feeAssetId, attachment == null ? ByteString.EMPTY : attachment, timestamp);
+    }
+
     public static BurnTransactionV2 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
         if (isWaves(assetId)) {
             throw new IllegalArgumentException("Cannot burn WAVES");
@@ -141,8 +151,20 @@ public class Transactions {
     }
 
     public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                      AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
+                                    AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
         return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
+    }
+
+
+
+    public static ExchangeTransactionV2 makeExchangeTransactionV2(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
+                                                                  long price, long buyMatcherFee, long sellMatcherFee, long fee) {
+        return makeExchangeTransactionV2(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, System.currentTimeMillis());
+    }
+
+    public static ExchangeTransactionV2 makeExchangeTransactionV2(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
+                                                                  long price, long buyMatcherFee, long sellMatcherFee, long fee, long timestamp) {
+        return new ExchangeTransactionV2(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, timestamp);
     }
 
     public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account) {
