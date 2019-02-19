@@ -307,8 +307,8 @@ public class Node {
         return send(tx);
     }
 
-    public String transfer(PrivateKeyAccount from, String assetId, String recipient,
-                           long amount, long fee, String feeAssetId, String message) throws IOException {
+    public String transfer(PrivateKeyAccount from, String recipient,
+                           long amount, String assetId, long fee, String feeAssetId, String message) throws IOException {
         TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
         return send(tx);
     }
