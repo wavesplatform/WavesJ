@@ -265,6 +265,15 @@ public class NodeTest {
     }
 
     @Test
+    public void testGetBalance() throws IOException {
+        Node n = new Node();
+        BalanceDetails bd = n.getBalanceDetails(alice.getAddress());
+        Long balance = n.getBalance(alice.getAddress());
+
+        assertEquals(bd.getAvailable(), balance);
+    }
+
+    @Test
     public void testValidator() throws IOException {
         String addr = "3MzZCGFyuxgC4ZmtKRS7vpJTs75ZXdkbp1K";
         Node node = new Node();

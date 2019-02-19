@@ -129,7 +129,7 @@ public class Node {
     }
 
     public BalanceDetails getBalanceDetails(String address) throws IOException {
-        return wavesJsonMapper.convertValue(send("/addresses/balance/details/" + address, "balances"), BALANCE_DETAILS);
+        return wavesJsonMapper.convertValue(send("/addresses/balance/details/" + address), BALANCE_DETAILS);
     }
 
     public long getBalance(String address, int confirmations) throws IOException {
