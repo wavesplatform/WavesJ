@@ -70,18 +70,19 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
         buf.put(getBodyBytes())
                 .put((byte) 1) //proofs version
                 .putShort((short) getProofs().size());
-        getProofs().forEach(p -> buf
-                .putShort((short) p.getBytes().length)
-                .put(p.getBytes()));
+        for (ByteString p : getProofs()) {
+            buf
+                    .putShort((short) p.getBytes().length)
+                    .put(p.getBytes());
+        }
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 
     @Override
     public DataTransaction withProof(int index, ByteString proof) {
         List<ByteString> newProofs = updateProofs(index, proof);
-        return new DataTransaction(senderPublicKey,data, fee, timestamp, newProofs);
+        return new DataTransaction(senderPublicKey, data, fee, timestamp, newProofs);
     }
-
 
 
     public Collection<DataEntry<?>> getData() {
@@ -128,7 +129,6 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
     }
-
 
 
 }

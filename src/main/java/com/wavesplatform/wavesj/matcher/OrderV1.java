@@ -56,7 +56,7 @@ public class OrderV1 extends ObjectWithSignature implements Order {
     }
 
     private List<ByteString> setProofs(ByteString signature) {
-        List<ByteString> p = new ArrayList<>();
+        List<ByteString> p = new ArrayList<ByteString>();
         p.add(signature);
         return p;
     }
@@ -212,7 +212,7 @@ public class OrderV1 extends ObjectWithSignature implements Order {
 
     @Override
     public List<ByteString> getProofs() {
-        List<ByteString> p = new ArrayList<>();
+        List<ByteString> p = new ArrayList<ByteString>();
         p.add(getSignature());
         return p;
     }

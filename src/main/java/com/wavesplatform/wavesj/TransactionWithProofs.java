@@ -45,9 +45,11 @@ public abstract class TransactionWithProofs<T extends Transaction> extends Trans
         buf.put(getBodyBytes())
                 .put((byte) 1) //proofs version
                 .putShort((short) getProofs().size());
-        getProofs().forEach(p -> buf
-                .putShort((short) p.getBytes().length)
-                .put(p.getBytes()));
+        for (ByteString p : getProofs()) {
+            buf
+                    .putShort((short) p.getBytes().length)
+                    .put(p.getBytes());
+        }
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 }
