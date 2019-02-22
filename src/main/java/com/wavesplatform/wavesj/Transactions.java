@@ -141,8 +141,8 @@ public class Transactions {
         return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
     }
 
-    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                    AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
+    public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                  AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
         if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
             throw new IllegalArgumentException("spendAsset and receiveAsset should not be equal");
         }
@@ -150,40 +150,40 @@ public class Transactions {
                 expiration, matcherFee, Order.V2);
     }
 
-    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                    AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
-        return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
+    public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                  AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
+        return makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
     }
 
 
 
-    public static ExchangeTransactionV2 makeExchangeTransactionV2(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
-                                                                  long price, long buyMatcherFee, long sellMatcherFee, long fee) {
-        return makeExchangeTransactionV2(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, System.currentTimeMillis());
+    public static ExchangeTransactionV2 makeExchangeTx(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
+                                                       long price, long buyMatcherFee, long sellMatcherFee, long fee) {
+        return makeExchangeTx(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, System.currentTimeMillis());
     }
 
-    public static ExchangeTransactionV2 makeExchangeTransactionV2(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
-                                                                  long price, long buyMatcherFee, long sellMatcherFee, long fee, long timestamp) {
+    public static ExchangeTransactionV2 makeExchangeTx(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
+                                                       long price, long buyMatcherFee, long sellMatcherFee, long fee, long timestamp) {
         return new ExchangeTransactionV2(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, timestamp);
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account) {
-        return makeOrderCancelTx(account, System.currentTimeMillis());
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account) {
+        return makeOrderCancel(account, System.currentTimeMillis());
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, long timestamp) {
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, long timestamp) {
         return new CancelOrder(account, timestamp);
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair) {
-        return makeOrderCancelTx(account, assetPair, System.currentTimeMillis());
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, AssetPair assetPair) {
+        return makeOrderCancel(account, assetPair, System.currentTimeMillis());
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, long timestamp) {
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, AssetPair assetPair, long timestamp) {
         return new CancelOrder(account, assetPair, timestamp);
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
         return new CancelOrder(account, assetPair, orderId);
     }
 

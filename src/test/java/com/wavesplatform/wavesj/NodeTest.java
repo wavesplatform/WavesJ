@@ -1,7 +1,6 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.transactions.ExchangeTransaction;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
@@ -46,9 +45,9 @@ public class NodeTest {
         long matcherFee = 300000L;
 
         AssetPair pair = new AssetPair("CR7DB15TWwnr3xE9CYJx6EMJGjGqDEbwxB6AsKch5FGM","3tEgksr86ooPVKyQHZEiAJhwnMWDmos68AFhbXNjBJjL");
-        Order buyOrder = Transactions.makeOrderTx(alice, matcherKey, Order.Type.BUY, pair, 50000, 10000,
+        Order buyOrder = Transactions.makeOrder(alice, matcherKey, Order.Type.BUY, pair, 50000, 10000,
                 System.currentTimeMillis() + 60*60*1000, 300000, System.currentTimeMillis());
-        Order sellOrder = Transactions.makeOrderTx(bob, matcherKey, Order.Type.SELL, pair, 50000, 10000,
+        Order sellOrder = Transactions.makeOrder(bob, matcherKey, Order.Type.SELL, pair, 50000, 10000,
                 System.currentTimeMillis() + 60*60*1000, 300000, System.currentTimeMillis());
 
         String exchangeTxId = node.exchangeTransactio(matcher, buyOrder, sellOrder, 10000, 50000,

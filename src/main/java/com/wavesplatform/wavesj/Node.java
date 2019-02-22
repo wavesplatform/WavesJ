@@ -353,7 +353,7 @@ public class Node {
 
     public String exchangeTransactio(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
                                      long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
-        return send(Transactions.makeExchangeTransactionV2(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
+        return send(Transactions.makeExchangeTx(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
     }
 
 
@@ -398,7 +398,7 @@ public class Node {
 
     public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
                                long price, long amount, long expiration, long matcherFee) throws IOException {
-        Order tx = Transactions.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
+        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
         JsonNode tree = parse(exec(request(tx)));
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
@@ -407,17 +407,17 @@ public class Node {
     }
 
     public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancelTx(account, assetPair, orderId);
+        ApiJson tx = Transactions.makeOrderCancel(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
     }
 
     public String cancelOrdersbyPair(PrivateKeyAccount account, AssetPair assetPair) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancelTx(account, assetPair);
+        ApiJson tx = Transactions.makeOrderCancel(account, assetPair);
         return parse(exec(request(tx)), "status").asText();
     }
 
     public String cancelAllOrders(PrivateKeyAccount account) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancelTx(account);
+        ApiJson tx = Transactions.makeOrderCancel(account);
         return parse(exec(request(tx)), "status").asText();
     }
 
