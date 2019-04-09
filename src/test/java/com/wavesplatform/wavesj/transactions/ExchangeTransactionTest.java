@@ -4,30 +4,58 @@ import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.matcher.Order;
 import org.junit.Test;
 
-import java.util.Collections;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Sell Account:
+ *      address=3MtEyGGB3XQ6zWB71cCN98fotHvjxxwNMu4
+ *      public=4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce
+ *      private=3C8rjfZJnh2EHhKccvggPsoMXLw53DriT8EnjyRPJdhh
+ *      seed=sunset noodle trap mule mango can spring garment slot august photo champion paper host more
+ *
+ * Buy Account:
+ *      address=3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw
+ *      public=H9S6sPxueb6z1PB46VZJD6FbaTxsNfT8GHv5PPHbvDHx
+ *      private=HAWqLZA98pJPvwGZuomKUkNpgfzKt4HhfMdFWPXwjxuX
+ *      seed=creek extend car eight fat hole farm they behave element bag allow absurd clinic harbor
+ *
+ * Matcher Account:
+ *      address=3Mu5FBXL16bHA5EuDrFAx6Ej2zjydqFR8bt
+ *      public=9EpwUuxutBzZHTttQZWWSDnkQpgFVdwbpzpHen6bbmJT
+ *      private=HhDixyYKsfDYbV6XnMJgrpT2mHPGvSfGKS5RfX3y9W4s
+ *      seed=save code exhibit ramp scare donate net enjoy glimpse like absorb assume skin robust grass
+ */
 public class ExchangeTransactionTest {
-    Order sell = new Order(Order.Type.SELL, new AssetPair(Asset.WAVES, "9ZDWzK53XT5bixkmMwTJi2YzgxCqn5dUajXFcT2HcFDy"), 3, 5000000000L, 1526992336241L, 1529584336241L, 2, new PublicKeyAccount("7E9Za8v8aT6EyU1sX91CVK7tWUeAetnNYDxzKZsyjyKV", (byte)'T'), new PublicKeyAccount("Fvk5DXmfyWVZqQVBowUBMwYtRAHDtdyZNNeRrwSjt6KP", (byte)'T'), new ByteString("2R6JfmNjEnbXAA6nt8YuCzSf1effDS4Wkz8owpCD9BdCNn864SnambTuwgLRYzzeP5CAsKHEviYKAJ2157vdr5Zq"));
-    Order buy = new Order(Order.Type.BUY, new AssetPair(Asset.WAVES, "9ZDWzK53XT5bixkmMwTJi2YzgxCqn5dUajXFcT2HcFDy"), 2, 6000000000L, 1526992336241L, 1529584336241L, 1, new PublicKeyAccount("BqeJY8CP3PeUDaByz57iRekVUGtLxoow4XxPvXfHynaZ", (byte)'T'), new PublicKeyAccount("Fvk5DXmfyWVZqQVBowUBMwYtRAHDtdyZNNeRrwSjt6KP", (byte)'T'), new ByteString("2bkuGwECMFGyFqgoHV4q7GRRWBqYmBFWpYRkzgYANR4nN2twgrNaouRiZBqiK2RJzuo9NooB9iRiuZ4hypBbUQs"));
+
+    Order sell = new Order(Order.Type.SELL,
+            new AssetPair(Asset.WAVES, "9ZDWzK53XT5bixkmMwTJi2YzgxCqn5dUajXFcT2HcFDy"),
+            3, 5000000000L, 1526992336241L, 1529584336241L, 2,
+            new PublicKeyAccount("4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce", (byte)'T'),
+            new PublicKeyAccount("9EpwUuxutBzZHTttQZWWSDnkQpgFVdwbpzpHen6bbmJT", (byte)'T'),
+            new ByteString("5H88PP3MKbjp33MB1FTjvPzwse6RRFTLSw6DvStqJT1Daj3n4Z9cjJaLJVD9XRWnQURZQNN76uZFMKcVy5ZRXhQ9"));
+
+    Order buy = new Order(Order.Type.BUY,
+            new AssetPair(Asset.WAVES, "9ZDWzK53XT5bixkmMwTJi2YzgxCqn5dUajXFcT2HcFDy"),
+            2, 6000000000L, 1526992336241L, 1529584336241L, 1,
+            new PublicKeyAccount("H9S6sPxueb6z1PB46VZJD6FbaTxsNfT8GHv5PPHbvDHx", (byte)'T'),
+            new PublicKeyAccount("9EpwUuxutBzZHTttQZWWSDnkQpgFVdwbpzpHen6bbmJT", (byte)'T'),
+            new ByteString("5zcZi59ExGw34aN9jWTeUubh1k8V6PfDp7fBPVLa1xfDdNX8nwn7TtddVhGgQjDApqcYaHSLhdmVZQw8zjGQTSfA"));
 
     ExchangeTransaction tx = new ExchangeTransaction(
             2, 5000000000L, buy, sell, 1, 1, 1, 1526992336241L,
-            new ByteString("5NxNhjMrrH5EWjSFnVnPbanpThic6fnNL48APVAkwq19y2FpQp4tNSqoAZgboC2ykUfqQs9suwBQj6wERmsWWNqa")
+            new ByteString("46vN6tLmbgLZ8reFwURBRnifoKntP7rBxpr1CPvrQwEPERBMQpWGpdcn559yCQTQrZ3XkXQseVN1CbR4L97fzhDf")
     );
 
     @Test
     public void bytesBytesTest() {
-        assertEquals("6MgyGQMgz1QqkmbgKRKuAzeaNu3ZwmonHawr7k6fbqaAUJSPuvJyVGrE8U9CnVafwmuFcifDfePnnjizWbTqmkFAaejNegi1C3mgfwHMATNy4JyFkwnCjtfzt22Y7LaVHWft81nuQEhgNT4w9w7fATVyYuMM7ZsMfaBBaJN9LPaARDK5dR7qPWvh6TKuWBCSx1QmN6hwWcHJwKb8fNvTLZiX9Dk3bmqCK9idw1pjZDMLoeRPRzivDCTvLkAYtqyHactxtgN9WSAtjB1yQpgMmYkEfBBamStdxo8Ljw4fqKGetotsUyLRfz8FFexAnmoKxwvmpkxGuspEtpMnJAq9LC1FBhAkNDuGHWRrpQksLgXzyLLtnY31q9TBTWjbCsr44ByVqBYt2bFszNo77a8AWJJziKeuvGiWYoK56FYScQx5z27R1HZV4dCXc3ypkberMJ49YprawWJKfoiu2GsjybCCaQnbFcF1Ffs2Nm83wc45btkCHYM64FCWGFsNY9M2MLVADpzWwauNNW6VDeSkirn2jS5ZSui48j6NEQjXEVzH3Z3CsF66hgGrt62YwREKccRnKUjvTWuG8qimf6woQ7uKgTsqHw3FdzybHDrwuLDc6JBDPJoP7Kxc", Base58.encode(tx.getBytes()));
+        assertEquals("6MgyGQMgz1Qr5HaMc6pmcVVUxhDL3T8EmnJfWuQCpVKF3LZDdEgudqzuFfNGadmkWFD1H6neUxPE1xhsP2aC3FuPAPJUaapjznv4J2KBUUQmjrMk9kTaEMt7bbzHkHbdC9eqsuDrYgYFyQhjq5TSBRyaGERGyuw5sy3SSkDkkApfPL4cDadzCWg6feA2c7MUJiAifSRAUAW9J5FNEZWSgJxAWU2WfFL6PfHS3maTNRvDfCQziDwVsdToMqYfiA5DqtDXMX6wsTnbYtYuryKo9GQQPmHWUt32f1cBjfKPBC8goapDKWFjJKNPgEwW7ri47L8Tyt2sHBhCmC3bULaJYihy6qjpbYVGfJdaA34PUaMJZSyTD2SHTsbKaApobvDXkoqrSdfJUoGmwbPrQnDWSBzNPfTTrrykNNkpXDS8Eb7Wmkf9AEnm9ar3ASuewbY5ZAUvobV9qzCwALurPmEQ7w6ejco7ubfoTe7Ru8US3iw5zBfie42H3crp3h3pCmgYDduAQ3Tmayw9qGSXARaiwJAVkUoMHBzDFxoTvq6x5oFe7T9umrw9mMEqTgFWs8cJAWyr1ptAAg1PPfw7iFf7LDAijz7e5fiiY9WjXqGe3G6e9jtYFBeM7dGk", Base58.encode(tx.getBytes()));
     }
 
     @Test
     public void bytesIdTest() {
-        assertEquals("FaDrdKax2KBZY6Mh7K3tWmanEdzZx6MhYUmpjV3LBJRp", tx.getId().getBase58String());
+        assertEquals("CkoSA84PqhAp7b68PSQBKYAybaRAaHZLd64jzBpWDzQ3", tx.getId().getBase58String());
     }
-
 
     @Test
     public void signatureTest() {
