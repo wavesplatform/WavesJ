@@ -62,22 +62,22 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
     }
 
     public ContractInvocationTransaction withArg(long val) {
-        call.addArg(new LongArg(val));
+        call.addArg(val);
         return this;
     }
 
     public ContractInvocationTransaction withArg(String val) {
-        call.addArg(new StringArg(val));
+        call.addArg(val);
         return this;
     }
 
     public ContractInvocationTransaction withArg(boolean val) {
-        call.addArg(new BooleanArg(val));
+        call.addArg(val);
         return this;
     }
 
     public ContractInvocationTransaction withArg(ByteString val) {
-        call.addArg(new BinaryArg(val));
+        call.addArg(val);
         return this;
     }
 
@@ -237,8 +237,24 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
             this.name = name;
         }
 
-        public void addArg(FunctionalArg<?> arg) {
-            args.add(arg);
+        public FunctionCall addArg(long val) {
+            args.add(new LongArg(val));
+            return this;
+        }
+
+        public FunctionCall addArg(String val) {
+            args.add(new StringArg(val));
+            return this;
+        }
+
+        public FunctionCall addArg(boolean val) {
+            args.add(new BooleanArg(val));
+            return this;
+        }
+
+        public FunctionCall addArg(ByteString val) {
+            args.add(new BinaryArg(val));
+            return this;
         }
 
         public void write(ByteBuffer buf) {
