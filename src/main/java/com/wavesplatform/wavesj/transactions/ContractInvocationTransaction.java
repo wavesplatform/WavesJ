@@ -178,6 +178,37 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         return getOnlyUsed(buf);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContractInvocationTransaction that = (ContractInvocationTransaction) o;
+
+        if (getChainId() != that.getChainId()) return false;
+        if (getFee() != that.getFee()) return false;
+        if (getTimestamp() != that.getTimestamp()) return false;
+        if (!getSenderPublicKey().equals(that.getSenderPublicKey())) return false;
+        if (!getRecipient().equals(that.getRecipient())) return false;
+        if (!getCall().equals(that.getCall())) return false;
+        if (getPayments() != null ? !getPayments().equals(that.getPayments()) : that.getPayments() != null)
+            return false;
+        return getFeeAssetId() != null ? getFeeAssetId().equals(that.getFeeAssetId()) : that.getFeeAssetId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) getChainId();
+        result = 31 * result + getSenderPublicKey().hashCode();
+        result = 31 * result + getRecipient().hashCode();
+        result = 31 * result + getCall().hashCode();
+        result = 31 * result + (getPayments() != null ? getPayments().hashCode() : 0);
+        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
+        result = 31 * result + (getFeeAssetId() != null ? getFeeAssetId().hashCode() : 0);
+        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
+        return result;
+    }
+
     @JsonPropertyOrder({"name", "args"})
     public static class FunctionCall implements Serializable {
         private static final byte E_FUNCALL = (byte) 9;
@@ -236,6 +267,24 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         public List<FunctionalArg<?>> getArgs() {
             return args;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FunctionCall that = (FunctionCall) o;
+
+            if (!getName().equals(that.getName())) return false;
+            return getArgs() != null ? getArgs().equals(that.getArgs()) : that.getArgs() == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getName().hashCode();
+            result = 31 * result + (getArgs() != null ? getArgs().hashCode() : 0);
+            return result;
+        }
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
@@ -264,6 +313,24 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         }
 
         public abstract String getType();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FunctionalArg<?> that = (FunctionalArg<?>) o;
+
+            if (!getValue().equals(that.getValue())) return false;
+            return getType().equals(that.getType());
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getValue().hashCode();
+            result = 31 * result + getType().hashCode();
+            return result;
+        }
     }
 
     public static class LongArg extends FunctionalArg<Long> {
@@ -379,6 +446,24 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
 
         public String getAssetId() {
             return assetId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Payment payment = (Payment) o;
+
+            if (getAmount() != payment.getAmount()) return false;
+            return getAssetId() != null ? getAssetId().equals(payment.getAssetId()) : payment.getAssetId() == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (getAmount() ^ (getAmount() >>> 32));
+            result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
+            return result;
         }
     }
 }
