@@ -30,7 +30,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
     private long timestamp;
 
     @JsonCreator
-    ContractInvocationTransaction(@JsonProperty("chainId") byte chainId,
+    public ContractInvocationTransaction(@JsonProperty("chainId") byte chainId,
                                   @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
                                   @JsonProperty("dappAddress") String recipient,
                                   @JsonProperty("call") FunctionCall call,
