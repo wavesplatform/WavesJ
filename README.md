@@ -84,10 +84,10 @@ There are some examples under `src/examples/java`.
 
 ## Building the library
 
-To build from scratch, run
+To build from scratch, prepare testnet account with 10 Waves and run
 
 ```
-mvn clean package
+mvn clean package -DbenzPrivateKey=YourPrivateKeyOnTestnetWith10Waves
 ```
 
 The outputs are placed under the `target` directory.

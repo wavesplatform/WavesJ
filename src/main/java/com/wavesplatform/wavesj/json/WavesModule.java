@@ -6,6 +6,7 @@ import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.json.deser.*;
 import com.wavesplatform.wavesj.json.ser.*;
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction;
 
 public class WavesModule extends SimpleModule {
     public WavesModule(byte chainId, WavesJsonMapper objectMapper) {
@@ -20,5 +21,6 @@ public class WavesModule extends SimpleModule {
         addSerializer(Alias.class, new AliasSer());
         addSerializer(AssetPair.class, new AssetPairSer());
         addSerializer(Order.Type.class, new OrderTypeSer());
+        addSerializer(ContractInvocationTransaction.BinaryArg.class, new InvocationBinaryArgSer());
     }
 }
