@@ -50,10 +50,10 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         this.timestamp = timestamp;
     }
 
-    public ContractInvocationTransaction(byte chainId, PrivateKeyAccount senderPrivateKey, String recipient,
+    public ContractInvocationTransaction(byte chainId, PublicKeyAccount senderPublicKey, String recipient,
                                          String function, long fee, String feeAssetId, long timestamp) {
         this.chainId = chainId;
-        this.senderPublicKey = senderPrivateKey;
+        this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.call = new FunctionCall(function);
         this.fee = fee;
@@ -145,31 +145,10 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
 
         call.write(buf);
 
-        // START Payments
-        // 1. Convert payments into array of bytes arrays
-        // Deser.serializeArrays(payment.map(pmt => Longs.toByteArray(pmt.amount) ++ Deser.serializeOption(pmt.assetId.compatId)(_.arr)))
-        //
-        // def serializeOption[T](b: Option[T])(ser: T => Array[Byte]): Array[Byte] = b.map(a => (1: Byte) +: serializeArray(ser(a))).getOrElse(Array(0: Byte))
-        //
-        // 2.1 Write payments arrays size in short
-        // 2.2 Serialize each payment array
-        // def serializeArrays(bs: Seq[Array[Byte]]): Array[Byte] = Shorts.toByteArray(bs.length.toShort) ++ Bytes.concat(bs.map(serializeArray): _*)
-
-        // 3.1 put payment array length
-        // 3.2 put payment array
-        /* def serializeArray(b: Array[Byte]): Array[Byte] = {
-         * val length = b.length
-         * if (length.isValidShort)
-         *   Shorts.toByteArray(length.toShort) ++ b
-         * else
-         *  throw new IllegalArgumentException(s"Attempting to serialize array with size, but the size($length) exceeds MaxShort(${Short.MaxValue})")
-         * }
-         */
         buf.putShort(toShort(payments.size()));
         for (Payment payment: payments) {
             payment.write(buf);
         }
-        // END Payments
 
         buf.putLong(fee);
         putAsset(buf, feeAssetId);
