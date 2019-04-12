@@ -42,6 +42,8 @@ public class ByteUtils {
     }
 
     public static String putRecipient(ByteBuffer buffer, byte chainId, String recipient) {
+        // recipient 3PHnZyXiQp45kU5TvYVPU6YmLmwUqJWYwvj / alias:W:vpb9ia5xhcgwespwp8nreigxx3w3oq
+        recipient = recipient.startsWith(Alias.PREFIX) && recipient.charAt(7) == ':' ? recipient.substring(8) : recipient;
         if (recipient.length() <= 30) {
             // assume an alias
             buffer.put((byte) 0x02).put(chainId).putShort((short) recipient.length()).put(recipient.getBytes(UTF8));
