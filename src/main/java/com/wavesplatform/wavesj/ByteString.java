@@ -1,6 +1,8 @@
 package com.wavesplatform.wavesj;
 
-public class ByteString {
+import java.io.Serializable;
+
+public class ByteString implements Serializable {
     private String base58String;
 
     public ByteString(String base58String) throws IllegalArgumentException {

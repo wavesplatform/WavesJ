@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wavesplatform.wavesj.Transaction;
 import com.wavesplatform.wavesj.json.WavesJsonMapper;
@@ -27,7 +28,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
         byte chainId = objectMapper.getChainId();
-        if (treeNode.get("chainId") != null) {
+        if (treeNode.get("chainId") != null && !(treeNode.get("chainId") instanceof NullNode)) {
             Byte _chainId = objectMapper.treeToValue(treeNode.get("chainId"), Byte.class);
             if (_chainId != null) chainId = _chainId;
         }
@@ -127,6 +128,9 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                         t = TransferTransactionV2.class;
                         break;
                 }
+                break;
+            case ContractInvocationTransaction.CONTRACT_INVOKE:
+                t = ContractInvocationTransaction.class;
                 break;
             default:
                 t = UnknownTransaction.class;
