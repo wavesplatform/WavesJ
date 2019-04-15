@@ -87,7 +87,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs<Contrac
     }
 
     public ContractInvocationTransaction sign(PrivateKeyAccount senderPrivateKey) {
-        this.proofs = unmodifiableList(singletonList(new ByteString(senderPrivateKey.sign(getBytes()))));
+        this.proofs = unmodifiableList(singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
         return this;
     }
 
