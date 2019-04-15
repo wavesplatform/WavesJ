@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 
 @Ignore
 public class NodeTest {
-    private static final long AMOUNT = 1 * Asset.TOKEN;
+    private static final long AMOUNT = Asset.TOKEN;
     private static final long FEE = 100000;
     private static final long MFEE = 300000;
     private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
@@ -52,6 +52,15 @@ public class NodeTest {
 
         String exchangeTxId = node.exchangeTransactio(matcher, buyOrder, sellOrder, 10000, 50000,
                 matcherFee,matcherFee,matcherFee);
+    }
+
+    @Test
+    public void t() throws URISyntaxException, IOException {
+        Node n = new Node("https://nodes.wavesplatform.com", 'W');
+        List<Transaction> txs = n.getAddressTransactions("3P3jLj7hjC26XxpyaUUXmaFpua8tV3ufDja", 10);
+        for (Transaction t : txs){
+            System.out.println(t.getIdStr());
+        }
     }
 
 
@@ -179,7 +188,7 @@ public class NodeTest {
         assertNotNull(setScriptId);
 
         String compiledScript = node.compileScript("");
-        assertEquals(null, compiledScript);
+        assertNull(compiledScript);
     }
 
     @Test
@@ -209,7 +218,7 @@ public class NodeTest {
         // Create an order
         Order order = matcher.createOrder(alice, matcherKey,
                 MARKET, Order.Type.SELL,
-                1, 1 * Asset.TOKEN,
+                1, Asset.TOKEN,
                 System.currentTimeMillis() + 65000,
                 MFEE);
         assertNotNull(order.getId());
@@ -217,7 +226,7 @@ public class NodeTest {
         assertEquals(Order.Status.ACCEPTED, order.getStatus());
         assertEquals(Asset.WAVES, order.getAssetPair().getAmountAsset());
         assertEquals(WBTC, order.getAssetPair().getPriceAsset());
-        assertEquals(1 * Asset.TOKEN, order.getAmount());
+        assertEquals(Asset.TOKEN, order.getAmount());
         assertEquals(1, order.getPrice());
 
         // Check order status

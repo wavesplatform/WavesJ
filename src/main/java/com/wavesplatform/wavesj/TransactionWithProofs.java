@@ -27,6 +27,10 @@ public abstract class TransactionWithProofs<T extends Transaction> extends Trans
         return proofs;
     }
 
+    public String getIdStr(){
+        return  getId().toString();
+    }
+
     protected List<ByteString> updateProofs(int index, ByteString proof) {
         if (index < 0 || index >= MAX_PROOF_COUNT) {
             throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));

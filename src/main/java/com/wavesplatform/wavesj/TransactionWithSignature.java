@@ -18,6 +18,10 @@ public abstract class TransactionWithSignature extends TransactionWithBytesHashI
         return Curve25519.getInstance(Curve25519.BEST).verifySignature(getSenderPublicKey().getPublicKey(), getBodyBytes(), signature.getBytes());
     }
 
+    public String getIdStr(){
+       return  getId().toString();
+    }
+
     @Override
     public byte[] getBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);

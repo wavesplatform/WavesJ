@@ -14,33 +14,33 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
     public static final byte SPONSOR = 14;
     private PublicKeyAccount senderPublicKey;
     private String assetId;
-    private long minAssetFee;
+    private long minSponsoredAssetFee;
     private long fee;
     private long timestamp;
 
     @JsonCreator
     public SponsorTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                              @JsonProperty("address") String assetId,
-                              @JsonProperty("minSponsoredAssetFee") long minAssetFee,
+                              @JsonProperty("assetId") String assetId,
+                              @JsonProperty("minSponsoredAssetFee") long minSponsoredAssetFee,
                               @JsonProperty("fee") long fee,
                               @JsonProperty("timestamp") long timestamp,
                               @JsonProperty("proofs") List<ByteString> proofs) {
         setProofs(proofs);
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
-        this.minAssetFee = minAssetFee;
+        this.minSponsoredAssetFee = minSponsoredAssetFee;
         this.fee = fee;
         this.timestamp = timestamp;
     }
 
     public SponsorTransaction(PrivateKeyAccount senderPublicKey,
                               String assetId,
-                              long minAssetFee,
+                              long minSponsoredAssetFee,
                               long fee,
                               long timestamp) {
         this.senderPublicKey = senderPublicKey;
         this.assetId = assetId;
-        this.minAssetFee = minAssetFee;
+        this.minSponsoredAssetFee = minSponsoredAssetFee;
         this.fee = fee;
         this.timestamp = timestamp;
         this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
@@ -55,8 +55,8 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
         return Asset.toJsonObject(assetId);
     }
 
-    public long getMinAssetFee() {
-        return minAssetFee;
+    public long getMinSponsoredAssetFee() {
+        return minSponsoredAssetFee;
     }
 
     public long getFee() {
@@ -72,7 +72,7 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(SponsorTransaction.SPONSOR).put(Transaction.V1)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
-                .putLong(minAssetFee).putLong(fee).putLong(timestamp);
+                .putLong(minSponsoredAssetFee).putLong(fee).putLong(timestamp);
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 
@@ -93,7 +93,7 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
 
         SponsorTransaction that = (SponsorTransaction) o;
 
-        if (getMinAssetFee() != that.getMinAssetFee()) return false;
+        if (getMinSponsoredAssetFee() != that.getMinSponsoredAssetFee()) return false;
         if (getFee() != that.getFee()) return false;
         if (getTimestamp() != that.getTimestamp()) return false;
         if (getSenderPublicKey() != null ? !getSenderPublicKey().equals(that.getSenderPublicKey()) : that.getSenderPublicKey() != null)
@@ -105,7 +105,7 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
     public int hashCode() {
         int result = getSenderPublicKey() != null ? getSenderPublicKey().hashCode() : 0;
         result = 31 * result + (getAssetId() != null ? getAssetId().hashCode() : 0);
-        result = 31 * result + (int) (getMinAssetFee() ^ (getMinAssetFee() >>> 32));
+        result = 31 * result + (int) (getMinSponsoredAssetFee() ^ (getMinSponsoredAssetFee() >>> 32));
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
@@ -114,6 +114,6 @@ public class SponsorTransaction extends TransactionWithProofs<Transaction> {
     @Override
     public Transaction withProof(int index, ByteString proof) {
         List<ByteString> newProofs = updateProofs(index, proof);
-        return new SponsorTransaction(senderPublicKey, assetId, minAssetFee,fee,timestamp, newProofs);
+        return new SponsorTransaction(senderPublicKey, assetId, minSponsoredAssetFee,fee,timestamp, newProofs);
     }
 }
