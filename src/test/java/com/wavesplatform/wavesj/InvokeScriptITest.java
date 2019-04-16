@@ -1,8 +1,8 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.json.WavesJsonMapper;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction.FunctionalArg;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.FunctionalArg;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -18,7 +18,7 @@ import static com.wavesplatform.wavesj.Asset.toWavelets;
 import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
 @FixMethodOrder(NAME_ASCENDING)
-public class ContractInvocationITest extends BaseITest {
+public class InvokeScriptITest extends BaseITest {
 
     private static final String INV1_FUNC = "deposit";
     private static final String INV2_FUNC = "withdraw";
@@ -51,7 +51,7 @@ public class ContractInvocationITest extends BaseITest {
         investorAcc = generateAcc("Investor", true);
         donationAcc = generateAcc("Donation", true);
 
-        String script = IOUtils.toString(ContractInvocationITest.class.getResourceAsStream("/ride4dapp/wallet.ride"));
+        String script = IOUtils.toString(InvokeScriptITest.class.getResourceAsStream("/ride4dapp/wallet.ride"));
         script = script.replace(PLACEHOLDER_DONATION_ADDRESS, donationAcc.getAddress());
         Assert.assertNotNull("script should be not null", script);
         LOGGER.info("t001_invocationCall STARTED: benz_balance={}", getBalance(benzAcc));
@@ -96,8 +96,8 @@ public class ContractInvocationITest extends BaseITest {
         Thread.sleep(5 * 1000);
         LOGGER.info("\t#03 START: invoke deposit - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(), INV1_FUNC, fromWavelets(inv1Fee), fromWavelets(INV1_PAYMENT));
-        ContractInvocationTransaction depositTx =
-                new ContractInvocationTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
+        InvokeScriptTransaction depositTx =
+                new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
                         inv1Fee, null, System.currentTimeMillis())
                         .withPayment(INV1_PAYMENT, null)
                         .sign(investorAcc);
@@ -113,8 +113,8 @@ public class ContractInvocationITest extends BaseITest {
         LOGGER.info("\t#04 START: invoke withdraw - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(),
                 INV2_FUNC, fromWavelets(inv2Fee), fromWavelets(INV1_PAYMENT));
-        ContractInvocationTransaction withdrawTx =
-                    new ContractInvocationTransaction(chainId, investorAcc, smartAcc.getAddress(), INV2_FUNC,
+        InvokeScriptTransaction withdrawTx =
+                    new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV2_FUNC,
                             inv2Fee, null, System.currentTimeMillis())
                         .withArg(INV2_ARG1)
                         .withArg(INV2_ARG2)
@@ -132,7 +132,7 @@ public class ContractInvocationITest extends BaseITest {
     @Test
     public void t005_readInvocationInfo() throws IOException {
         //inv1Id = "FDAsteLn2oMvyZJsxCQX9Fy1DkRXdgss4t7VbuAEkA5V";
-        ContractInvocationTransaction inv1Tx = readInvocationAndVerifyDefaults(inv1Id);
+        InvokeScriptTransaction inv1Tx = readInvocationAndVerifyDefaults(inv1Id);
         Assert.assertEquals(investorAcc.getAddress(), inv1Tx.getSenderPublicKey().getAddress());
         Assert.assertEquals("Function name is valid", INV1_FUNC, inv1Tx.getCall().getName());
         Assert.assertEquals("Function args count is valid", 0, inv1Tx.getCall().getArgs().size());
@@ -140,7 +140,7 @@ public class ContractInvocationITest extends BaseITest {
         Assert.assertEquals("Payment amount is valid", INV1_PAYMENT, inv1Tx.getPayments().get(0).getAmount());
 
         //inv2Id = "4u5SPZobCkp1BVxBYTGHwF93AaqxXA3kapYJfgkzhhkS";
-        ContractInvocationTransaction inv2Tx = readInvocationAndVerifyDefaults(inv2Id);
+        InvokeScriptTransaction inv2Tx = readInvocationAndVerifyDefaults(inv2Id);
         Assert.assertEquals(investorAcc.getAddress(), inv2Tx.getSenderPublicKey().getAddress());
         Assert.assertEquals("Function name is valid", INV2_FUNC, inv2Tx.getCall().getName());
 
@@ -153,22 +153,22 @@ public class ContractInvocationITest extends BaseITest {
         Assert.assertEquals("Payments count is valid", 0, inv2Tx.getPayments().size());
     }
 
-    private ContractInvocationTransaction readInvocationAndVerifyDefaults(String invId) throws IOException {
+    private InvokeScriptTransaction readInvocationAndVerifyDefaults(String invId) throws IOException {
         Transaction inv = node.getTransaction(invId);
         assertInvocationTypeValid(inv);
 
-        ContractInvocationTransaction invTx = (ContractInvocationTransaction) inv;
+        InvokeScriptTransaction invTx = (InvokeScriptTransaction) inv;
         assertInvocationFieldsNotNull(invTx);
         return invTx;
     }
 
     private static void assertInvocationTypeValid(Transaction inv) throws IOException {
         LOGGER.info(mapper.writeValueAsString(inv));
-        Assert.assertTrue("Json deserialization should return ContractInvocationTransaction instance",
-                inv.getClass().isAssignableFrom(ContractInvocationTransaction.class));
+        Assert.assertTrue("Json deserialization should return InvokeScriptTransaction instance",
+                inv.getClass().isAssignableFrom(InvokeScriptTransaction.class));
     }
 
-    private static void assertInvocationFieldsNotNull(ContractInvocationTransaction invTx) {
+    private static void assertInvocationFieldsNotNull(InvokeScriptTransaction invTx) {
         Assert.assertNotNull(invTx.getSenderPublicKey());
         Assert.assertNotNull(invTx.getRecipient());
         Assert.assertNotNull(invTx.getProofs());

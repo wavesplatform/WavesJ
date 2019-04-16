@@ -27,9 +27,9 @@ public abstract class TransactionWithProofs<T extends Transaction> extends Trans
         return proofs;
     }
 
-    public String getIdStr(){
-        return  getId().toString();
-    }
+//    public String getIdStr(){
+//        return  getId().toString();
+//    }
 
     protected List<ByteString> updateProofs(int index, ByteString proof) {
         if (index < 0 || index >= MAX_PROOF_COUNT) {

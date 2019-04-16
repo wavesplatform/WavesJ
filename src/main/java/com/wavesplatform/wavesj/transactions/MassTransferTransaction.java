@@ -22,27 +22,6 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
     private final ByteString attachment;
     private final long timestamp;
 
-    private String id;
-
-    @JsonCreator
-    public MassTransferTransaction(
-            @JsonProperty("id") String id,
-            @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                                   @JsonProperty("address") String assetId,
-                                   @JsonProperty("transfers") Collection<Transfer> transfers,
-                                   @JsonProperty("fee") long fee,
-                                   @JsonProperty("attachment") ByteString attachment,
-                                   @JsonProperty("timestamp") long timestamp,
-                                   @JsonProperty("proofs") List<ByteString> proofs) {
-        setProofs(proofs);
-        this.id = id;
-        this.senderPublicKey = senderPublicKey;
-        this.assetId = assetId;
-        this.transfers = transfers;
-        this.fee = fee;
-        this.attachment = attachment;
-        this.timestamp = timestamp;
-    }
 
     @JsonCreator
     public MassTransferTransaction(
@@ -61,13 +40,6 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
         this.attachment = attachment;
         this.timestamp = timestamp;
     }
-
-    @Override
-    public String getIdStr(){
-        return id;
-    }
-
-
 
     public MassTransferTransaction(PrivateKeyAccount senderPublicKey,
                                    String assetId,
@@ -169,6 +141,6 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
     @Override
     public MassTransferTransaction withProof(int index, ByteString proof) {
         List<ByteString> newProofs = updateProofs(index, proof);
-        return new MassTransferTransaction(id, senderPublicKey, assetId, transfers, fee, attachment, timestamp, newProofs);
+        return new MassTransferTransaction(senderPublicKey, assetId, transfers, fee, attachment, timestamp, newProofs);
     }
 }

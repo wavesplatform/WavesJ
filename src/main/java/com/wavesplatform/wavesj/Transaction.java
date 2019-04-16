@@ -18,9 +18,6 @@ public interface Transaction extends ApiJson, Signable {
     ByteString getId();
 
 
-    @JsonIgnore
-    String getIdStr();
-
     PublicKeyAccount getSenderPublicKey();
 
     byte getType();

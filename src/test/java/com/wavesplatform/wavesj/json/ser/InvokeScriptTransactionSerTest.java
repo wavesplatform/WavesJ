@@ -1,9 +1,9 @@
 package com.wavesplatform.wavesj.json.ser;
 
 import com.wavesplatform.wavesj.*;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction.FunctionCall;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction.Payment;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.FunctionCall;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.Payment;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,9 +23,9 @@ import static java.util.Collections.singletonList;
  *      private=HAWqLZA98pJPvwGZuomKUkNpgfzKt4HhfMdFWPXwjxuX
  *      seed=creek extend car eight fat hole farm they behave element bag allow absurd clinic harbor
  */
-public class ContractInvocationTransactionSerTest extends TransactionSerTest {
+public class InvokeScriptTransactionSerTest extends TransactionSerTest {
 
-    ContractInvocationTransaction tx = new ContractInvocationTransaction(
+    InvokeScriptTransaction tx = new InvokeScriptTransaction(
             Account.TESTNET,
                 new PublicKeyAccount("4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce", Account.TESTNET),
                 "3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw",
@@ -43,6 +43,6 @@ public class ContractInvocationTransactionSerTest extends TransactionSerTest {
 
     @Test
     public void V1SerializationTest() throws IOException {
-        serializationRoadtripTest(tx, ContractInvocationTransaction.class);
+        serializationRoadtripTest(tx, InvokeScriptTransaction.class);
     }
 }

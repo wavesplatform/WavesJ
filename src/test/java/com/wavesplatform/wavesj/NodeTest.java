@@ -54,15 +54,6 @@ public class NodeTest {
                 matcherFee,matcherFee,matcherFee);
     }
 
-    @Test
-    public void t() throws URISyntaxException, IOException {
-        Node n = new Node("https://nodes.wavesplatform.com", 'W');
-        List<Transaction> txs = n.getAddressTransactions("3P3jLj7hjC26XxpyaUUXmaFpua8tV3ufDja", 10);
-        for (Transaction t : txs){
-            System.out.println(t.getIdStr());
-        }
-    }
-
 
     @Test
     public void testGetters() throws IOException {

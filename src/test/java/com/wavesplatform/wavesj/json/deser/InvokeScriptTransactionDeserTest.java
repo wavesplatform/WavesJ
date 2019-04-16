@@ -3,7 +3,7 @@ package com.wavesplatform.wavesj.json.deser;
 import com.wavesplatform.wavesj.Account;
 import com.wavesplatform.wavesj.ByteString;
 import com.wavesplatform.wavesj.PublicKeyAccount;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,18 +11,18 @@ import java.io.IOException;
 import static com.wavesplatform.wavesj.Asset.toWavelets;
 import static java.util.Collections.singletonList;
 
-public class ContractInvocationTransactionDeserTest extends TransactionDeserTest {
+public class InvokeScriptTransactionDeserTest extends TransactionDeserTest {
 
-    private ContractInvocationTransaction tx = new ContractInvocationTransaction(
+    private InvokeScriptTransaction tx = new InvokeScriptTransaction(
             Account.TESTNET,
             new PublicKeyAccount("4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce", Account.TESTNET),
             "3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw",
-            new ContractInvocationTransaction.FunctionCall("deposit")
+            new InvokeScriptTransaction.FunctionCall("deposit")
                     .addArg(10L)
                     .addArg("STRING_ARG")
                     .addArg(true)
                     .addArg(new ByteString("4QZkF9")),
-            singletonList(new ContractInvocationTransaction.Payment(toWavelets(10), null)),
+            singletonList(new InvokeScriptTransaction.Payment(toWavelets(10), null)),
             toWavelets(0.005),
             null,
             1526983936610L,
@@ -48,6 +48,6 @@ public class ContractInvocationTransactionDeserTest extends TransactionDeserTest
                 "\"timestamp\":1526983936610," +
                 "\"proofs\":[\"59e1LnALZD7JssScwso6Rj9geZvUvRYEgDQe3xb312gKEqHQRMewgFJsAdcGcCAUhQPwpt5yfA7i42kdukwQNEJg\"]," +
                 "\"type\":16," +
-                "\"version\":1}", tx, ContractInvocationTransaction.class);
+                "\"version\":1}", tx, InvokeScriptTransaction.class);
     }
 }

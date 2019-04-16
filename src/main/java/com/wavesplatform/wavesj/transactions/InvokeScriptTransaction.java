@@ -17,7 +17,7 @@ import static com.wavesplatform.wavesj.ByteUtils.putAsset;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 
-public class ContractInvocationTransaction extends TransactionWithProofs<ContractInvocationTransaction> {
+public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptTransaction> {
     public static final byte CONTRACT_INVOKE = 16;
 
     private byte chainId;
@@ -30,15 +30,15 @@ public class ContractInvocationTransaction extends TransactionWithProofs<Contrac
     private long timestamp;
 
     @JsonCreator
-    public ContractInvocationTransaction(@JsonProperty("chainId") byte chainId,
-                                  @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                                  @JsonProperty("dappAddress") String recipient,
-                                  @JsonProperty("call") FunctionCall call,
-                                  @JsonProperty("payment") List<Payment> payments,
-                                  @JsonProperty("fee") long fee,
-                                  @JsonProperty("feeAssetId") String feeAssetId,
-                                  @JsonProperty("timestamp") long timestamp,
-                                  @JsonProperty("proofs") List<ByteString> proofs) {
+    public InvokeScriptTransaction(@JsonProperty("chainId") byte chainId,
+                                   @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
+                                   @JsonProperty("dappAddress") String recipient,
+                                   @JsonProperty("call") FunctionCall call,
+                                   @JsonProperty("payment") List<Payment> payments,
+                                   @JsonProperty("fee") long fee,
+                                   @JsonProperty("feeAssetId") String feeAssetId,
+                                   @JsonProperty("timestamp") long timestamp,
+                                   @JsonProperty("proofs") List<ByteString> proofs) {
         setProofs(proofs);
         this.chainId = chainId;
         this.senderPublicKey = senderPublicKey;
@@ -50,8 +50,8 @@ public class ContractInvocationTransaction extends TransactionWithProofs<Contrac
         this.timestamp = timestamp;
     }
 
-    public ContractInvocationTransaction(byte chainId, PublicKeyAccount senderPublicKey, String recipient,
-                                         String function, long fee, String feeAssetId, long timestamp) {
+    public InvokeScriptTransaction(byte chainId, PublicKeyAccount senderPublicKey, String recipient,
+                                   String function, long fee, String feeAssetId, long timestamp) {
         this.chainId = chainId;
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
@@ -61,32 +61,32 @@ public class ContractInvocationTransaction extends TransactionWithProofs<Contrac
         this.timestamp = timestamp;
     }
 
-    public ContractInvocationTransaction withArg(long val) {
+    public InvokeScriptTransaction withArg(long val) {
         call.addArg(val);
         return this;
     }
 
-    public ContractInvocationTransaction withArg(String val) {
+    public InvokeScriptTransaction withArg(String val) {
         call.addArg(val);
         return this;
     }
 
-    public ContractInvocationTransaction withArg(boolean val) {
+    public InvokeScriptTransaction withArg(boolean val) {
         call.addArg(val);
         return this;
     }
 
-    public ContractInvocationTransaction withArg(ByteString val) {
+    public InvokeScriptTransaction withArg(ByteString val) {
         call.addArg(val);
         return this;
     }
 
-    public ContractInvocationTransaction withPayment(long amount, String assetId) {
+    public InvokeScriptTransaction withPayment(long amount, String assetId) {
         payments.add(new Payment(amount, assetId));
         return this;
     }
 
-    public ContractInvocationTransaction sign(PrivateKeyAccount senderPrivateKey) {
+    public InvokeScriptTransaction sign(PrivateKeyAccount senderPrivateKey) {
         this.proofs = unmodifiableList(singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
         return this;
     }
@@ -137,9 +137,9 @@ public class ContractInvocationTransaction extends TransactionWithProofs<Contrac
     }
 
     @Override
-    public ContractInvocationTransaction withProof(int index, ByteString proof) {
+    public InvokeScriptTransaction withProof(int index, ByteString proof) {
         List<ByteString> newProofs = updateProofs(index, proof);
-        return new ContractInvocationTransaction(chainId, senderPublicKey, recipient, call, payments, fee, feeAssetId, timestamp, newProofs);
+        return new InvokeScriptTransaction(chainId, senderPublicKey, recipient, call, payments, fee, feeAssetId, timestamp, newProofs);
     }
 
 
@@ -169,7 +169,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs<Contrac
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ContractInvocationTransaction that = (ContractInvocationTransaction) o;
+        InvokeScriptTransaction that = (InvokeScriptTransaction) o;
 
         if (getChainId() != that.getChainId()) return false;
         if (getFee() != that.getFee()) return false;

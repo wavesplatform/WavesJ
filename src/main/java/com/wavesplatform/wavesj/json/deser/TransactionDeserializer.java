@@ -129,8 +129,8 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                         break;
                 }
                 break;
-            case ContractInvocationTransaction.CONTRACT_INVOKE:
-                t = ContractInvocationTransaction.class;
+            case InvokeScriptTransaction.CONTRACT_INVOKE:
+                t = InvokeScriptTransaction.class;
                 break;
             default:
                 t = UnknownTransaction.class;
