@@ -86,8 +86,18 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         return this;
     }
 
+
+    public static int unsignedToBytes(byte b) {
+        return b & 0xFF;
+    }
+
     public InvokeScriptTransaction sign(PrivateKeyAccount senderPrivateKey) {
         this.proofs = unmodifiableList(singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
+        ArrayList<Integer> ub = new ArrayList<Integer>();
+        for (byte b:getBodyBytes()){
+            System.out.println(unsignedToBytes(b));
+            ub.add(unsignedToBytes(b));
+        }
         return this;
     }
 
@@ -438,7 +448,8 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         public void write(ByteBuffer buf) {
             ByteBuffer tmpBuf = ByteBuffer.allocate(256);
             tmpBuf.putLong(amount);
-            putAsset(tmpBuf, assetId);
+            putPaymentAsset(tmpBuf, assetId);
+        //    tmpBuf.putShort(toShort(getOnlyUsed(tmpBuf).length));
             ByteUtils.putBytes(buf, getOnlyUsed(tmpBuf), LENGTH_AS_SHORT);
         }
 

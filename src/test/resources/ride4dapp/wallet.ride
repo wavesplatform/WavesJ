@@ -5,26 +5,28 @@
 @Callable(i)
 func deposit() = {
     let pmt = extract(i.payment)
-    if (isDefined(pmt.assetId))
-        then throw("can hodl waves only at the moment")
-    else {
+    let asset = if (isDefined(pmt.assetId))
+                 then toBase58String(extract(pmt.assetId))
+                else
+                    "WAVES"
+
         let currentKey = toBase58String(i.caller.bytes)
-        let currentAmount = match getInteger(this, currentKey) {
+        let currentAmount = match getInteger(this, currentKey + "_" + asset) {
             case a:Int => a
             case _ => 0
         }
         let newAmount = currentAmount + pmt.amount
-        WriteSet([DataEntry(currentKey, newAmount)])
-   }
+        WriteSet([DataEntry(currentKey + "_" + asset, newAmount)])
+
 }
 
 @Callable(i)
-func withdraw(amount: Int, donate: Boolean, name: String, vec: ByteVector) = {
+func withdraw(amount: Int, donate: Boolean, name: String, vec: ByteVector, asset: String) = {
     let expectedVec = toBytes("Hello, Ride4DApp!")
     let donationAddress = extract(addressFromString("$donationAddressInjection"));
 
-    let withdrawTotal =  if (donate) then 2 * amount else amount
-    let currentKey = toBase58String(i.caller.bytes)
+    let withdrawTotal =  if (donate) then amount else amount / 2
+    let currentKey = toBase58String(i.caller.bytes) + "_" + asset
     let currentAmount = match getInteger(this, currentKey) {
         case a:Int => a
         case _ => 0

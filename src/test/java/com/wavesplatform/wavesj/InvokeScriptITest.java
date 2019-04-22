@@ -22,7 +22,7 @@ public class InvokeScriptITest extends BaseITest {
 
     private static final String INV1_FUNC = "deposit";
     private static final String INV2_FUNC = "withdraw";
-    private static final long INV1_PAYMENT = toWavelets(2);
+    private static final long INV1_PAYMENT = toWavelets(1);
     private static final long INV2_ARG1 = INV1_PAYMENT / 2;
     private static final boolean INV2_ARG2 = true;
     private static final String INV2_ARG3 = "ABC АБВ";
@@ -47,9 +47,9 @@ public class InvokeScriptITest extends BaseITest {
 
     @Test
     public void t001_invocationCall() throws Exception {
-        smartAcc = generateAcc("Smart", true);
-        investorAcc = generateAcc("Investor", true);
-        donationAcc = generateAcc("Donation", true);
+        smartAcc = generateAcc("Smart1", true);
+        investorAcc = generateAcc("Investor1", true);
+        donationAcc = generateAcc("Donation1", true);
 
         String script = IOUtils.toString(InvokeScriptITest.class.getResourceAsStream("/ride4dapp/wallet.ride"));
         script = script.replace(PLACEHOLDER_DONATION_ADDRESS, donationAcc.getAddress());
@@ -61,7 +61,7 @@ public class InvokeScriptITest extends BaseITest {
         long investorInitAmt = toWavelets(3);
         long investorBalance = 0;
         LOGGER.info("\t#00 START: transferring funds to investor - benz_balance={} smart_balance={} investor_balance={} " +
-                "investorInitAmt={} investor_address={} transfer_fee={}",
+                        "investorInitAmt={} investor_address={} transfer_fee={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), fromWavelets(investorInitAmt),
                 investorAcc.getAddress(), fromWavelets(transferFee));
         node.transfer(benzAcc, investorAcc.getAddress(), investorInitAmt, transferFee, "");
@@ -93,16 +93,29 @@ public class InvokeScriptITest extends BaseITest {
         // (invoke function without arguments)
         long inv1Fee = toWavelets(0.005);
 
+//        Thread.sleep(5 * 1000);
+//        LOGGER.info("\t#03 START: invoke deposit - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
+//                getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(), INV1_FUNC, fromWavelets(inv1Fee), fromWavelets(INV1_PAYMENT));
+//        InvokeScriptTransaction depositTx =
+//                new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
+//                        inv1Fee, null, System.currentTimeMillis())
+//                        .withPayment(INV1_PAYMENT, null)
+//                        .sign(investorAcc);
+//
+//        inv1Id = txId = node.send(depositTx);
+
+
         Thread.sleep(5 * 1000);
         LOGGER.info("\t#03 START: invoke deposit - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(), INV1_FUNC, fromWavelets(inv1Fee), fromWavelets(INV1_PAYMENT));
-        InvokeScriptTransaction depositTx =
+        InvokeScriptTransaction depositAssetTx =
                 new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
                         inv1Fee, null, System.currentTimeMillis())
-                        .withPayment(INV1_PAYMENT, null)
+                        .withPayment(INV1_PAYMENT, "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe")
                         .sign(investorAcc);
 
-        inv1Id = txId = node.send(depositTx);
+       node.send(depositAssetTx);
+
         smartBalance = waitOnBalance(smartAcc.getAddress(), smartBalance, INV1_PAYMENT, EQUALS, DEFAULT_TIMEOUT);
         LOGGER.info("\t#03 DONE: benz_balance={} smart_balance={} investor_balance={} txId={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), txId);
@@ -113,13 +126,16 @@ public class InvokeScriptITest extends BaseITest {
         LOGGER.info("\t#04 START: invoke withdraw - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(),
                 INV2_FUNC, fromWavelets(inv2Fee), fromWavelets(INV1_PAYMENT));
+
+
         InvokeScriptTransaction withdrawTx =
-                    new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV2_FUNC,
-                            inv2Fee, null, System.currentTimeMillis())
+                new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV2_FUNC,
+                        inv2Fee, null, System.currentTimeMillis())
                         .withArg(INV2_ARG1)
                         .withArg(INV2_ARG2)
                         .withArg(INV2_ARG3)
                         .withArg(INV2_ARG4)
+                        .withArg(Asset.WAVES)
                         .sign(investorAcc);
 
         inv2Id = txId = node.send(withdrawTx);
@@ -145,7 +161,7 @@ public class InvokeScriptITest extends BaseITest {
         Assert.assertEquals("Function name is valid", INV2_FUNC, inv2Tx.getCall().getName());
 
         List<FunctionalArg<?>> args = inv2Tx.getCall().getArgs();
-        Assert.assertEquals("Function args count is valid", 4, args.size());
+        Assert.assertEquals("Function args count is valid", 5, args.size());
         assertFuncArg(args.get(0), "integer", INV2_ARG1);
         assertFuncArg(args.get(1), "boolean", INV2_ARG2);
         assertFuncArg(args.get(2), "string", INV2_ARG3);
