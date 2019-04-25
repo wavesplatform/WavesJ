@@ -93,11 +93,6 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
 
     public InvokeScriptTransaction sign(PrivateKeyAccount senderPrivateKey) {
         this.proofs = unmodifiableList(singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
-        ArrayList<Integer> ub = new ArrayList<Integer>();
-        for (byte b:getBodyBytes()){
-            System.out.println(unsignedToBytes(b));
-            ub.add(unsignedToBytes(b));
-        }
         return this;
     }
 

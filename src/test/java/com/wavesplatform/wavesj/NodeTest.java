@@ -4,6 +4,8 @@ import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matcher;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,13 +13,17 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.DataEntry.*;
+import static com.wavesplatform.wavesj.Hash.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @Ignore
 public class NodeTest {
@@ -44,14 +50,14 @@ public class NodeTest {
         String matcherKey = Base58.encode(matcher.getPublicKey());
         long matcherFee = 300000L;
 
-        AssetPair pair = new AssetPair("CR7DB15TWwnr3xE9CYJx6EMJGjGqDEbwxB6AsKch5FGM","3tEgksr86ooPVKyQHZEiAJhwnMWDmos68AFhbXNjBJjL");
+        AssetPair pair = new AssetPair("CR7DB15TWwnr3xE9CYJx6EMJGjGqDEbwxB6AsKch5FGM", "3tEgksr86ooPVKyQHZEiAJhwnMWDmos68AFhbXNjBJjL");
         Order buyOrder = Transactions.makeOrder(alice, matcherKey, Order.Type.BUY, pair, 50000, 10000,
-                System.currentTimeMillis() + 60*60*1000, 300000, System.currentTimeMillis());
+                System.currentTimeMillis() + 60 * 60 * 1000, 300000, System.currentTimeMillis());
         Order sellOrder = Transactions.makeOrder(bob, matcherKey, Order.Type.SELL, pair, 50000, 10000,
-                System.currentTimeMillis() + 60*60*1000, 300000, System.currentTimeMillis());
+                System.currentTimeMillis() + 60 * 60 * 1000, 300000, System.currentTimeMillis());
 
         String exchangeTxId = node.exchangeTransactio(matcher, buyOrder, sellOrder, 10000, 50000,
-                matcherFee,matcherFee,matcherFee);
+                matcherFee, matcherFee, matcherFee);
     }
 
 
@@ -76,7 +82,7 @@ public class NodeTest {
     public void testBlock() throws IOException, URISyntaxException {
         Node node = new Node("https://nodes.wavesplatform.com", 'W');
         Block b = node.getBlock(1350761);
-        for (Transaction t : b.getTransactions()){
+        for (Transaction t : b.getTransactions()) {
             System.out.println(t.getType());
         }
     }
@@ -110,7 +116,7 @@ public class NodeTest {
         Node node = new Node("https://nodes.wavesplatform.com", 'W');
         //Transaction tx = node.getTransaction("7hTDfrz6VQMqB8CVZt338q1xkADi694ah2NDHrmLBvwo");
         Transaction tx = node.getTransaction("Hum6JHcCAnxKE25UarHVxYy4EBCUdnPEjPjKZpAeynE8");
-         System.out.println(tx.getId().getBase58String());
+        System.out.println(tx.getId().getBase58String());
     }
 
     @Test
@@ -287,5 +293,25 @@ public class NodeTest {
         String alias = "blackturtle";
         Node node = new Node("https://nodes.wavesplatform.com/", 'W');
         assertEquals(node.getAddrByAlias(alias), addr);
+    }
+
+    @Test
+    public void testHash() {
+        String expectedAccountSeed = "JBGe8Cu1wu9GBtttoVnLSEyfUmivX6HFSmpsXFwSPbr7";
+        String seed = "create genesis wallet-0";
+
+        ByteBuffer buf = ByteBuffer.allocate(seed.getBytes().length + 4);
+        buf.putInt(0).put(seed.getBytes());
+        byte[] accountSeed = secureHash(buf.array(), 0, buf.array().length);
+
+        String accountSeedBase58 = Base58.encode(accountSeed);
+        assertEquals(expectedAccountSeed, accountSeedBase58);
+
+        byte[] blake2b = hash(buf.array(), 0, buf.array().length, Hash.BLAKE2B256);
+        byte[] keccak = hash(blake2b, 0, blake2b.length, Hash.KECCAK256);
+
+        assertEquals(expectedAccountSeed, Base58.encode(keccak));
+        assertThat(Base58.decode(expectedAccountSeed), equalTo(keccak));
+
     }
 }

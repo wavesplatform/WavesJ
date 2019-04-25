@@ -93,28 +93,17 @@ public class InvokeScriptITest extends BaseITest {
         // (invoke function without arguments)
         long inv1Fee = toWavelets(0.005);
 
-//        Thread.sleep(5 * 1000);
-//        LOGGER.info("\t#03 START: invoke deposit - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
-//                getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(), INV1_FUNC, fromWavelets(inv1Fee), fromWavelets(INV1_PAYMENT));
-//        InvokeScriptTransaction depositTx =
-//                new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
-//                        inv1Fee, null, System.currentTimeMillis())
-//                        .withPayment(INV1_PAYMENT, null)
-//                        .sign(investorAcc);
-//
-//        inv1Id = txId = node.send(depositTx);
-
-
         Thread.sleep(5 * 1000);
         LOGGER.info("\t#03 START: invoke deposit - benz_balance={} smart_balance={} investor_balance={} invokerAddress={} invFunc={} invFee={} invAttachPayment={}",
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(), INV1_FUNC, fromWavelets(inv1Fee), fromWavelets(INV1_PAYMENT));
-        InvokeScriptTransaction depositAssetTx =
+        InvokeScriptTransaction depositTx =
                 new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
                         inv1Fee, null, System.currentTimeMillis())
-                        .withPayment(INV1_PAYMENT, "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe")
+                        .withPayment(INV1_PAYMENT, null)
                         .sign(investorAcc);
 
-       node.send(depositAssetTx);
+        inv1Id = txId = node.send(depositTx);
+
 
         smartBalance = waitOnBalance(smartAcc.getAddress(), smartBalance, INV1_PAYMENT, EQUALS, DEFAULT_TIMEOUT);
         LOGGER.info("\t#03 DONE: benz_balance={} smart_balance={} investor_balance={} txId={}",

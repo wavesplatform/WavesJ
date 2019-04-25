@@ -1,3 +1,12 @@
+## 0.14.1
+
+- Support for InvokeScript transaction
+- Support for Exchange transaction version 2
+- Separated getBodyBytes() (tx bytes without signature) and getBytes() (whole tx bytes) methods.
+- Crypto hash methods are public now
+- Bug fixing
+
+
 ## 0.13.2
 
 - Asset distribution method was added
