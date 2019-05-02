@@ -20,7 +20,7 @@ import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 public abstract class BaseITest {
 
     public static Predicate<Long, Long> EQUALS = new Equals<Long>();
-    public static long DEFAULT_TIMEOUT = 60 * 1000;
+    public static long DEFAULT_TIMEOUT = 120 * 1000;
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BaseITest.class);
 

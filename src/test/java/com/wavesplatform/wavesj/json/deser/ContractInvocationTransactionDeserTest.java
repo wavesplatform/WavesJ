@@ -48,6 +48,7 @@ public class ContractInvocationTransactionDeserTest extends TransactionDeserTest
                 "\"timestamp\":1526983936610," +
                 "\"proofs\":[\"59e1LnALZD7JssScwso6Rj9geZvUvRYEgDQe3xb312gKEqHQRMewgFJsAdcGcCAUhQPwpt5yfA7i42kdukwQNEJg\"]," +
                 "\"type\":16," +
-                "\"version\":1}", tx, ContractInvocationTransaction.class);
+                "\"version\":1," +
+                "\"height\":1234}", tx, ContractInvocationTransaction.class);
     }
 }

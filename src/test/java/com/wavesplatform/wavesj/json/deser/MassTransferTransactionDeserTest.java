@@ -28,6 +28,6 @@ public class MassTransferTransactionDeserTest extends TransactionDeserTest {
 
     @Test
     public void V1DeserializeTest() throws IOException {
-        deserializationTest("{\"type\":11,\"id\":\"H36CTJc7ztGRZPCrvpNYeagCN1HV1gXqUthsXKdBT3UD\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":200000,\"timestamp\":1518091313964,\"proofs\":[\"FXMNu3ecy5zBjn9b69VtpuYRwxjCbxdkZ3xZpLzB8ZeFDvcgTkmEDrD29wtGYRPtyLS3LPYrL2d5UM6TpFBMUGQ\"],\"version\":1,\"assetId\":null,\"attachment\":\"59QuUcqP6p\",\"transferCount\":2,\"totalAmount\":300000000,\"transfers\":[{\"recipient\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"amount\":100000000},{\"recipient\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"amount\":200000000}]}", tx, MassTransferTransaction.class);
+        deserializationTest("{\"height\":1234,\"type\":11,\"id\":\"H36CTJc7ztGRZPCrvpNYeagCN1HV1gXqUthsXKdBT3UD\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":200000,\"timestamp\":1518091313964,\"proofs\":[\"FXMNu3ecy5zBjn9b69VtpuYRwxjCbxdkZ3xZpLzB8ZeFDvcgTkmEDrD29wtGYRPtyLS3LPYrL2d5UM6TpFBMUGQ\"],\"version\":1,\"assetId\":null,\"attachment\":\"59QuUcqP6p\",\"transferCount\":2,\"totalAmount\":300000000,\"transfers\":[{\"recipient\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"amount\":100000000},{\"recipient\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"amount\":200000000}]}", tx, MassTransferTransaction.class);
     }
 }
