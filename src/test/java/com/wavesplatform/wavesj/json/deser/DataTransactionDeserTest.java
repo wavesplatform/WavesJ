@@ -29,7 +29,7 @@ public class DataTransactionDeserTest extends TransactionDeserTest {
 
     @Test
     public void V1DeserializeTest() throws IOException {
-        deserializationTest("{\"type\":12,\"id\":\"87SfuGJXH1cki2RGDH7WMTGnTXeunkc5mEjNKmmMdRzM\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526911531530,\"proofs\":[\"32mNYSefBTrkVngG5REkmmGAVv69ZvNhpbegmnqDReMTmXNyYqbECPgHgXrX2UwyKGLFS45j7xDFyPXjF8jcfw94\"],\"version\":1,\"data\":[{\"key\":\"int\",\"type\":\"integer\",\"value\":24},{\"key\":\"bool\",\"type\":\"boolean\",\"value\":true},{\"key\":\"blob\",\"type\":\"binary\",\"value\":\"base64:YWxpY2U=\"}]}", tx, DataTransaction.class);
+        deserializationTest("{\"height\":1234,\"type\":12,\"id\":\"87SfuGJXH1cki2RGDH7WMTGnTXeunkc5mEjNKmmMdRzM\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526911531530,\"proofs\":[\"32mNYSefBTrkVngG5REkmmGAVv69ZvNhpbegmnqDReMTmXNyYqbECPgHgXrX2UwyKGLFS45j7xDFyPXjF8jcfw94\"],\"version\":1,\"data\":[{\"key\":\"int\",\"type\":\"integer\",\"value\":24},{\"key\":\"bool\",\"type\":\"boolean\",\"value\":true},{\"key\":\"blob\",\"type\":\"binary\",\"value\":\"base64:YWxpY2U=\"}]}", tx, DataTransaction.class);
     }
 
 }

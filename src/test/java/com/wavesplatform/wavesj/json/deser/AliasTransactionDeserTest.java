@@ -16,11 +16,11 @@ public class AliasTransactionDeserTest extends TransactionDeserTest {
 
     @Test
     public void V1DeserializeTest() throws IOException {
-        deserializationTest("{\"type\":10,\"id\":\"7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526910778245,\"signature\":\"CC1jQ4qkuVfMvB2Kpg2Go6QKXJxUFC8UUswUxBsxwisrR8N5s3Yc8zA6dhjTwfWKfdouSTAnRXCxTXb3T6pJq3T\",\"version\":1,\"alias\":\"myalias\"}", txV1, AliasTransactionV1.class);
+        deserializationTest("{\"height\":1234,\"type\":10,\"id\":\"7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526910778245,\"signature\":\"CC1jQ4qkuVfMvB2Kpg2Go6QKXJxUFC8UUswUxBsxwisrR8N5s3Yc8zA6dhjTwfWKfdouSTAnRXCxTXb3T6pJq3T\",\"version\":1,\"alias\":\"myalias\"}", txV1, AliasTransactionV1.class);
     }
 
     @Test
     public void V2DeserializeTest() throws IOException {
-        deserializationTest("{\"type\":10,\"id\":\"7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526910778245,\"proofs\":[\"26U7rQTwpdma5GYSZb5bNygVCtSuWL6DKet1Nauf5J57v19mmfnq434YrkKYJqvYt2ydQBUT3P7Xgj5ZVDVAcc5k\"],\"version\":2,\"alias\":\"myalias\"}", txV2, AliasTransactionV2.class);
+        deserializationTest("{\"height\":1234,\"type\":10,\"id\":\"7acjQQWJAharrgzb4Z6jo3eeAKAGPmLkHTPtvBTKaiug\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526910778245,\"proofs\":[\"26U7rQTwpdma5GYSZb5bNygVCtSuWL6DKet1Nauf5J57v19mmfnq434YrkKYJqvYt2ydQBUT3P7Xgj5ZVDVAcc5k\"],\"version\":2,\"alias\":\"myalias\"}", txV2, AliasTransactionV2.class);
     }
 }

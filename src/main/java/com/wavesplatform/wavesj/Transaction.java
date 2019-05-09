@@ -16,6 +16,12 @@ public interface Transaction extends ApiJson, Signable {
     @JsonIgnore
     public ByteString getId();
 
+    /**
+     * Can be obtained ONLY during deserialization
+     * @return transaction's height if available or 0
+     */
+    public int getHeight();
+
     public abstract PublicKeyAccount getSenderPublicKey();
 
     public abstract byte getType();

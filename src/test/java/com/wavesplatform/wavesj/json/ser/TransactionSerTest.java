@@ -12,11 +12,13 @@ import static org.junit.Assert.assertEquals;
 public abstract class TransactionSerTest {
     ObjectMapper mapper = new WavesJsonMapper((byte) 'T');
 
-    protected void serializationRoadtripTest(Transaction tx, Class<?> txClass) throws IOException {
+    protected <T extends Transaction> T serializationRoadtripTest(T tx, Class<T> txClass) throws IOException {
         StringWriter sw = new StringWriter();
         mapper.writeValue(sw, tx);
-        Transaction deserialized = (Transaction) mapper.readValue(sw.toString(), txClass);
+        T deserialized = mapper.readValue(sw.toString(), txClass);
         assertEquals(deserialized, tx);
         assertEquals(deserialized.getId(), tx.getId());
+        assertEquals(0, deserialized.getHeight());
+        return deserialized;
     }
 }

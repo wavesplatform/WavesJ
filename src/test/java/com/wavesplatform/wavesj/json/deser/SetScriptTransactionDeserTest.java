@@ -19,8 +19,9 @@ public class SetScriptTransactionDeserTest extends TransactionDeserTest {
 
     @Test
     public void V1DeserializeTest() throws IOException {
-        SetScriptTransaction deserialized = mapper.readValue("{\"type\":13,\"id\":\"Cst37pKJ19WnUZSD6mjqywosMJDbqatuYm2sFAbXrysE\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526983936610,\"proofs\":[\"tcTr672rQ5gXvcA9xCGtQpkHC8sAY1TDYqDcQG7hQZAeHcvvHFo565VEv1iD1gVa3ZuGjYS7hDpuTnQBfY2dUhY\"],\"version\":1,\"script\":null, \"chainId\": 84}", SetScriptTransaction.class);
+        SetScriptTransaction deserialized = mapper.readValue("{\"height\":1234,\"type\":13,\"id\":\"Cst37pKJ19WnUZSD6mjqywosMJDbqatuYm2sFAbXrysE\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000,\"timestamp\":1526983936610,\"proofs\":[\"tcTr672rQ5gXvcA9xCGtQpkHC8sAY1TDYqDcQG7hQZAeHcvvHFo565VEv1iD1gVa3ZuGjYS7hDpuTnQBfY2dUhY\"],\"version\":1,\"script\":null, \"chainId\": 84}", SetScriptTransaction.class);
         assertEquals(deserialized, tx);
         assertEquals(deserialized.getId(), tx.getId());
+        assertEquals(1234, deserialized.getHeight());
     }
 }

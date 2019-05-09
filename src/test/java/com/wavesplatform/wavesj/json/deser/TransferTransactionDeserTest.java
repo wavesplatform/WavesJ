@@ -53,6 +53,7 @@ public class TransferTransactionDeserTest extends TransactionDeserTest {
                 "\"feeAssetId\": null," +
                 "\"feeAsset\": null," +
                 "\"amount\": 1900000," +
+                "\"height\":1234," +
                 "\"attachment\": \"4t2Xazb2SX\"}", txV1, TransferTransactionV1.class);
     }
 
@@ -78,6 +79,7 @@ public class TransferTransactionDeserTest extends TransactionDeserTest {
                 "\"feeAssetId\":null," +
                 "\"feeAsset\":null," +
                 "\"amount\":100000000," +
+                "\"height\":1234," +
                 "\"attachment\":\"3k9wwt7nZn\"}", Transaction.class);
         assert(deserialized.verifySignature());
     }
@@ -97,6 +99,7 @@ public class TransferTransactionDeserTest extends TransactionDeserTest {
                 "\"feeAssetId\": null," +
                 "\"feeAsset\": null," +
                 "\"amount\": 100000000," +
+                "\"height\":1234," +
                 "\"attachment\": \"4t2Xazb2SX\"}", txV2, TransferTransactionV2.class);
     }
 }
