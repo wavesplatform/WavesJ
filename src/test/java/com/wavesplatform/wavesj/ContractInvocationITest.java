@@ -91,9 +91,20 @@ public class ContractInvocationITest extends BaseITest {
         stageDone("#02", "invoke deposit function without args (invest 2 Waves)");
     }
 
+    /**
+     * Invest 2 Waves - call default function
+     */
+    @Test
+    public void t015_invokeDefaultFunc() throws Exception {
+        stageStart("#03", "invoke @Default function (invest 2 Waves)");
+        ContractInvocationTransaction defaultInv = createInvoke(INV_DEFAULT_FUNC, toWavelets(0.005), INV_DEFAULT_PAYMENT);
+        sendInv(defaultInv);
+        stageDone("#03", "invoke @Default function (invest 2 Waves)");
+    }
+
     @Test
     public void t020_invokeFuncWithAllTypesOfArgs() throws Exception {
-        stageStart("#03", "invoke withdraw with all types of args");
+        stageStart("#04", "invoke withdraw with all types of args");
         ContractInvocationTransaction withdrawTx = createInvoke(INV2_FUNC, toWavelets(0.005), 0);
         withdrawTx = withdrawTx
                 .withArg(INV2_ARG1)
@@ -102,7 +113,7 @@ public class ContractInvocationITest extends BaseITest {
                 .withArg(INV2_ARG4)
                 .sign(investorAcc);
         inv2Id = sendInv(withdrawTx);
-        stageDone("#03", "invoke withdraw with all types of args");
+        stageDone("#04", "invoke withdraw with all types of args");
     }
 
     @Test
