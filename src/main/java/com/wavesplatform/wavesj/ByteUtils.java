@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
@@ -8,6 +9,9 @@ import static com.wavesplatform.wavesj.Asset.isWaves;
 
 public class ByteUtils {
     public static final int KBYTE = 1024;
+    public static final byte OPTIONAL_EXIST = 1;
+    public static final byte OPTIONAL_EMPTY = 0;
+
     public final static Charset UTF8 = Charset.forName("UTF-8");
 
     private static final String LENGTH_GT_SHORT = "Attempting to put array with size={0} greater than MaxShort({1})";
@@ -19,11 +23,19 @@ public class ByteUtils {
         return bytes;
     }
 
+    public static void putOptionalFlag(ByteBuffer buffer, Serializable obj) {
+        if (obj != null) {
+            buffer.put(ByteUtils.OPTIONAL_EXIST);
+        } else {
+            buffer.put(ByteUtils.OPTIONAL_EMPTY);
+        }
+    }
+
     public static void putAsset(ByteBuffer buffer, String assetId) {
         if (isWaves(assetId)) {
-            buffer.put((byte) 0);
+            buffer.put(OPTIONAL_EMPTY);
         } else {
-            buffer.put((byte) 1).put(Base58.decode(assetId));
+            buffer.put(OPTIONAL_EXIST).put(Base58.decode(assetId));
         }
     }
 

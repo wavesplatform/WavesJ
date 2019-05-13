@@ -22,7 +22,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
 
     private byte chainId;
     private PublicKeyAccount senderPublicKey;
-    private @JsonProperty("dappAddress") String recipient;
+    private @JsonProperty("dApp") String recipient;
     private FunctionCall call;
     private @JsonProperty("payment") List<Payment> payments = new ArrayList<Payment>();
     private long fee;
@@ -44,7 +44,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
         this.call = call;
-        this.payments = payments;
+        this.payments = payments != null ? payments : new ArrayList<Payment>();
         this.fee = fee;
         this.feeAssetId = feeAssetId;
         this.timestamp = timestamp;
@@ -55,7 +55,9 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         this.chainId = chainId;
         this.senderPublicKey = senderPublicKey;
         this.recipient = recipient;
-        this.call = new FunctionCall(function);
+        if (function != null) {
+            this.call = new FunctionCall(function);
+        }
         this.fee = fee;
         this.feeAssetId = feeAssetId;
         this.timestamp = timestamp;
@@ -143,7 +145,10 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         buf.put(senderPublicKey.getPublicKey());
         ByteUtils.putRecipient(buf, chainId, recipient);
 
-        call.write(buf);
+        ByteUtils.putOptionalFlag(buf, call);
+        if (call != null) {
+            call.write(buf);
+        }
 
         buf.putShort(toShort(payments.size()));
         for (Payment payment: payments) {
@@ -169,7 +174,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         if (getTimestamp() != that.getTimestamp()) return false;
         if (!getSenderPublicKey().equals(that.getSenderPublicKey())) return false;
         if (!getRecipient().equals(that.getRecipient())) return false;
-        if (!getCall().equals(that.getCall())) return false;
+        if (getCall() != null ? !getCall().equals(that.getCall()) : that.getCall() != null) return false;
         if (getPayments() != null ? !getPayments().equals(that.getPayments()) : that.getPayments() != null)
             return false;
         return getFeeAssetId() != null ? getFeeAssetId().equals(that.getFeeAssetId()) : that.getFeeAssetId() == null;
@@ -180,7 +185,7 @@ public class ContractInvocationTransaction extends TransactionWithProofs {
         int result = (int) getChainId();
         result = 31 * result + getSenderPublicKey().hashCode();
         result = 31 * result + getRecipient().hashCode();
-        result = 31 * result + getCall().hashCode();
+        result = 31 * result + (getCall() != null ? getCall().hashCode() : 0);
         result = 31 * result + (getPayments() != null ? getPayments().hashCode() : 0);
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (getFeeAssetId() != null ? getFeeAssetId().hashCode() : 0);

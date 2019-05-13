@@ -1,54 +1,42 @@
 package com.wavesplatform.wavesj.json.deser;
 
-import com.wavesplatform.wavesj.Account;
-import com.wavesplatform.wavesj.ByteString;
-import com.wavesplatform.wavesj.PublicKeyAccount;
+import com.wavesplatform.wavesj.json.ContractInvocationTxTestData;
 import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.wavesplatform.wavesj.Asset.toWavelets;
-import static java.util.Collections.singletonList;
-
 public class ContractInvocationTransactionDeserTest extends TransactionDeserTest {
-
-    private ContractInvocationTransaction tx = new ContractInvocationTransaction(
-            Account.TESTNET,
-            new PublicKeyAccount("4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce", Account.TESTNET),
-            "3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw",
-            new ContractInvocationTransaction.FunctionCall("deposit")
-                    .addArg(10L)
-                    .addArg("STRING_ARG")
-                    .addArg(true)
-                    .addArg(new ByteString("4QZkF9")),
-            singletonList(new ContractInvocationTransaction.Payment(toWavelets(10), null)),
-            toWavelets(0.005),
-            null,
-            1526983936610L,
-            singletonList(new ByteString("59e1LnALZD7JssScwso6Rj9geZvUvRYEgDQe3xb312gKEqHQRMewgFJsAdcGcCAUhQPwpt5yfA7i42kdukwQNEJg"))
-    );
 
     @Test
     public void V1DeserializeTest() throws IOException {
-        deserializationTest("{\"chainId\":84," +
-                "\"senderPublicKey\":\"4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce\"," +
-                "\"dappAddress\":\"3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw\"," +
-                "\"call\":{" +
-                    "\"function\":\"deposit\"," +
-                    "\"args\":[" +
-                        "{\"value\":10,\"type\":\"integer\"}," +
-                        "{\"value\":\"STRING_ARG\",\"type\":\"string\"}," +
-                        "{\"value\":true,\"type\":\"boolean\"}," +
-                        "{\"type\":\"binary\",\"value\":\"base64:hUKqkA==\"}" +
-                    "]}," +
-                "\"payment\":[{\"amount\":1000000000,\"assetId\":null}]," +
-                "\"fee\":500000," +
-                "\"feeAssetId\":null," +
-                "\"timestamp\":1526983936610," +
-                "\"proofs\":[\"59e1LnALZD7JssScwso6Rj9geZvUvRYEgDQe3xb312gKEqHQRMewgFJsAdcGcCAUhQPwpt5yfA7i42kdukwQNEJg\"]," +
-                "\"type\":16," +
-                "\"version\":1," +
-                "\"height\":1234}", tx, ContractInvocationTransaction.class);
+        deserializationTest(
+                ContractInvocationTxTestData.txFullJson(),
+                ContractInvocationTxTestData.txFull(),
+                ContractInvocationTransaction.class);
+    }
+
+    @Test
+    public void testV1DeserTxNoFunctionCall() throws IOException {
+        deserializationTest(
+                ContractInvocationTxTestData.txNoFunctionCallJson(),
+                ContractInvocationTxTestData.txNoFunctionCall(),
+                ContractInvocationTransaction.class);
+    }
+
+    @Test
+    public void testV1DeserTxNoPayment() throws IOException {
+        deserializationTest(
+                ContractInvocationTxTestData.txNoPaymentJson(),
+                ContractInvocationTxTestData.txNoPayment(),
+                ContractInvocationTransaction.class);
+    }
+
+    @Test
+    public void testV1DeserTxNoFunctionCallAndPayment() throws IOException {
+        deserializationTest(
+                ContractInvocationTxTestData.txNoFunctionCallAndPaymentJson(),
+                ContractInvocationTxTestData.txNoFunctionCallAndPayment(),
+                ContractInvocationTransaction.class);
     }
 }
