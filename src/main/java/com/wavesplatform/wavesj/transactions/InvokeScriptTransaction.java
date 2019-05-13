@@ -20,9 +20,11 @@ import static java.util.Collections.unmodifiableList;
 public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptTransaction> {
     public static final byte CONTRACT_INVOKE = 16;
 
+
+    private static int MAX_TX_SIZE = 5 * KBYTE;
     private byte chainId;
     private PublicKeyAccount senderPublicKey;
-    private @JsonProperty("dappAddress") String recipient;
+    private @JsonProperty("dApp") String dApp;
     private FunctionCall call;
     private @JsonProperty("payment") List<Payment> payments = new ArrayList<Payment>();
     private long fee;
@@ -32,7 +34,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     @JsonCreator
     public InvokeScriptTransaction(@JsonProperty("chainId") byte chainId,
                                    @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                                   @JsonProperty("dappAddress") String recipient,
+                                   @JsonProperty("dApp") String dApp,
                                    @JsonProperty("call") FunctionCall call,
                                    @JsonProperty("payment") List<Payment> payments,
                                    @JsonProperty("fee") long fee,
@@ -42,7 +44,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         setProofs(proofs);
         this.chainId = chainId;
         this.senderPublicKey = senderPublicKey;
-        this.recipient = recipient;
+        this.dApp = dApp;
         this.call = call;
         this.payments = payments;
         this.fee = fee;
@@ -50,11 +52,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         this.timestamp = timestamp;
     }
 
-    public InvokeScriptTransaction(byte chainId, PublicKeyAccount senderPublicKey, String recipient,
+    public InvokeScriptTransaction(byte chainId, PublicKeyAccount senderPublicKey, String dApp,
                                    String function, long fee, String feeAssetId, long timestamp) {
         this.chainId = chainId;
         this.senderPublicKey = senderPublicKey;
-        this.recipient = recipient;
+        this.dApp = dApp;
         this.call = new FunctionCall(function);
         this.fee = fee;
         this.feeAssetId = feeAssetId;
@@ -100,8 +102,8 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         return chainId;
     }
 
-    public String getRecipient() {
-        return recipient;
+    public String getdApp() {
+        return dApp;
     }
 
     public String getFeeAssetId() {
@@ -144,18 +146,23 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     @Override
     public InvokeScriptTransaction withProof(int index, ByteString proof) {
         List<ByteString> newProofs = updateProofs(index, proof);
-        return new InvokeScriptTransaction(chainId, senderPublicKey, recipient, call, payments, fee, feeAssetId, timestamp, newProofs);
+        return new InvokeScriptTransaction(chainId, senderPublicKey, dApp, call, payments, fee, feeAssetId, timestamp, newProofs);
     }
 
 
     @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
         buf.put(CONTRACT_INVOKE).put(Transaction.V1).put(chainId);
         buf.put(senderPublicKey.getPublicKey());
-        ByteUtils.putRecipient(buf, chainId, recipient);
+        ByteUtils.putRecipient(buf, chainId, dApp);
 
-        call.write(buf);
+        if (call == null){
+            buf.put((byte)0);
+        } else {
+            buf.put((byte)1);
+            call.write(buf);
+        }
 
         buf.putShort(toShort(payments.size()));
         for (Payment payment: payments) {
@@ -180,7 +187,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         if (getFee() != that.getFee()) return false;
         if (getTimestamp() != that.getTimestamp()) return false;
         if (!getSenderPublicKey().equals(that.getSenderPublicKey())) return false;
-        if (!getRecipient().equals(that.getRecipient())) return false;
+        if (!getdApp().equals(that.getdApp())) return false;
         if (!getCall().equals(that.getCall())) return false;
         if (getPayments() != null ? !getPayments().equals(that.getPayments()) : that.getPayments() != null)
             return false;
@@ -191,7 +198,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     public int hashCode() {
         int result = (int) getChainId();
         result = 31 * result + getSenderPublicKey().hashCode();
-        result = 31 * result + getRecipient().hashCode();
+        result = 31 * result + getdApp().hashCode();
         result = 31 * result + getCall().hashCode();
         result = 31 * result + (getPayments() != null ? getPayments().hashCode() : 0);
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
@@ -444,7 +451,6 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
             ByteBuffer tmpBuf = ByteBuffer.allocate(256);
             tmpBuf.putLong(amount);
             putPaymentAsset(tmpBuf, assetId);
-        //    tmpBuf.putShort(toShort(getOnlyUsed(tmpBuf).length));
             ByteUtils.putBytes(buf, getOnlyUsed(tmpBuf), LENGTH_AS_SHORT);
         }
 

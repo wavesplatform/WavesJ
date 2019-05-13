@@ -33,7 +33,7 @@ public class InvokeScriptTransactionDeserTest extends TransactionDeserTest {
     public void V1DeserializeTest() throws IOException {
         deserializationTest("{\"chainId\":84," +
                 "\"senderPublicKey\":\"4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce\"," +
-                "\"dappAddress\":\"3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw\"," +
+                "\"dApp\":\"3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw\"," +
                 "\"call\":{" +
                     "\"function\":\"deposit\"," +
                     "\"args\":[" +

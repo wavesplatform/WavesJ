@@ -13,6 +13,7 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public class DataTransaction extends TransactionWithProofs<DataTransaction> {
     public static final byte DATA = 12;
+    private static final int MAX_TX_SIZE = 150 * KBYTE;
 
     private final PublicKeyAccount senderPublicKey;
     private final Collection<DataEntry<?>> data;
@@ -49,7 +50,7 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
 
     @Override
     public byte[] getBodyBytes() {
-        int datalen = KBYTE;
+        int datalen = MAX_TX_SIZE;
         for (DataEntry<?> e : data) {
             datalen += e.size();
         }
@@ -66,7 +67,7 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
 
     @Override
     public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
         buf.put(getBodyBytes())
                 .put((byte) 1) //proofs version
                 .putShort((short) getProofs().size());

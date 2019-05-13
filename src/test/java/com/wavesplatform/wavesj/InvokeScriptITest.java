@@ -175,7 +175,7 @@ public class InvokeScriptITest extends BaseITest {
 
     private static void assertInvocationFieldsNotNull(InvokeScriptTransaction invTx) {
         Assert.assertNotNull(invTx.getSenderPublicKey());
-        Assert.assertNotNull(invTx.getRecipient());
+        Assert.assertNotNull(invTx.getdApp());
         Assert.assertNotNull(invTx.getProofs());
         Assert.assertNotNull(invTx.getCall());
         Assert.assertNotNull(invTx.getPayments());
