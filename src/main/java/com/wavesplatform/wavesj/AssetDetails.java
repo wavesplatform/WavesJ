@@ -48,4 +48,20 @@ public class AssetDetails {
         this.scripted = scripted;
         this.minSponsoredAssetFee = minSponsoredAssetFee;
     }
+
+    @Override
+    public String toString() {
+        return "AssetDetails{" +
+                "assetId='" + assetId + '\'' +
+                ", issueHeight=" + issueHeight +
+                ", issuer='" + issuer + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", decimals=" + decimals +
+                ", reissuable=" + reissuable +
+                ", quantity=" + quantity +
+                ", scripted=" + scripted +
+                ", minSponsoredAssetFee=" + minSponsoredAssetFee +
+                '}';
+    }
 }
