@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AssetDetails {
-    public final String assetId;
-    public final Long issueHeight;
-    public final String issuer;
-    public final String name;
-    public final String description;
-    public final Integer decimals;
-    public final Boolean reissuable;
-    public final Long quantity;
-    public final Boolean scripted;
-    public final Long minSponsoredAssetFee;
+    private final String assetId;
+    private final Long issueHeight;
+    private final String issuer;
+    private final String name;
+    private final String description;
+    private final Integer decimals;
+    private final Boolean reissuable;
+    private final Long quantity;
+    private final Boolean scripted;
+    private final Long minSponsoredAssetFee;
 
     @JsonCreator
     public AssetDetails(@JsonProperty("assetId") String assetId, @JsonProperty("issueHeight") Long issueHeight,
