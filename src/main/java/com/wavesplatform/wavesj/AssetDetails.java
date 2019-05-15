@@ -125,7 +125,7 @@ public class AssetDetails {
             return false;
         if (getScripted() != null ? !getScripted().equals(that.getScripted()) : that.getScripted() != null)
             return false;
-        return getMinSponsoredAssetFee().equals(that.getMinSponsoredAssetFee());
+        return getMinSponsoredAssetFee() != null ? getMinSponsoredAssetFee().equals(that.getMinSponsoredAssetFee()) : that.getMinSponsoredAssetFee() == null;
 
     }
 
@@ -141,7 +141,7 @@ public class AssetDetails {
         result = 31 * result + (getReissuable() != null ? getReissuable().hashCode() : 0);
         result = 31 * result + (getQuantity() != null ? getQuantity().hashCode() : 0);
         result = 31 * result + (getScripted() != null ? getScripted().hashCode() : 0);
-        result = 31 * result + getMinSponsoredAssetFee().hashCode();
+        result = 31 * result + (getMinSponsoredAssetFee() != null ? getMinSponsoredAssetFee().hashCode() : 0);
         return result;
     }
 
