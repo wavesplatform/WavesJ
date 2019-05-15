@@ -3,7 +3,9 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AssetDetails {
+import java.io.Serializable;
+
+public class AssetDetails implements Serializable {
     private final String assetId;
     private final Long issueHeight;
     private final Long issueTimestamp;
