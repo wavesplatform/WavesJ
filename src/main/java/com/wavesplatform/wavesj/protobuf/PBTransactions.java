@@ -1,8 +1,10 @@
 package com.wavesplatform.wavesj.protobuf;
 
 import com.google.protobuf.ByteString;
+import com.wavesplatform.protobuf.transaction.RecipientOuterClass;
 import com.wavesplatform.protobuf.transaction.TransactionOuterClass;
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.util.ArrayList;
@@ -58,6 +60,24 @@ public class PBTransactions {
         return vd;
     }
 
+    public static Order toVanillaOrder(final TransactionOuterClass.ExchangeTransactionData.Order order) {
+        final Order.Type orderType = order.getOrderSide() == TransactionOuterClass.ExchangeTransactionData.Order.Side.BUY ? Order.Type.BUY : Order.Type.SELL;
+        final AssetPair assetPair = new AssetPair(toVanillaAssetId(order.getAssetPair().getAmountAssetId()), toVanillaAssetId(order.getAssetPair().getPriceAssetId()));
+
+        return new Order(orderType, assetPair, order.getAmount(), order.getPrice(), order.getTimestamp(), order.getExpiration(), order.getMatcherFee().getAmount(), new PublicKeyAccount(order.getSenderPublicKey().toByteArray(), (byte) order.getChainId()), new PublicKeyAccount(order.getMatcherPublicKey().toByteArray(), (byte)order.getChainId()), toSignature(order.getProofsList()));
+    }
+
+    public static String toRecipientString(final RecipientOuterClass.Recipient recipient) {
+        switch (recipient.getRecipientCase()) {
+            case ALIAS:
+                return recipient.getAlias();
+            case ADDRESS:
+                return Base58.encode(recipient.getAddress().toByteArray());
+            default:
+                throw new IllegalArgumentException("Recipient not supported: " + recipient);
+        }
+    }
+
     public static Transaction toVanilla(final TransactionOuterClass.SignedTransaction signedTransaction) {
         final TransactionOuterClass.Transaction tx = signedTransaction.getTransaction();
         if (tx.getVersion() != 1 && tx.getVersion() != 2) throw new IllegalArgumentException("TX version not supported: " + tx);
@@ -83,6 +103,76 @@ public class PBTransactions {
         } else if (tx.hasDataTransaction()) {
             final TransactionOuterClass.DataTransactionData data = tx.getDataTransaction();
             return new DataTransaction(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte) tx.getChainId()), toVanillaDataEntryList(data.getDataList()), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+        } else if (tx.hasExchange()) {
+            final TransactionOuterClass.ExchangeTransactionData exchange = tx.getExchange();
+            return new ExchangeTransaction(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), exchange.getAmount(), exchange.getPrice(), toVanillaOrder(exchange.getOrders(0)), toVanillaOrder(exchange.getOrders(1)), exchange.getBuyMatcherFee(), exchange.getSellMatcherFee(), tx.getFee().getAmount(), tx.getTimestamp(), toSignature(signedTransaction.getProofsList()));
+        } else if (tx.hasGenesis()) {
+            // ???
+        } else if (tx.hasInvokeScript()) {
+            // ???
+        } else if (tx.hasIssue()) {
+            final TransactionOuterClass.IssueTransactionData issue = tx.getIssue();
+            switch (tx.getVersion()) {
+                case Transaction.V1:
+                    return new IssueTransactionV1(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte) tx.getChainId()), new String(issue.getName().toByteArray()), new String(issue.getDescription().toByteArray()), issue.getAmount(), (byte)issue.getDecimals(), issue.getReissuable(), tx.getFee().getAmount(), tx.getTimestamp(), toSignature(signedTransaction.getProofsList()));
+
+                case Transaction.V2:
+                    return new IssueTransactionV2(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte) tx.getChainId()), (byte) tx.getChainId(), new String(issue.getName().toByteArray()), new String(issue.getDescription().toByteArray()), issue.getAmount(), (byte)issue.getDecimals(), issue.getReissuable(), new String(issue.getScript().getBytes().toByteArray()), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+            }
+        } else if (tx.hasReissue()) {
+            final TransactionOuterClass.ReissueTransactionData reissue = tx.getReissue();
+            switch (tx.getVersion()) {
+                case Transaction.V1:
+                    return new ReissueTransactionV1(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte) tx.getChainId()), toVanillaAssetId(reissue.getAssetAmount().getAssetId()), reissue.getAssetAmount().getAmount(), reissue.getReissuable(), tx.getFee().getAmount(), tx.getTimestamp(), toSignature(signedTransaction.getProofsList()));
+
+                case Transaction.V2:
+                    return new ReissueTransactionV2(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte) tx.getChainId()), (byte)tx.getChainId(), toVanillaAssetId(reissue.getAssetAmount().getAssetId()), reissue.getAssetAmount().getAmount(), reissue.getReissuable(), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+            }
+        } else if (tx.hasSetAssetScript()) {
+            // ???
+        } else if (tx.hasSetScript()) {
+            final TransactionOuterClass.SetScriptTransactionData setScript = tx.getSetScript();
+            return new SetScriptTransaction(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), new String(setScript.getScript().getBytes().toByteArray()), (byte)tx.getChainId(), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+        } else if (tx.hasTransfer()) {
+            final TransactionOuterClass.TransferTransactionData transfer = tx.getTransfer();
+            switch (tx.getVersion()) {
+                case Transaction.V1:
+                    return new TransferTransactionV1(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), toRecipientString(transfer.getRecipient()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId().getIssuedAsset()), tx.getFee().getAmount(), toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), toVanillaByteString(transfer.getAttachment()), tx.getTimestamp(), toSignature(signedTransaction.getProofsList()));
+
+                case Transaction.V2:
+                    return new TransferTransactionV2(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), toRecipientString(transfer.getRecipient()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId().getIssuedAsset()), tx.getFee().getAmount(), toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), toVanillaByteString(transfer.getAttachment()), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+            }
+        } else if (tx.hasPayment()) {
+            // ???
+        } else if (tx.hasLease()) {
+            final TransactionOuterClass.LeaseTransactionData lease = tx.getLease();
+            switch (tx.getVersion()) {
+                case Transaction.V1:
+                    return new LeaseTransactionV1(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), toRecipientString(lease.getRecipient()), lease.getAmount(), tx.getFee().getAmount(), tx.getTimestamp(), toSignature(signedTransaction.getProofsList()));
+
+                case Transaction.V2:
+                    return new LeaseTransactionV2(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), toRecipientString(lease.getRecipient()), lease.getAmount(), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+            }
+        } else if (tx.hasLeaseCancel()) {
+            final TransactionOuterClass.LeaseCancelTransactionData leaseCancel = tx.getLeaseCancel();
+            switch (tx.getVersion()) {
+                case Transaction.V1:
+                    return new LeaseCancelTransactionV1(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), Base58.encode(leaseCancel.getLeaseId().toByteArray()), tx.getFee().getAmount(), tx.getTimestamp(), toSignature(signedTransaction.getProofsList()));
+
+                case Transaction.V2:
+                    return new LeaseCancelTransactionV2(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), (byte)tx.getChainId(), Base58.encode(leaseCancel.getLeaseId().toByteArray()), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+            }
+        } else if (tx.hasMassTransfer()) {
+            final TransactionOuterClass.MassTransferTransactionData massTransfer = tx.getMassTransfer();
+            final List<Transfer> transfers = new ArrayList<Transfer>(massTransfer.getTransfersList().size());
+            for (TransactionOuterClass.MassTransferTransactionData.Transfer transfer : massTransfer.getTransfersList()) {
+                final Transfer transfer1 = new Transfer(toRecipientString(transfer.getAddress()), transfer.getAmount());
+                transfers.add(transfer1);
+            }
+            return new MassTransferTransaction(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), toVanillaAssetId(massTransfer.getAssetId().getIssuedAsset()), Collections.unmodifiableList(transfers), tx.getFee().getAmount(), toVanillaByteString(massTransfer.getAttachment()), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
+        } else if (tx.hasSponsorFee()) {
+            final TransactionOuterClass.SponsorFeeTransactionData sponsorFee = tx.getSponsorFee();
+            return new SponsorTransaction(new PublicKeyAccount(tx.getSenderPublicKey().toByteArray(), (byte)tx.getChainId()), toVanillaAssetId(sponsorFee.getMinFee().getAssetId()), sponsorFee.getMinFee().getAmount(), tx.getFee().getAmount(), tx.getTimestamp(), toVanillaProofs(signedTransaction.getProofsList()));
         }
 
         throw new IllegalArgumentException("Invalid TX: " + tx);
