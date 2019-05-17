@@ -24,9 +24,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     private static int MAX_TX_SIZE = 5 * KBYTE;
     private byte chainId;
     private PublicKeyAccount senderPublicKey;
-    private @JsonProperty("dApp") String dApp;
+    private @JsonProperty("dApp")
+    String dApp;
     private FunctionCall call;
-    private @JsonProperty("payment") List<Payment> payments = new ArrayList<Payment>();
+    private @JsonProperty("payment")
+    List<Payment> payments = new ArrayList<Payment>();
     private long fee;
     private String feeAssetId;
     private long timestamp;
@@ -107,7 +109,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     }
 
     public String getFeeAssetId() {
-        return feeAssetId;
+        return Asset.toJsonObject(feeAssetId);
     }
 
     @Override
@@ -157,15 +159,15 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         buf.put(senderPublicKey.getPublicKey());
         ByteUtils.putRecipient(buf, chainId, dApp);
 
-        if (call == null){
-            buf.put((byte)0);
+        if (call == null) {
+            buf.put((byte) 0);
         } else {
-            buf.put((byte)1);
+            buf.put((byte) 1);
             call.write(buf);
         }
 
         buf.putShort(toShort(payments.size()));
-        for (Payment payment: payments) {
+        for (Payment payment : payments) {
             payment.write(buf);
         }
 
@@ -211,10 +213,14 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     public static class FunctionCall implements Serializable {
         private static final byte E_FUNCALL = (byte) 9;
 
-        /** WARNING! Unsupported in current implementation. Function header for native function */
+        /**
+         * WARNING! Unsupported in current implementation. Function header for native function
+         */
         private static final byte FH_NATIVE = (byte) 0;
 
-        /** Function header for custom (user's) function */
+        /**
+         * Function header for custom (user's) function
+         */
         private static final byte FH_USER = (byte) 1;
 
         @JsonProperty("function")
@@ -265,7 +271,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
 
             // write function's arguments
             buf.putInt(args.size());
-            for (FunctionalArg<?> arg: args) {
+            for (FunctionalArg<?> arg : args) {
                 arg.write(buf);
             }
         }
@@ -302,8 +308,8 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type")
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type")
     @JsonSubTypes({
             @Type(value = LongArg.class, name = LongArg.T_LONG),
             @Type(value = BinaryArg.class, name = BinaryArg.T_BINARY),
@@ -459,7 +465,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         }
 
         public String getAssetId() {
-            return assetId;
+            return Asset.toJsonObject(assetId);
         }
 
         @Override

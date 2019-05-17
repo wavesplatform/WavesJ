@@ -98,7 +98,7 @@ public class InvokeScriptITest extends BaseITest {
                 getBalance(benzAcc), getBalance(smartAcc), getBalance(investorAcc), benzAcc.getAddress(), INV1_FUNC, fromWavelets(inv1Fee), fromWavelets(INV1_PAYMENT));
         InvokeScriptTransaction depositTx =
                 new InvokeScriptTransaction(chainId, investorAcc, smartAcc.getAddress(), INV1_FUNC,
-                        inv1Fee, null, System.currentTimeMillis())
+                        inv1Fee, Asset.WAVES, System.currentTimeMillis())
                         .withPayment(INV1_PAYMENT, null)
                         .sign(investorAcc);
 
