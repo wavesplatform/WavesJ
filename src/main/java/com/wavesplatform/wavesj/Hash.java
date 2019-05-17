@@ -25,7 +25,7 @@ public class Hash {
         return d;
     }
 
-    public static byte[] hash(byte[] message, int ofs, int len, ThreadLocal<Digest> alg) {
+    private static byte[] hash(byte[] message, int ofs, int len, ThreadLocal<Digest> alg) {
         Digest d = digest(alg);
         byte[] res = new byte[d.getDigestSize()];
         d.update(message, ofs, len);
