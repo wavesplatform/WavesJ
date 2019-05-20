@@ -66,7 +66,8 @@ public class TransferTransactionDeserTest extends TransactionDeserTest {
      */
     @Test
     public void V1DeserializeTest2() throws IOException {
-        TransactionWithSignature deserialized = (TransactionWithSignature) mapper.readValue("{\"type\":4," +
+        TransactionWithSignature deserialized = (TransactionWithSignature) mapper.readValue("{\"height\":1234," +
+                "\"type\":4," +
                 "\"id\":\"3amMDaJJiLhvyxrqs8JpFT5s42gfbZKMGuPasAEEbu1a\"," +
                 "\"sender\":\"3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw\"," +
                 "\"senderPublicKey\":\"H9S6sPxueb6z1PB46VZJD6FbaTxsNfT8GHv5PPHbvDHx\"," +
@@ -81,12 +82,13 @@ public class TransferTransactionDeserTest extends TransactionDeserTest {
                 "\"amount\":100000000," +
                 "\"height\":1234," +
                 "\"attachment\":\"3k9wwt7nZn\"}", Transaction.class);
-        assert(deserialized.verifySignature());
+        assert (deserialized.verifySignature());
     }
 
     @Test
     public void V2DeserializeTest() throws IOException {
-        deserializationTest("{\"type\": 4," +
+        deserializationTest("{\"height\":1234," +
+                "\"type\": 4," +
                 "\"id\": \"2qMiGUpNMuRpeyTnXLa1mLuVP1cYEtxys55cQbDaXd5g\"," +
                 "\"sender\": \"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\"," +
                 "\"senderPublicKey\": \"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\"," +

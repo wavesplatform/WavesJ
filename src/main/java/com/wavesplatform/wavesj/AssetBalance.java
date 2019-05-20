@@ -23,11 +23,11 @@ public class AssetBalance {
     }
 
 
-    public Long getAmountAsset() {
+    public Long getBalance() {
         return balance;
     }
 
-    public String getPriceAsset() {
+    public String getAssetId() {
         return assetId;
     }
 }

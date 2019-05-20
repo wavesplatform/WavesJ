@@ -12,6 +12,7 @@ import static com.wavesplatform.wavesj.ByteUtils.putString;
 public class IssueTransactionV1 extends TransactionWithSignature implements IssueTransaction {
     public static final byte ISSUE = 3;
 
+    private static final int MAX_TX_SIZE = 10 * KBYTE;
     private final PublicKeyAccount senderPublicKey;
     private final String name;
     private final String description;
@@ -37,7 +38,7 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         this.reissuable = reissuable;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
+        this.signature = new ByteString(senderPublicKey.sign(getBodyBytes()));
     }
 
     @JsonCreator
@@ -93,8 +94,8 @@ public class IssueTransactionV1 extends TransactionWithSignature implements Issu
         return timestamp;
     }
 
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
+    public byte[] getBodyBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
         buf.put(IssueTransaction.ISSUE);
         buf.put(senderPublicKey.getPublicKey());
         putString(buf, name);

@@ -1,13 +1,13 @@
 package com.wavesplatform.wavesj;
 
-import com.wavesplatform.wavesj.matcher.CancelOrder;
-import com.wavesplatform.wavesj.matcher.DeleteOrder;
-import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.matcher.*;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.util.Collection;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.Asset.isWaves;
+import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
 
 public class Transactions {
 
@@ -41,6 +41,16 @@ public class Transactions {
     public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
                                                        long fee, String feeAssetId, String attachment) {
         return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
+    }
+
+    public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
+                                                       long fee, String feeAssetId, ByteString attachment) {
+        return makeTransferTx(sender, recipient, amount, assetId, fee, feeAssetId, attachment, System.currentTimeMillis());
+    }
+
+    public static TransferTransactionV2 makeTransferTx(PrivateKeyAccount sender, String recipient, long amount, String assetId,
+                                                       long fee, String feeAssetId, ByteString attachment, long timestamp) {
+        return new TransferTransactionV2(sender, recipient, amount, assetId, fee, feeAssetId, attachment == null ? ByteString.EMPTY : attachment, timestamp);
     }
 
     public static BurnTransactionV2 makeBurnTx(PrivateKeyAccount sender, byte chainId, String assetId, long amount, long fee, long timestamp) {
@@ -133,41 +143,83 @@ public class Transactions {
         return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
     }
 
-    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                    AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
+    public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                  AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
         if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
             throw new IllegalArgumentException("spendAsset and receiveAsset should not be equal");
         }
-        return new Order(orderType, assetPair, amount, price, timestamp,
-                expiration, matcherFee, account, new PublicKeyAccount(matcherKey, account.getChainId()));
+        return new OrderV2(account, new PublicKeyAccount(matcherKey, account.getChainId()), orderType, assetPair, amount, price, timestamp,
+                expiration, matcherFee, Order.V2);
     }
 
-    public static Order makeOrderTx(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
-                                    AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
-        return makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
+    public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                  AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
+        return makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account) {
-        return makeOrderCancelTx(account, System.currentTimeMillis());
+
+
+    public static ExchangeTransactionV2 makeExchangeTx(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
+                                                       long price, long buyMatcherFee, long sellMatcherFee, long fee) {
+        return makeExchangeTx(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, System.currentTimeMillis());
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, long timestamp) {
+    public static ExchangeTransactionV2 makeExchangeTx(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
+                                                       long price, long buyMatcherFee, long sellMatcherFee, long fee, long timestamp) {
+        return new ExchangeTransactionV2(account, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee, timestamp);
+    }
+
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account) {
+        return makeOrderCancel(account, System.currentTimeMillis());
+    }
+
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, long timestamp) {
         return new CancelOrder(account, timestamp);
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair) {
-        return makeOrderCancelTx(account, assetPair, System.currentTimeMillis());
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, AssetPair assetPair) {
+        return makeOrderCancel(account, assetPair, System.currentTimeMillis());
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, long timestamp) {
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, AssetPair assetPair, long timestamp) {
         return new CancelOrder(account, assetPair, timestamp);
     }
 
-    public static CancelOrder makeOrderCancelTx(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
+    public static CancelOrder makeOrderCancel(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
         return new CancelOrder(account, assetPair, orderId);
     }
 
     public static DeleteOrder makeDeleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
         return new DeleteOrder(account, assetPair, orderId);
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                             List<Payment> payments, long fee, String feeAssetId, long timestamp) {
+        return new InvokeScriptTransaction(chainId, account, dApp, call, payments, fee, feeAssetId, timestamp);
+    }
+
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                             List<Payment> payments, long fee, String feeAssetId) {
+        return makeInvokeScriptTx(account, chainId, dApp, call, payments, fee, feeAssetId, System.currentTimeMillis());
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                             long fee, String feeAssetId, long timestamp) {
+        return new InvokeScriptTransaction(chainId, account, dApp, call, fee, feeAssetId, timestamp);
+    }
+
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                            long fee, String feeAssetId) {
+        return makeInvokeScriptTx(account, chainId, dApp, call, fee, feeAssetId, System.currentTimeMillis());
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp) {
+        return new InvokeScriptTransaction(chainId, account, dApp, functionName, fee, feeAssetId, timestamp);
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, String functionName, long fee, String feeAssetId) {
+        return makeInvokeScriptTx(account, chainId, dApp, functionName, fee, feeAssetId, System.currentTimeMillis());
     }
 }

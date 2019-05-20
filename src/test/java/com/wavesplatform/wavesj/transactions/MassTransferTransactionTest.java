@@ -21,7 +21,7 @@ public class MassTransferTransactionTest {
 
     @Test
     public void bytesBytesTest() {
-        assertEquals("NwibNKaAQ6aG8Uw5gkauUET1Du4GPVnU9ZAV8FxvvCQJu4n1cfJbEcuSgs9LM5v8Nw8koLc5Y8AGHtRJfekYXMw2RH81sE6C1i81pZRTj2PpuyjhWmdAbhbiePiFBQfeXGfXxy1GPmxsp7T9iDWtxJmRpiQ2UjD3QRyEuejtssBuhAgqv", Base58.encode(tx.getBytes()));
+        assertEquals("NwibNKaAQ6aG8Uw5gkauUET1Du4GPVnU9ZAV8FxvvCQJu4n1cfJbEcuSgs9LM5v8Nw8koLc5Y8AGHtRJfekYXMw2RH81sE6C1i81pZRTj2PpuyjhWmdAbhbiePiFBQfeXGfXxy1GPmxsp7T9iDWtxJmRpiQ2UjD3QRyEuejtssBuhAgqv", Base58.encode(tx.getBodyBytes()));
     }
 
     @Test

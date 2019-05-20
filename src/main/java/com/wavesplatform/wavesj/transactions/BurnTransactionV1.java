@@ -25,7 +25,7 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
+        this.signature = new ByteString(senderPublicKey.sign(getBodyBytes()));
     }
 
     @JsonCreator
@@ -64,7 +64,7 @@ public class BurnTransactionV1 extends TransactionWithSignature implements BurnT
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(BurnTransaction.BURN)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))

@@ -14,7 +14,7 @@ public class SponsorTransactionTest {
 
     @Test
     public void bytesBytesTest() {
-        assertEquals("3CKxGzNmb7shpaDFwdovUs4ro1deJaJLzN3yGVgcQKFAu9twWaBLAmjF41p628LkMAwe4ksHdqiqQWCNjaB3FVMbNVu8bzURhqGic3MGGWsBSFriCeewxP5CtPC", Base58.encode(tx.getBytes()));
+        assertEquals("3CKxGzNmb7shpaDFwdovUs4ro1deJaJLzN3yGVgcQKFAu9twWaBLAmjF41p628LkMAwe4ksHdqiqQWCNjaB3FVMbNVu8bzURhqGic3MGGWsBSFriCeewxP5CtPC", Base58.encode(tx.getBodyBytes()));
     }
 
     @Test

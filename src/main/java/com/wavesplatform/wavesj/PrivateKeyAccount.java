@@ -235,7 +235,7 @@ public class PrivateKeyAccount extends PublicKeyAccount {
      * @return Base58-encoded signature
      */
     public String sign(Transaction tx) {
-        return sign(tx.getBytes());
+        return sign(tx.getBodyBytes());
     }
 
     public String sign(byte[] bytes) {

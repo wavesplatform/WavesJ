@@ -3,18 +3,19 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public interface Transaction extends ApiJson, Signable {
-    public static final byte V1 = 1;
-    public static final byte V2 = 2;
+    byte V1 = 1;
+    byte V2 = 2;
 
-    public long getFee();
+    long getFee();
 
-    public long getTimestamp();
+    long getTimestamp();
 
     /**
      * Transaction ID.
+     * @return transaction id in ByteString format
      */
     @JsonIgnore
-    public ByteString getId();
+    ByteString getId();
 
     /**
      * Can be obtained ONLY during deserialization
@@ -22,9 +23,9 @@ public interface Transaction extends ApiJson, Signable {
      */
     public int getHeight();
 
-    public abstract PublicKeyAccount getSenderPublicKey();
+    PublicKeyAccount getSenderPublicKey();
 
-    public abstract byte getType();
+    byte getType();
 
-    public abstract byte getVersion();
+    byte getVersion();
 }

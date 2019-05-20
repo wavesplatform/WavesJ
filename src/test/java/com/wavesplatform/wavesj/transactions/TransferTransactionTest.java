@@ -17,7 +17,7 @@ public class TransferTransactionTest {
 
     @Test
     public void bytesV1BytesTest() {
-        assertEquals("5xTbFB85oEXsuV8u7Q7yjTnhWogdL2Kg5bMZKtCUsVB8PkMpXHDZB8UBDrhFM3P9kMHcw6S4DuRSXHvABRu8d4x5qPG5YcyWxF7or95t1rB1zPBD1v7HitFMw9AsLZF9", Base58.encode(txV1.getBytes()));
+        assertEquals("5xTbFB85oEXsuV8u7Q7yjTnhWogdL2Kg5bMZKtCUsVB8PkMpXHDZB8UBDrhFM3P9kMHcw6S4DuRSXHvABRu8d4x5qPG5YcyWxF7or95t1rB1zPBD1v7HitFMw9AsLZF9", Base58.encode(txV1.getBodyBytes()));
     }
 
     @Test
@@ -27,7 +27,7 @@ public class TransferTransactionTest {
 
     @Test
     public void bytesV2BytesTest() {
-        assertEquals("KA5dHBQkDB6Qu8xJPXJzDdZq3b7kwSsXjjjGWasc54aDKicGQo3qNiMbM4ZUYruNLydSD5vM4aBoq1gbpum6qRk4fSaMPwUC5gwwoeJdRxCGHSPtJMgFzq4rKs8krD1g7", Base58.encode(txV2.getBytes()));
+        assertEquals("KA5dHBQkDB6Qu8xJPXJzDdZq3b7kwSsXjjjGWasc54aDKicGQo3qNiMbM4ZUYruNLydSD5vM4aBoq1gbpum6qRk4fSaMPwUC5gwwoeJdRxCGHSPtJMgFzq4rKs8krD1g7", Base58.encode(txV2.getBodyBytes()));
     }
 
     @Test

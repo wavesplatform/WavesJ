@@ -21,6 +21,7 @@ public class BlockHeader {
     private final long fee;
     private final int height;
     private final int transactionCount;
+    private final NxtConsensus consensus;
 
     @JsonCreator
     private BlockHeader(
@@ -31,7 +32,8 @@ public class BlockHeader {
             @JsonProperty("generator") String generator,
             @JsonProperty("fee") long fee,
             @JsonProperty("height") int height,
-            @JsonProperty("transactionCount") int transactionCount) {
+            @JsonProperty("transactionCount") int transactionCount,
+            @JsonProperty("nxt-consensus") NxtConsensus consensus) {
         this.version = version;
         this.timestamp = timestamp;
         this.signature = signature;
@@ -40,6 +42,7 @@ public class BlockHeader {
         this.fee = fee;
         this.height = height;
         this.transactionCount = transactionCount;
+        this.consensus = consensus;
     }
 
 
@@ -73,5 +76,9 @@ public class BlockHeader {
 
     public int getVersion() {
         return version;
+    }
+
+    public NxtConsensus getConsensus(){
+        return consensus;
     }
 }

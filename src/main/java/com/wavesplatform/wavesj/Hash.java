@@ -5,10 +5,10 @@ import org.bouncycastle.crypto.digests.Blake2bDigest;
 import org.bouncycastle.crypto.digests.KeccakDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
-class Hash {
-    static final ThreadLocal<Digest> BLAKE2B256 = new ThreadLocal<Digest>();
-    static final ThreadLocal<Digest> KECCAK256 = new ThreadLocal<Digest>();
-    static final ThreadLocal<Digest> SHA256 = new ThreadLocal<Digest>();
+public class Hash {
+    public static final ThreadLocal<Digest> BLAKE2B256 = new ThreadLocal<Digest>();
+    public static final ThreadLocal<Digest> KECCAK256 = new ThreadLocal<Digest>();
+    public static final ThreadLocal<Digest> SHA256 = new ThreadLocal<Digest>();
 
     private static Digest digest(ThreadLocal<Digest> cache) {
         Digest d = cache.get();
@@ -25,7 +25,7 @@ class Hash {
         return d;
     }
 
-    static byte[] hash(byte[] message, int ofs, int len, ThreadLocal<Digest> alg) {
+    protected static byte[] hash(byte[] message, int ofs, int len, ThreadLocal<Digest> alg) {
         Digest d = digest(alg);
         byte[] res = new byte[d.getDigestSize()];
         d.update(message, ofs, len);
@@ -33,7 +33,7 @@ class Hash {
         return res;
     }
 
-    static byte[] secureHash(byte[] message, int ofs, int len) {
+    public static byte[] secureHash(byte[] message, int ofs, int len) {
         byte[] blake2b = hash(message, ofs, len, Hash.BLAKE2B256);
         return hash(blake2b, 0, blake2b.length, Hash.KECCAK256);
     }

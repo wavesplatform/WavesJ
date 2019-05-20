@@ -19,11 +19,11 @@ public class ReissueTransactionDeserTest extends TransactionDeserTest {
 
     @Test
     public void V1DeserializeTest() throws IOException {
-        deserializationTest("{\"height\":1234,\"type\":5,\"id\":\"2y8pNQteNQnY5JWtrZGLUv3tD6GFT6DDzBWttVTwBa2t\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000000,\"timestamp\":1526287561757,\"signature\":\"3LnRMrjkk7RoV35PTwcdB4yW2rqUqXaKAh8DnPk5tNWABvhVQ9oqdTk3zM8b9AbGtry7WEcQZtevfK92DCFaa6hA\",\"version\":1,\"chainId\":null,\"assetId\":\"9ekQuYn92natMnMq8KqeGK3Nn7cpKd3BvPEGgD6fFyyz\",\"quantity\":100000000,\"reissuable\":true}", txV1, ReissueTransactionV1.class);
+        deserializationTest("{\"height\":1234,\"type\":5,\"id\":\"2y8pNQteNQnY5JWtrZGLUv3tD6GFT6DDzBWttVTwBa2t\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000000,\"timestamp\":1526287561757,\"signature\":\"3LnRMrjkk7RoV35PTwcdB4yW2rqUqXaKAh8DnPk5tNWABvhVQ9oqdTk3zM8b9AbGtry7WEcQZtevfK92DCFaa6hA\",\"version\":1,\"chainId\":null,\"address\":\"9ekQuYn92natMnMq8KqeGK3Nn7cpKd3BvPEGgD6fFyyz\",\"quantity\":100000000,\"reissuable\":true}", txV1, ReissueTransactionV1.class);
     }
 
     @Test
     public void V2DeserializeTest() throws IOException {
-        deserializationTest("{\"height\":1234,\"type\":5,\"id\":\"HbQ7gMoDyRxSU6LbLLBVNTbxASaR8rm4Zck6eYvWVUkB\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000000,\"timestamp\":1526287561757,\"proofs\":[\"4DFEtUwJ9gjMQMuEXipv2qK7rnhhWEBqzpC3ZQesW1Kh8D822t62e3cRGWNU3N21r7huWnaty95wj2tZxYSvCfro\"],\"version\":2,\"chainId\":84,\"assetId\":\"9ekQuYn92natMnMq8KqeGK3Nn7cpKd3BvPEGgD6fFyyz\",\"quantity\":100000000,\"reissuable\":true}", txV2, ReissueTransactionV2.class);
+        deserializationTest("{\"height\":1234,\"type\":5,\"id\":\"HbQ7gMoDyRxSU6LbLLBVNTbxASaR8rm4Zck6eYvWVUkB\",\"sender\":\"3N5GRqzDBhjVXnCn44baHcz2GoZy5qLxtTh\",\"senderPublicKey\":\"FM5ojNqW7e9cZ9zhPYGkpSP1Pcd8Z3e3MNKYVS5pGJ8Z\",\"fee\":100000000,\"timestamp\":1526287561757,\"proofs\":[\"4DFEtUwJ9gjMQMuEXipv2qK7rnhhWEBqzpC3ZQesW1Kh8D822t62e3cRGWNU3N21r7huWnaty95wj2tZxYSvCfro\"],\"version\":2,\"chainId\":84,\"address\":\"9ekQuYn92natMnMq8KqeGK3Nn7cpKd3BvPEGgD6fFyyz\",\"quantity\":100000000,\"reissuable\":true}", txV2, ReissueTransactionV2.class);
     }
 }
