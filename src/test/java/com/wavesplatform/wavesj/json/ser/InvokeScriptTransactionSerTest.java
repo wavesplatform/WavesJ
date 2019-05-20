@@ -1,14 +1,11 @@
 package com.wavesplatform.wavesj.json.ser;
 
-import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.json.InvokeScriptTransactionTxTestData;
 import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
-import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.FunctionCall;
-import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.Payment;
 import org.junit.Test;
 
 import java.io.IOException;
-import static com.wavesplatform.wavesj.Asset.toWavelets;
-import static java.util.Collections.singletonList;
+
 
 /**
  * Account 1:
@@ -25,24 +22,32 @@ import static java.util.Collections.singletonList;
  */
 public class InvokeScriptTransactionSerTest extends TransactionSerTest {
 
-    InvokeScriptTransaction tx = new InvokeScriptTransaction(
-            Account.TESTNET,
-                new PublicKeyAccount("4QZkF9ejEsao1M8pNDAjoNqGsLsT3E6koXbNtCFxscce", Account.TESTNET),
-                "3Mvqinkpz45gprXcpgcMb9yqUv4jpBGMQMw",
-                        new FunctionCall("deposit")
-                        .addArg(10L)
-                        .addArg("STRING_ARG")
-                        .addArg(true)
-                        .addArg(new ByteString("4QZkF9")),
-                singletonList(new Payment(toWavelets(10), null)),
-                toWavelets(0.005),
-                null,
-                1526983936610L,
-                singletonList(new ByteString("59e1LnALZD7JssScwso6Rj9geZvUvRYEgDQe3xb312gKEqHQRMewgFJsAdcGcCAUhQPwpt5yfA7i42kdukwQNEJg"))
-            );
+    @Test
+    public void testV1SerTxFull() throws IOException {
+        serializationRoadtripTest(
+                InvokeScriptTransactionTxTestData.txFull(),
+                InvokeScriptTransaction.class);
+    }
 
     @Test
-    public void V1SerializationTest() throws IOException {
-        serializationRoadtripTest(tx, InvokeScriptTransaction.class);
+    public void testV1SerTxNoFunctionalCall() throws IOException {
+        serializationRoadtripTest(
+                InvokeScriptTransactionTxTestData.txNoFunctionCall(),
+                InvokeScriptTransaction.class);
     }
+
+    @Test
+    public void testV1SerTxNoPayment() throws IOException {
+        serializationRoadtripTest(
+                InvokeScriptTransactionTxTestData.txNoPayment(),
+                InvokeScriptTransaction.class);
+    }
+
+    @Test
+    public void testV1SerTxNoFunctionalCallAndPayment() throws IOException {
+        serializationRoadtripTest(
+                InvokeScriptTransactionTxTestData.txNoFunctionCallAndPayment(),
+                InvokeScriptTransaction.class);
+    }
+
 }

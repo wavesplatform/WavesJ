@@ -176,6 +176,10 @@ public class Node {
         return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s/%s", address, key)),ADDRESS_DATA_BY_KEY);
     }
 
+    public AssetDetails getAssetDetails(String assetId) throws IOException {
+        return wavesJsonMapper.convertValue(send("/assets/details/" + assetId), AssetDetails.class);
+    }
+
 
     /**
      * Returns object by its ID.

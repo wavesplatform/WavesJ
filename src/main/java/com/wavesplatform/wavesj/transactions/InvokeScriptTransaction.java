@@ -12,9 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteArraysUtils.getOnlyUsed;
-import static com.wavesplatform.wavesj.ByteUtils.*;
 import static com.wavesplatform.wavesj.ByteUtils.BytesFormatter.LENGTH_AS_SHORT;
-import static com.wavesplatform.wavesj.ByteUtils.putAsset;
+import static com.wavesplatform.wavesj.ByteUtils.*;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 
@@ -49,7 +48,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         this.senderPublicKey = senderPublicKey;
         this.dApp = dApp;
         this.call = call;
-        this.payments = payments;
+        this.payments = payments != null ? payments : new ArrayList<Payment>();
         this.fee = fee;
         this.feeAssetId = feeAssetId;
         this.timestamp = timestamp;
@@ -87,11 +86,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     }
 
     public InvokeScriptTransaction(byte chainId, PrivateKeyAccount senderPrivateKey, String dApp, String functionName,
-                                  long fee, String feeAssetId, long timestamp) {
+                                   long fee, String feeAssetId, long timestamp) {
         this.chainId = chainId;
         this.senderPublicKey = new PublicKeyAccount(senderPrivateKey.getPublicKey(), senderPrivateKey.getChainId());
         this.dApp = dApp;
-        this.call = new FunctionCall(functionName);
+        this.call = functionName == null ? null : new FunctionCall(functionName);
         this.fee = fee;
         this.feeAssetId = feeAssetId;
         this.timestamp = timestamp;
@@ -186,7 +185,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
 
 
     @Override
-    public int getTransactionMaxSize(){
+    public int getTransactionMaxSize() {
         return MAX_TX_SIZE;
     }
 
@@ -228,9 +227,8 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         if (getTimestamp() != that.getTimestamp()) return false;
         if (!getSenderPublicKey().equals(that.getSenderPublicKey())) return false;
         if (!getdApp().equals(that.getdApp())) return false;
-        if (!getCall().equals(that.getCall())) return false;
-        if (getPayments() != null ? !getPayments().equals(that.getPayments()) : that.getPayments() != null)
-            return false;
+        if (getCall() != null ? !getCall().equals(that.getCall()) : that.getCall() != null) return false;
+        if (!getPayments().equals(that.getPayments())) return false;
         return getFeeAssetId() != null ? getFeeAssetId().equals(that.getFeeAssetId()) : that.getFeeAssetId() == null;
     }
 
@@ -239,8 +237,8 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         int result = (int) getChainId();
         result = 31 * result + getSenderPublicKey().hashCode();
         result = 31 * result + getdApp().hashCode();
-        result = 31 * result + getCall().hashCode();
-        result = 31 * result + (getPayments() != null ? getPayments().hashCode() : 0);
+        result = 31 * result + (getCall() != null ? getCall().hashCode() : 0);
+        result = 31 * result + getPayments().hashCode();
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (getFeeAssetId() != null ? getFeeAssetId().hashCode() : 0);
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
@@ -273,9 +271,9 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         }
 
         public FunctionCall(String name) {
-            if (name == null || name.isEmpty()) {
-                throw new IllegalArgumentException("Function name couldn't be null or empty");
-            }
+//            if (name == null || name.isEmpty()) {
+//                throw new IllegalArgumentException("Function name couldn't be null or empty");
+//            }
             this.name = name;
         }
 
