@@ -21,6 +21,7 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
     private final long fee;
     private final ByteString attachment;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = 5 * KBYTE;
 
 
     @JsonCreator
@@ -81,8 +82,13 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(5 * KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(MassTransferTransaction.MASS_TRANSFER).put(Transaction.V1);
         buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);

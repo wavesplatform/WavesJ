@@ -12,7 +12,7 @@ public class AssetBalance {
     @JsonCreator
     public AssetBalance(
             @JsonProperty("balance") Long balance,
-            @JsonProperty("address") String assetId) {
+            @JsonProperty("assetId") String assetId) {
         this.balance = balance;
         this.assetId = normalize(assetId);
     }

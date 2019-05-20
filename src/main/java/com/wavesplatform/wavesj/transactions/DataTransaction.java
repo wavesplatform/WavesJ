@@ -49,8 +49,13 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        int datalen = MAX_TX_SIZE;
+        int datalen = getTransactionMaxSize();
         for (DataEntry<?> e : data) {
             datalen += e.size();
         }
@@ -62,20 +67,6 @@ public class DataTransaction extends TransactionWithProofs<DataTransaction> {
             e.write(buf);
         }
         buf.putLong(timestamp).putLong(fee);
-        return ByteArraysUtils.getOnlyUsed(buf);
-    }
-
-    @Override
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
-        buf.put(getBodyBytes())
-                .put((byte) 1) //proofs version
-                .putShort((short) getProofs().size());
-        for (ByteString p : getProofs()) {
-            buf
-                    .putShort((short) p.getBytes().length)
-                    .put(p.getBytes());
-        }
         return ByteArraysUtils.getOnlyUsed(buf);
     }
 

@@ -23,6 +23,7 @@ public class IssueTransactionV2 extends TransactionWithProofs<IssueTransactionV2
     private final String script;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     public IssueTransactionV2(PrivateKeyAccount senderPublicKey,
                               byte chainId,
@@ -112,8 +113,15 @@ public class IssueTransactionV2 extends TransactionWithProofs<IssueTransactionV2
         return timestamp;
     }
 
+    @Override
+    public int getTransactionMaxSize(){
+        byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
+        return MAX_TX_SIZE+rawScript.length;
+    }
+
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
+
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(IssueTransaction.ISSUE);
         buf.put(Transaction.V2);
         buf.put(chainId);

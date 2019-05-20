@@ -15,6 +15,7 @@ public class AliasTransactionV2 extends TransactionWithProofs<AliasTransactionV2
     private final Alias alias;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     @Override
     public ByteString getId() {
@@ -66,9 +67,15 @@ public class AliasTransactionV2 extends TransactionWithProofs<AliasTransactionV2
         return timestamp;
     }
 
+
+    @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
     @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(ALIAS).put(Transaction.V2).put(senderPublicKey.getPublicKey());
         putBytes(buf, alias.getBytes());
         buf.putLong(fee).putLong(timestamp);

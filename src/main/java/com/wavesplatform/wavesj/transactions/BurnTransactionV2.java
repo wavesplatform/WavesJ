@@ -17,6 +17,7 @@ public class BurnTransactionV2 extends TransactionWithProofs<BurnTransactionV2> 
     private final long amount;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     public BurnTransactionV2(PrivateKeyAccount senderPublicKey,
                              byte chainId,
@@ -75,8 +76,13 @@ public class BurnTransactionV2 extends TransactionWithProofs<BurnTransactionV2> 
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(BurnTransaction.BURN).put(Transaction.V2).put(chainId)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId))
                 .putLong(amount).putLong(fee).putLong(timestamp);

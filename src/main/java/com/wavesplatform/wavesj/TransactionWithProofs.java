@@ -10,7 +10,7 @@ import java.util.List;
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public abstract class TransactionWithProofs<T extends Transaction> extends TransactionWithBytesHashId {
-    public static final int MAX_PROOF_COUNT = 8;
+    private static final int MAX_PROOF_COUNT = 8;
     private static final int MAX_TX_SIZE = 10 * KBYTE;
 
     protected List<ByteString> proofs;
@@ -44,9 +44,13 @@ public abstract class TransactionWithProofs<T extends Transaction> extends Trans
         return newProofs;
     }
 
+    protected int getTransactionMaxSize() {
+        return MAX_TX_SIZE;
+    }
+
     @Override
     public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(getBodyBytes())
                 .put((byte) 1) //proofs version
                 .putShort((short) getProofs().size());

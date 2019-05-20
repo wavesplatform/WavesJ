@@ -19,6 +19,7 @@ public class TransferTransactionV2 extends TransactionWithProofs<TransferTransac
     private final String feeAssetId;
     private final ByteString attachment;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     @JsonCreator
     public TransferTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
@@ -93,8 +94,13 @@ public class TransferTransactionV2 extends TransactionWithProofs<TransferTransac
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(TransferTransaction.TRANSFER).put(Transaction.V2);
         buf.put(senderPublicKey.getPublicKey());
         putAsset(buf, assetId);

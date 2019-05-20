@@ -20,6 +20,7 @@ public class ReissueTransactionV2 extends TransactionWithProofs<ReissueTransacti
     private boolean reissuable;
     private long fee;
     private long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     @JsonCreator
     public ReissueTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
@@ -86,8 +87,13 @@ public class ReissueTransactionV2 extends TransactionWithProofs<ReissueTransacti
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
         buf.put(ReissueTransaction.REISSUE).put(Transaction.V2).put(chainId)
                 .put(senderPublicKey.getPublicKey()).put(Base58.decode(assetId)).putLong(quantity)
                 .put((byte) (reissuable ? 1 : 0))

@@ -18,6 +18,7 @@ public class SetScriptTransaction extends TransactionWithProofs<SetScriptTransac
     private byte chainId;
     private long fee;
     private long timestamp;
+    private static final int MAX_TX_SIZE = 10 * KBYTE;
 
     @JsonCreator
     public SetScriptTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,

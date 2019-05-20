@@ -4,8 +4,10 @@ import com.wavesplatform.wavesj.matcher.*;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.util.Collection;
+import java.util.List;
 
 import static com.wavesplatform.wavesj.Asset.isWaves;
+import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
 
 public class Transactions {
 
@@ -189,5 +191,35 @@ public class Transactions {
 
     public static DeleteOrder makeDeleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) {
         return new DeleteOrder(account, assetPair, orderId);
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                             List<Payment> payments, long fee, String feeAssetId, long timestamp) {
+        return new InvokeScriptTransaction(chainId, account, dApp, call, payments, fee, feeAssetId, timestamp);
+    }
+
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                             List<Payment> payments, long fee, String feeAssetId) {
+        return makeInvokeScriptTx(account, chainId, dApp, call, payments, fee, feeAssetId, System.currentTimeMillis());
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                             long fee, String feeAssetId, long timestamp) {
+        return new InvokeScriptTransaction(chainId, account, dApp, call, fee, feeAssetId, timestamp);
+    }
+
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
+                                                            long fee, String feeAssetId) {
+        return makeInvokeScriptTx(account, chainId, dApp, call, fee, feeAssetId, System.currentTimeMillis());
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp) {
+        return new InvokeScriptTransaction(chainId, account, dApp, functionName, fee, feeAssetId, timestamp);
+    }
+
+    public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, String functionName, long fee, String feeAssetId) {
+        return makeInvokeScriptTx(account, chainId, dApp, functionName, fee, feeAssetId, System.currentTimeMillis());
     }
 }

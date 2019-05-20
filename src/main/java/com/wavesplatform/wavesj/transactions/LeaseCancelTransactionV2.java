@@ -18,6 +18,7 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs<LeaseCancelT
     private final String leaseId;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     @JsonCreator
     public LeaseCancelTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
@@ -68,8 +69,13 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs<LeaseCancelT
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(LeaseCancelTransaction.LEASE_CANCEL).put(Transaction.V2).put(chainId);
         buf.put(senderPublicKey.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(leaseId));
         return ByteArraysUtils.getOnlyUsed(buf);

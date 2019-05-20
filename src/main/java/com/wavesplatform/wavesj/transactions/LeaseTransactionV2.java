@@ -19,6 +19,7 @@ public class LeaseTransactionV2 extends TransactionWithProofs<LeaseTransactionV2
     private final long amount;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     public LeaseTransactionV2(PrivateKeyAccount senderPublicKey,
                               String recipient,
@@ -69,8 +70,13 @@ public class LeaseTransactionV2 extends TransactionWithProofs<LeaseTransactionV2
     }
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(LeaseTransaction.LEASE).put(Transaction.V2).put((byte) 0);
         buf.put(senderPublicKey.getPublicKey());
         putRecipient(buf, senderPublicKey.getChainId(), recipient);

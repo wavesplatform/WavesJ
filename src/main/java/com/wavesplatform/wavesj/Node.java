@@ -9,6 +9,7 @@ import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 import com.wavesplatform.wavesj.transactions.LeaseTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.apache.http.HttpResponse;
@@ -31,6 +32,8 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
 
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
@@ -347,11 +350,69 @@ public class Node {
         return send(Transactions.makeMassTransferTx(from, assetId, transfers, fee, message));
     }
 
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId, long timestamp)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId, timestamp));
+    }
+
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId));
+    }
+
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId, timestamp));
+    }
+
+    /**
+     * send invoke script tx with call function without arguments
+     * @param from account private key
+     * @param chainId chain id
+     * @param dApp dapp address
+     * @param functionName function name to call
+     * @param fee threasaction fee
+     * @param feeAssetId transaction fee
+     * @return invoke script transaction id
+     * @throws IOException
+     */
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId));
+    }
+
+    /**
+     * send invoke script tx withour payments
+     * @param from account private key
+     * @param chainId chain id
+     * @param dApp dapp address
+     * @param call function call
+     * @param fee threasaction fee
+     * @param feeAssetId transaction fee
+     * @param timestamp tx timestamp
+     * @return invoke script transaction id
+     * @throws IOException
+     */
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId, long timestamp)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId, timestamp));
+    }
+
+    /**
+     * send invoke script tx withour payments
+     * @param from account private key
+     * @param chainId chain id
+     * @param dApp dapp address
+     * @param call function call
+     * @param fee threasaction fee
+     * @param feeAssetId transaction fee
+     * @return invoke script transaction id
+     * @throws IOException
+     */
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId));
+    }
+
     public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
         return send(Transactions.makeDataTx(from, data, fee));
     }
 
-    public String exchangeTransactio(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
+    public String exchange(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
                                      long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
         return send(Transactions.makeExchangeTx(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
     }
@@ -446,11 +507,10 @@ public class Node {
                 market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
     }
 
-    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) throws IOException {
+    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) {
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
-        String signature = account.sign(buf.array());
-        return signature;
+        return account.sign(buf.array());
     }
 
     private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {

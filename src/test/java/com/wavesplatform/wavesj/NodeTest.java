@@ -56,7 +56,7 @@ public class NodeTest {
         Order sellOrder = Transactions.makeOrder(bob, matcherKey, Order.Type.SELL, pair, 50000, 10000,
                 System.currentTimeMillis() + 60 * 60 * 1000, 300000, System.currentTimeMillis());
 
-        String exchangeTxId = node.exchangeTransactio(matcher, buyOrder, sellOrder, 10000, 50000,
+        String exchangeTxId = node.exchange(matcher, buyOrder, sellOrder, 10000, 50000,
                 matcherFee, matcherFee, matcherFee);
     }
 

@@ -12,12 +12,12 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+
+import static com.wavesplatform.wavesj.ByteUtils.UTF8;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
 @JsonTypeIdResolver(DataEntryTypeResolver.class)
 public abstract class DataEntry<T> {
-    private final static Charset UTF8 = Charset.forName("UTF-8");
     private final static byte INTEGER = 0;
     private final static byte BOOLEAN = 1;
     private final static byte BINARY = 2;

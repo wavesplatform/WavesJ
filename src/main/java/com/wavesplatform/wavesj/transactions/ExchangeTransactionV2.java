@@ -13,6 +13,7 @@ import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
 public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransactionV2> implements ExchangeTransaction {
 
+    public static final byte EXCHANGE = 7;
     private final long amount;
     private final long price;
     private final long buyMatcherFee;
@@ -22,6 +23,7 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
     private final Order sellOrder;
     private final PublicKeyAccount senderPublicKey;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     public ExchangeTransactionV2(PrivateKeyAccount senderPublicKey,
                                  Order buyOrder,
@@ -117,9 +119,15 @@ public class ExchangeTransactionV2 extends TransactionWithProofs<ExchangeTransac
         return sellOrder;
     }
 
+
+    @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
     @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put((byte) 0)
                 .put(ExchangeTransactionV2.EXCHANGE)
                 .put(Transaction.V2);

@@ -7,6 +7,7 @@ import com.wavesplatform.wavesj.*;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     public static final byte CONTRACT_INVOKE = 16;
 
 
-    private static int MAX_TX_SIZE = 5 * KBYTE;
+    private static final int MAX_TX_SIZE = 5 * KBYTE;
     private byte chainId;
     private PublicKeyAccount senderPublicKey;
     private @JsonProperty("dApp")
@@ -54,15 +55,47 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         this.timestamp = timestamp;
     }
 
-    public InvokeScriptTransaction(byte chainId, PublicKeyAccount senderPublicKey, String dApp,
-                                   String function, long fee, String feeAssetId, long timestamp) {
+    public InvokeScriptTransaction(byte chainId,
+                                   PrivateKeyAccount senderPrivateKey,
+                                   String dApp,
+                                   FunctionCall call,
+                                   List<Payment> payments,
+                                   long fee,
+                                   String feeAssetId,
+                                   long timestamp) {
         this.chainId = chainId;
-        this.senderPublicKey = senderPublicKey;
+        this.senderPublicKey = new PublicKeyAccount(senderPrivateKey.getPublicKey(), senderPrivateKey.getChainId());
         this.dApp = dApp;
-        this.call = new FunctionCall(function);
+        this.call = call;
+        this.payments = payments;
         this.fee = fee;
         this.feeAssetId = feeAssetId;
         this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
+    }
+
+    public InvokeScriptTransaction(byte chainId, PrivateKeyAccount senderPrivateKey, String dApp, FunctionCall call,
+                                   long fee, String feeAssetId, long timestamp) {
+        this.chainId = chainId;
+        this.senderPublicKey = new PublicKeyAccount(senderPrivateKey.getPublicKey(), senderPrivateKey.getChainId());
+        this.dApp = dApp;
+        this.call = call;
+        this.fee = fee;
+        this.feeAssetId = feeAssetId;
+        this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
+    }
+
+    public InvokeScriptTransaction(byte chainId, PrivateKeyAccount senderPrivateKey, String dApp, String functionName,
+                                  long fee, String feeAssetId, long timestamp) {
+        this.chainId = chainId;
+        this.senderPublicKey = new PublicKeyAccount(senderPrivateKey.getPublicKey(), senderPrivateKey.getChainId());
+        this.dApp = dApp;
+        this.call = new FunctionCall(functionName);
+        this.fee = fee;
+        this.feeAssetId = feeAssetId;
+        this.timestamp = timestamp;
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPrivateKey.sign(getBodyBytes()))));
     }
 
     public InvokeScriptTransaction withArg(long val) {
@@ -153,8 +186,13 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
 
 
     @Override
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
     public byte[] getBodyBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(MAX_TX_SIZE);
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(CONTRACT_INVOKE).put(Transaction.V1).put(chainId);
         buf.put(senderPublicKey.getPublicKey());
         ByteUtils.putRecipient(buf, chainId, dApp);
@@ -456,7 +494,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         public void write(ByteBuffer buf) {
             ByteBuffer tmpBuf = ByteBuffer.allocate(256);
             tmpBuf.putLong(amount);
-            putPaymentAsset(tmpBuf, assetId);
+            putAsset(tmpBuf, assetId);
             ByteUtils.putBytes(buf, getOnlyUsed(tmpBuf), LENGTH_AS_SHORT);
         }
 

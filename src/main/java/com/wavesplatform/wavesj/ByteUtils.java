@@ -19,14 +19,6 @@ public class ByteUtils {
         return bytes;
     }
 
-    public static void putPaymentAsset(ByteBuffer buffer, String assetId) {
-        if (isWaves(assetId)) {
-            buffer.put((byte) 0);
-        } else {
-            buffer.put((byte) 1).putShort(toShort(Base58.decode(assetId).length)).put(Base58.decode(assetId));
-        }
-    }
-
     public static void putAsset(ByteBuffer buffer, String assetId) {
         if (isWaves(assetId)) {
             buffer.put((byte) 0);
