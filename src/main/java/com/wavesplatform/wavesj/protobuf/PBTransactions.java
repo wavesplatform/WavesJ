@@ -352,12 +352,12 @@ public class PBTransactions {
         else return toVanillaByteString(proofs.get(0));
     }
 
-    private static com.wavesplatform.wavesj.ByteString toVanillaByteString(final ByteString bs) {
+    public static com.wavesplatform.wavesj.ByteString toVanillaByteString(final ByteString bs) {
         return new com.wavesplatform.wavesj.ByteString(bs.toByteArray());
     }
 
 
-    private static ByteString toPBByteString(final com.wavesplatform.wavesj.ByteString bs) {
+    public static ByteString toPBByteString(final com.wavesplatform.wavesj.ByteString bs) {
         return ByteString.copyFrom(bs.getBytes());
     }
 
