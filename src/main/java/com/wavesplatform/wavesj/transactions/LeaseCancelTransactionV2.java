@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class LeaseCancelTransactionV2 extends TransactionWithProofs implements LeaseCancelTransaction {
+public class LeaseCancelTransactionV2 extends TransactionWithProofs<LeaseCancelTransactionV2> implements LeaseCancelTransaction {
     public static final byte LEASE_CANCEL = 9;
 
     private final PublicKeyAccount senderPublicKey;
@@ -18,6 +18,7 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
     private final String leaseId;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     @JsonCreator
     public LeaseCancelTransactionV2(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
@@ -44,7 +45,7 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
         this.leaseId = leaseId;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -68,8 +69,13 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
     }
 
     @Override
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
+    public byte[] getBodyBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(LeaseCancelTransaction.LEASE_CANCEL).put(Transaction.V2).put(chainId);
         buf.put(senderPublicKey.getPublicKey()).putLong(fee).putLong(timestamp).put(Base58.decode(leaseId));
         return ByteArraysUtils.getOnlyUsed(buf);
@@ -108,5 +114,11 @@ public class LeaseCancelTransactionV2 extends TransactionWithProofs implements L
         result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
+    }
+
+    @Override
+    public LeaseCancelTransactionV2 withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new LeaseCancelTransactionV2(senderPublicKey, chainId, leaseId, fee, timestamp, newProofs);
     }
 }

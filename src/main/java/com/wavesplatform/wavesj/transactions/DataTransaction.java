@@ -11,8 +11,9 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 
-public class DataTransaction extends TransactionWithProofs {
+public class DataTransaction extends TransactionWithProofs<DataTransaction> {
     public static final byte DATA = 12;
+    private static final int MAX_TX_SIZE = 150 * KBYTE;
 
     private final PublicKeyAccount senderPublicKey;
     private final Collection<DataEntry<?>> data;
@@ -40,7 +41,7 @@ public class DataTransaction extends TransactionWithProofs {
         this.data = data;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     public PublicKeyAccount getSenderPublicKey() {
@@ -48,8 +49,13 @@ public class DataTransaction extends TransactionWithProofs {
     }
 
     @Override
-    public byte[] getBytes() {
-        int datalen = KBYTE;
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
+    public byte[] getBodyBytes() {
+        int datalen = getTransactionMaxSize();
         for (DataEntry<?> e : data) {
             datalen += e.size();
         }
@@ -63,6 +69,13 @@ public class DataTransaction extends TransactionWithProofs {
         buf.putLong(timestamp).putLong(fee);
         return ByteArraysUtils.getOnlyUsed(buf);
     }
+
+    @Override
+    public DataTransaction withProof(int index, ByteString proof) {
+        List<ByteString> newProofs = updateProofs(index, proof);
+        return new DataTransaction(senderPublicKey, data, fee, timestamp, newProofs);
+    }
+
 
     public Collection<DataEntry<?>> getData() {
         return data;
@@ -108,4 +121,6 @@ public class DataTransaction extends TransactionWithProofs {
         result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
         return result;
     }
+
+
 }

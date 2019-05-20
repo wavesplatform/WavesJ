@@ -22,7 +22,7 @@ public class DataTransactionTest {
 
     @Test
     public void bytesBytesTest() {
-        assertEquals("6bwzPpC7aKm9wBBmFcLFaz2dJ2Cnnf25RdF4FeNQjZJ7fS1qazDnaoN6edP5f2BGaJHcfScsQRVPT2Le9KTirT9L9XrRmrVMSeqc8B3MbjauqA3CEgnpbNY7", Base58.encode(tx.getBytes()));
+        assertEquals("6bwzPpC7aKm9wBBmFcLFaz2dJ2Cnnf25RdF4FeNQjZJ7fS1qazDnaoN6edP5f2BGaJHcfScsQRVPT2Le9KTirT9L9XrRmrVMSeqc8B3MbjauqA3CEgnpbNY7", Base58.encode(tx.getBodyBytes()));
     }
 
     @Test

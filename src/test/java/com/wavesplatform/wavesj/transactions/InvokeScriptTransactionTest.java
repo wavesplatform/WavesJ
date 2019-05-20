@@ -2,7 +2,7 @@ package com.wavesplatform.wavesj.transactions;
 
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.json.WavesJsonMapper;
-import com.wavesplatform.wavesj.transactions.ContractInvocationTransaction.FunctionalArg;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.FunctionalArg;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -12,9 +12,9 @@ import java.util.List;
 
 import static com.wavesplatform.wavesj.Asset.toWavelets;
 
-public class ContractInvocationTransactionTest {
+public class InvokeScriptTransactionTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContractInvocationTransaction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvokeScriptTransaction.class);
 
     private static final String FUNC = "deposit";
     private static final long FEE = Asset.toWavelets(0.005);
@@ -30,7 +30,7 @@ public class ContractInvocationTransactionTest {
     public void testJsonFormat() throws Exception {
         PrivateKeyAccount sender = generateAcc("Sender");
         PrivateKeyAccount recipient = generateAcc("Recipient");
-        ContractInvocationTransaction tx = new ContractInvocationTransaction(chainId, sender, recipient.getAddress(),
+        InvokeScriptTransaction tx = new InvokeScriptTransaction(chainId, sender, recipient.getAddress(),
                 FUNC, FEE, null, System.currentTimeMillis())
             .withArg(ARG1)
             .withArg(ARG2)
@@ -42,7 +42,7 @@ public class ContractInvocationTransactionTest {
         Transaction deserTx = mapper.readValue(txJson, Transaction.class);
         Assert.assertNotNull(deserTx);
 
-        ContractInvocationTransaction invTx = (ContractInvocationTransaction) tx;
+        InvokeScriptTransaction invTx = (InvokeScriptTransaction) tx;
         Assert.assertEquals(FEE, invTx.getFee());
         Assert.assertEquals(sender.getAddress(), invTx.getSenderPublicKey().getAddress());
         Assert.assertEquals(1, invTx.getPayments().size());

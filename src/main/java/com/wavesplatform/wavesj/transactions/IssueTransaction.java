@@ -5,7 +5,7 @@ import com.wavesplatform.wavesj.Transaction;
 import com.wavesplatform.wavesj.WithId;
 
 public interface IssueTransaction extends Transaction, Signable, WithId {
-    static final byte ISSUE = 3;
+    byte ISSUE = 3;
 
     String getName();
 

@@ -5,14 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.KBYTE;
 import static com.wavesplatform.wavesj.ByteUtils.putRecipient;
 
-public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTransaction {
+public class LeaseTransactionV2 extends TransactionWithProofs<LeaseTransactionV2> implements LeaseTransaction {
     public static final byte LEASE = 8;
 
     private final PublicKeyAccount senderPublicKey;
@@ -20,6 +19,7 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
     private final long amount;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     public LeaseTransactionV2(PrivateKeyAccount senderPublicKey,
                               String recipient,
@@ -31,7 +31,7 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
         this.amount = amount;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     @JsonCreator
@@ -70,8 +70,13 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
     }
 
     @Override
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
+    public byte[] getBodyBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(LeaseTransaction.LEASE).put(Transaction.V2).put((byte) 0);
         buf.put(senderPublicKey.getPublicKey());
         putRecipient(buf, senderPublicKey.getChainId(), recipient);
@@ -90,14 +95,7 @@ public class LeaseTransactionV2 extends TransactionWithProofs implements LeaseTr
     }
 
     public LeaseTransactionV2 withProof(int index, ByteString proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<ByteString> newProofs = new ArrayList<ByteString>(proofs);
-        for (int i = newProofs.size(); i <= index; i++) {
-            newProofs.add(ByteString.EMPTY);
-        }
-        newProofs.set(index, proof);
+        List<ByteString> newProofs = updateProofs(index, proof);
         return new LeaseTransactionV2(senderPublicKey, recipient, amount, fee, timestamp, newProofs);
     }
 

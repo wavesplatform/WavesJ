@@ -27,7 +27,7 @@ public class AliasTransactionV1 extends TransactionWithSignature implements Alia
         this.alias = alias;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.signature = new ByteString(senderPublicKey.sign(getBytes()));
+        this.signature = new ByteString(senderPublicKey.sign(getBodyBytes()));
     }
 
     @JsonCreator
@@ -65,7 +65,7 @@ public class AliasTransactionV1 extends TransactionWithSignature implements Alia
     }
 
     @Override
-    public byte[] getBytes() {
+    public byte[] getBodyBytes() {
         ByteBuffer buf = ByteBuffer.allocate(KBYTE);
         buf.put(ALIAS).put(senderPublicKey.getPublicKey());
         putBytes(buf, alias.getBytes());

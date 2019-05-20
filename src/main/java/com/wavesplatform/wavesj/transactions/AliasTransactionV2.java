@@ -5,17 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class AliasTransactionV2 extends TransactionWithProofs implements AliasTransaction {
+public class AliasTransactionV2 extends TransactionWithProofs<AliasTransactionV2> implements AliasTransaction {
     private final PublicKeyAccount senderPublicKey;
     private final Alias alias;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     @Override
     public ByteString getId() {
@@ -30,7 +30,7 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
         this.alias = alias;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     @JsonCreator
@@ -67,9 +67,15 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
         return timestamp;
     }
 
+
     @Override
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(KBYTE);
+    public int getTransactionMaxSize(){
+        return MAX_TX_SIZE;
+    }
+
+    @Override
+    public byte[] getBodyBytes() {
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(ALIAS).put(Transaction.V2).put(senderPublicKey.getPublicKey());
         putBytes(buf, alias.getBytes());
         buf.putLong(fee).putLong(timestamp);
@@ -87,14 +93,7 @@ public class AliasTransactionV2 extends TransactionWithProofs implements AliasTr
     }
 
     public AliasTransactionV2 withProof(int index, ByteString proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<ByteString> newProofs = new ArrayList<ByteString>(proofs);
-        for (int i = newProofs.size(); i <= index; i++) {
-            newProofs.add(ByteString.EMPTY);
-        }
-        newProofs.set(index, proof);
+        List<ByteString> newProofs = updateProofs(index, proof);
         return new AliasTransactionV2(senderPublicKey, alias, fee, timestamp, newProofs);
     }
 

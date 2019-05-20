@@ -9,6 +9,7 @@ import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 import com.wavesplatform.wavesj.transactions.LeaseTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.apache.http.HttpResponse;
@@ -28,7 +29,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
 
 public class Node {
     private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
@@ -47,9 +52,15 @@ public class Node {
     };
     private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
     };
+    private static final TypeReference<BalanceDetails> BALANCE_DETAILS = new TypeReference<BalanceDetails>() {
+    };
     private static final TypeReference<Map<String, Long>> RESERVED = new TypeReference<Map<String, Long>>() {
     };
     private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {
+    };
+    private static final TypeReference<List<DataEntry>> ADDRESS_DATA = new TypeReference<List<DataEntry>>() {
+    };
+    private static final TypeReference<DataEntry> ADDRESS_DATA_BY_KEY = new TypeReference<DataEntry>() {
     };
 
     private final URI uri;
@@ -120,6 +131,10 @@ public class Node {
         return send("/addresses/balance/" + address, "balance").asLong();
     }
 
+    public BalanceDetails getBalanceDetails(String address) throws IOException {
+        return wavesJsonMapper.convertValue(send("/addresses/balance/details/" + address), BALANCE_DETAILS);
+    }
+
     public long getBalance(String address, int confirmations) throws IOException {
         return send("/addresses/balance/" + address + "/" + confirmations, "balance").asLong();
     }
@@ -151,6 +166,14 @@ public class Node {
 
     public List<AssetBalance> getAssetsBalance(String address) throws IOException {
         return wavesJsonMapper.convertValue(send("/assets/balance/" + address, "balances"), ASSET_BALANCE_LIST);
+    }
+
+    public List<DataEntry> getData(String address) throws IOException{
+        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s", address)),ADDRESS_DATA);
+    }
+
+    public DataEntry getDataByKey(String address, String key) throws IOException{
+        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s/%s", address, key)),ADDRESS_DATA_BY_KEY);
     }
 
     public AssetDetails getAssetDetails(String assetId) throws IOException {
@@ -281,13 +304,18 @@ public class Node {
         return parse(exec(request(path)), key);
     }
 
+    public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, ByteString attachment) throws IOException {
+        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, attachment);
+        return send(tx);
+    }
+
     public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, String message) throws IOException {
         TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, message);
         return send(tx);
     }
 
-    public String transfer(PrivateKeyAccount from, String assetId, String recipient,
-                           long amount, long fee, String feeAssetId, String message) throws IOException {
+    public String transfer(PrivateKeyAccount from, String recipient,
+                           long amount, String assetId, long fee, String feeAssetId, String message) throws IOException {
         TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
         return send(tx);
     }
@@ -326,9 +354,74 @@ public class Node {
         return send(Transactions.makeMassTransferTx(from, assetId, transfers, fee, message));
     }
 
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId, long timestamp)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId, timestamp));
+    }
+
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId));
+    }
+
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId, timestamp));
+    }
+
+    /**
+     * send invoke script tx with call function without arguments
+     * @param from account private key
+     * @param chainId chain id
+     * @param dApp dapp address
+     * @param functionName function name to call
+     * @param fee threasaction fee
+     * @param feeAssetId transaction fee
+     * @return invoke script transaction id
+     * @throws IOException
+     */
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId));
+    }
+
+    /**
+     * send invoke script tx withour payments
+     * @param from account private key
+     * @param chainId chain id
+     * @param dApp dapp address
+     * @param call function call
+     * @param fee threasaction fee
+     * @param feeAssetId transaction fee
+     * @param timestamp tx timestamp
+     * @return invoke script transaction id
+     * @throws IOException
+     */
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId, long timestamp)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId, timestamp));
+    }
+
+    /**
+     * send invoke script tx withour payments
+     * @param from account private key
+     * @param chainId chain id
+     * @param dApp dapp address
+     * @param call function call
+     * @param fee threasaction fee
+     * @param feeAssetId transaction fee
+     * @return invoke script transaction id
+     * @throws IOException
+     */
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId)throws IOException{
+        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId));
+    }
+
     public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
         return send(Transactions.makeDataTx(from, data, fee));
     }
+
+    public String exchange(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
+                                     long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
+        return send(Transactions.makeExchangeTx(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
+    }
+
+
 
     /**
      * Sets a validating script for an account.
@@ -369,8 +462,8 @@ public class Node {
     }
 
     public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                             long price, long amount, long expiration, long matcherFee) throws IOException {
-        Order tx = Transactions.makeOrderTx(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
+                               long price, long amount, long expiration, long matcherFee) throws IOException {
+        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
         JsonNode tree = parse(exec(request(tx)));
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
@@ -379,17 +472,17 @@ public class Node {
     }
 
     public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancelTx(account, assetPair, orderId);
+        ApiJson tx = Transactions.makeOrderCancel(account, assetPair, orderId);
         return parse(exec(request(tx)), "status").asText();
     }
 
     public String cancelOrdersbyPair(PrivateKeyAccount account, AssetPair assetPair) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancelTx(account, assetPair);
+        ApiJson tx = Transactions.makeOrderCancel(account, assetPair);
         return parse(exec(request(tx)), "status").asText();
     }
 
     public String cancelAllOrders(PrivateKeyAccount account) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancelTx(account);
+        ApiJson tx = Transactions.makeOrderCancel(account);
         return parse(exec(request(tx)), "status").asText();
     }
 
@@ -418,11 +511,10 @@ public class Node {
                 market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
     }
 
-    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) throws IOException {
+    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) {
         ByteBuffer buf = ByteBuffer.allocate(40);
         buf.put(account.getPublicKey()).putLong(timestamp);
-        String signature = account.sign(buf.array());
-        return signature;
+        return account.sign(buf.array());
     }
 
     private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,7 +33,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             if (_chainId != null) chainId = _chainId;
         }
         // todo omfg remove after 0.15.4 release
-        ((ObjectNode)treeNode).put("chainId", chainId);
+        ((ObjectNode) treeNode).put("chainId", chainId);
 
         Class t = null;
         switch (type) {
@@ -110,8 +109,15 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             case SponsorTransaction.SPONSOR:
                 t = SponsorTransaction.class;
                 break;
-            case ExchangeTransaction.EXCHANGE:
-                t = ExchangeTransaction.class;
+            case ExchangeTransactionV1.EXCHANGE:
+                switch (version) {
+                    case Transaction.V1:
+                        t = ExchangeTransactionV1.class;
+                        break;
+                    case Transaction.V2:
+                        t = ExchangeTransactionV2.class;
+                        break;
+                }
                 break;
             case TransferTransaction.TRANSFER:
                 switch (version) {
@@ -123,8 +129,8 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                         break;
                 }
                 break;
-            case ContractInvocationTransaction.CONTRACT_INVOKE:
-                t = ContractInvocationTransaction.class;
+            case InvokeScriptTransaction.CONTRACT_INVOKE:
+                t = InvokeScriptTransaction.class;
                 break;
             default:
                 t = UnknownTransaction.class;

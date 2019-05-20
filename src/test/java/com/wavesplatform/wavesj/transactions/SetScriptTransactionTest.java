@@ -14,7 +14,7 @@ public class SetScriptTransactionTest {
 
     @Test
     public void bytesBytesTest() {
-        assertEquals("484WYm5XGZ17c6wUFmYAmSB1xyBXWDfF7DNFk5K3HbQKfPEgFjzr5iWQ1m8NuUpacqcAsxD", Base58.encode(tx.getBytes()));
+        assertEquals("484WYm5XGZ17c6wUFmYAmSB1xyBXWDfF7DNFk5K3HbQKfPEgFjzr5iWQ1m8NuUpacqcAsxD", Base58.encode(tx.getBodyBytes()));
     }
 
     @Test

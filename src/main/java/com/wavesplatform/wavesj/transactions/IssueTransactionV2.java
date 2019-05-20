@@ -5,13 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.wavesj.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.wavesplatform.wavesj.ByteUtils.*;
 
-public class IssueTransactionV2 extends TransactionWithProofs implements IssueTransaction {
+public class IssueTransactionV2 extends TransactionWithProofs<IssueTransactionV2> implements IssueTransaction {
     public static final byte ISSUE = 3;
 
     private final PublicKeyAccount senderPublicKey;
@@ -24,6 +23,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
     private final String script;
     private final long fee;
     private final long timestamp;
+    private static final int MAX_TX_SIZE = KBYTE;
 
     public IssueTransactionV2(PrivateKeyAccount senderPublicKey,
                               byte chainId,
@@ -45,7 +45,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
         this.script = script;
         this.fee = fee;
         this.timestamp = timestamp;
-        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBytes()))));
+        this.proofs = Collections.unmodifiableList(Collections.singletonList(new ByteString(senderPublicKey.sign(getBodyBytes()))));
     }
 
     @JsonCreator
@@ -113,8 +113,15 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
         return timestamp;
     }
 
-    public byte[] getBytes() {
-        ByteBuffer buf = ByteBuffer.allocate(10 * KBYTE);
+    @Override
+    public int getTransactionMaxSize(){
+        byte[] rawScript = script == null ? new byte[0] : Base64.decode(script);
+        return MAX_TX_SIZE+rawScript.length;
+    }
+
+    public byte[] getBodyBytes() {
+
+        ByteBuffer buf = ByteBuffer.allocate(getTransactionMaxSize());
         buf.put(IssueTransaction.ISSUE);
         buf.put(Transaction.V2);
         buf.put(chainId);
@@ -141,14 +148,7 @@ public class IssueTransactionV2 extends TransactionWithProofs implements IssueTr
     }
 
     public IssueTransactionV2 withProof(int index, ByteString proof) {
-        if (index < 0 || index >= MAX_PROOF_COUNT) {
-            throw new IllegalArgumentException("index should be between 0 and " + (MAX_PROOF_COUNT - 1));
-        }
-        List<ByteString> newProofs = new ArrayList<ByteString>(proofs);
-        for (int i = newProofs.size(); i <= index; i++) {
-            newProofs.add(ByteString.EMPTY);
-        }
-        newProofs.set(index, proof);
+        List<ByteString> newProofs = updateProofs(index, proof);
         return new IssueTransactionV2(senderPublicKey, chainId, name, description, quantity, decimals, reissuable, script, fee, timestamp, newProofs);
     }
 

@@ -10,6 +10,7 @@ public abstract class ObjectWithSignature implements Signable {
     }
 
     public boolean verifySignature() {
-        return Curve25519.getInstance(Curve25519.BEST).verifySignature(getSenderPublicKey().getPublicKey(), getBytes(), signature.getBytes());
+        return Curve25519.getInstance(Curve25519.BEST).verifySignature(getSenderPublicKey().getPublicKey(), getBodyBytes(), signature.getBytes());
     }
+
 }
