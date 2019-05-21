@@ -436,7 +436,23 @@ public class Node {
      * @see Account#TESTNET
      */
     public String setScript(PrivateKeyAccount from, String script, byte chainId, long fee) throws IOException {
-        return send(Transactions.makeScriptTx(from, compileScript(script), chainId, fee));
+        return send(Transactions.makeScriptTx(from, script, chainId, fee));
+    }
+
+    /**
+     * Uptates smart account script if allowed by script
+     *
+     * @param from    the account
+     * @param script  script text
+     * @param chainId chain ID
+     * @param fee     object fee
+     * @return transaction ID
+     * @throws IOException if an error occurs
+     * @see Account#MAINNET
+     * @see Account#TESTNET
+     */
+    public String setAssetScript(PrivateKeyAccount from, byte chainId, String assetId, String script, long fee)  throws IOException {
+        return send(Transactions.makeSetAssetScriptTransaction(from,chainId, assetId, script, fee));
     }
 
     /**

@@ -143,6 +143,24 @@ public class Transactions {
         return makeScriptTx(sender, script, chainId, fee, System.currentTimeMillis());
     }
 
+    /**
+     * Updates smart asset script
+     * @param sender trasaction sender
+     * @param chainId chain ID
+     * @param assetId asset id to update
+     * @param script compiled asset script
+     * @param fee transaction fee
+     * @param timestamp operation timestamp
+     * @return SetAssetScriptTransaction object
+     */
+    public static SetAssetScriptTransaction makeSetAssetScriptTransaction(PrivateKeyAccount sender, byte chainId, String assetId, String script, long fee, long timestamp) {
+        return new SetAssetScriptTransaction(sender, chainId, assetId, script, fee, timestamp);
+    }
+
+    public static SetAssetScriptTransaction makeSetAssetScriptTransaction(PrivateKeyAccount sender, byte chainId, String assetId, String script, long fee) {
+        return makeSetAssetScriptTransaction(sender, chainId, assetId, script, fee, System.currentTimeMillis());
+    }
+
     public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
                                   AssetPair assetPair, long price, long amount, long expiration, long matcherFee, long timestamp) {
         if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
@@ -156,7 +174,6 @@ public class Transactions {
                                   AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
         return makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
     }
-
 
 
     public static ExchangeTransactionV2 makeExchangeTx(PrivateKeyAccount account, Order buyOrder, Order sellOrder, long amount,
@@ -211,7 +228,7 @@ public class Transactions {
 
 
     public static InvokeScriptTransaction makeInvokeScriptTx(PrivateKeyAccount account, byte chainId, String dApp, FunctionCall call,
-                                                            long fee, String feeAssetId) {
+                                                             long fee, String feeAssetId) {
         return makeInvokeScriptTx(account, chainId, dApp, call, fee, feeAssetId, System.currentTimeMillis());
     }
 
