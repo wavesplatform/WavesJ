@@ -7,6 +7,8 @@ import com.wavesplatform.protobuf.transaction.ScriptOuterClass;
 import com.wavesplatform.protobuf.transaction.TransactionOuterClass;
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.matcher.OrderV1;
+import com.wavesplatform.wavesj.matcher.OrderV2;
 import com.wavesplatform.wavesj.transactions.*;
 
 import java.nio.ByteBuffer;
@@ -51,7 +53,14 @@ public class PBTransactions {
             return new DataTransaction(senderPublicKey, toVanillaDataEntryList(data.getDataList()), feeAmount, timestamp, proofs);
         } else if (tx.hasExchange()) {
             final TransactionOuterClass.ExchangeTransactionData exchange = tx.getExchange();
-            return new ExchangeTransaction(senderPublicKey, exchange.getAmount(), exchange.getPrice(), toVanillaOrder(exchange.getOrders(0)), toVanillaOrder(exchange.getOrders(1)), exchange.getBuyMatcherFee(), exchange.getSellMatcherFee(), feeAmount, timestamp, signature);
+            switch (tx.getVersion()) {
+                case Transaction.V1:
+                    return new ExchangeTransactionV1(toVanillaOrder(exchange.getOrders(0)), toVanillaOrder(exchange.getOrders(1)), senderPublicKey, exchange.getAmount(), exchange.getPrice(), exchange.getBuyMatcherFee(), exchange.getSellMatcherFee(), feeAmount, timestamp, signature);
+
+                case Transaction.V2:
+                    return new ExchangeTransactionV2(senderPublicKey, toVanillaOrder(exchange.getOrders(0)), toVanillaOrder(exchange.getOrders(1)), exchange.getAmount(), exchange.getPrice(), exchange.getBuyMatcherFee(), exchange.getSellMatcherFee(), feeAmount, timestamp, proofs);
+            }
+
         } else if (tx.hasGenesis()) {
             // ???
         } else if (tx.hasInvokeScript()) {
@@ -207,7 +216,7 @@ public class PBTransactions {
         } else if (tx instanceof SponsorTransaction) {
             final SponsorTransaction sponsor = (SponsorTransaction) tx;
             final TransactionOuterClass.SponsorFeeTransactionData data = TransactionOuterClass.SponsorFeeTransactionData.newBuilder()
-                    .setMinFee(TransactionOuterClass.AssetAmount.newBuilder().setAssetId(assetIdToBytes(sponsor.getAssetId())).setAmount(sponsor.getMinAssetFee()).build())
+                    .setMinFee(TransactionOuterClass.AssetAmount.newBuilder().setAssetId(assetIdToBytes(sponsor.getAssetId())).setAmount(sponsor.getMinSponsoredAssetFee()).build())
                     .build();
             base.setSponsorFee(data);
         } else if (tx instanceof ExchangeTransaction) {
@@ -225,7 +234,8 @@ public class PBTransactions {
 
         List<ByteString> proofs = new ArrayList<ByteString>();
         if (tx instanceof TransactionWithProofs)
-            for (com.wavesplatform.wavesj.ByteString proof : ((TransactionWithProofs) tx).getProofs())
+            //noinspection unchecked
+            for (com.wavesplatform.wavesj.ByteString proof : ((List<com.wavesplatform.wavesj.ByteString>) (((TransactionWithProofs) tx).getProofs())))
                 proofs.add(toPBByteString(proof));
         else if (tx instanceof TransactionWithSignature)
             proofs.add(toPBByteString(((TransactionWithSignature) tx).getSignature()));
@@ -286,12 +296,24 @@ public class PBTransactions {
     public static Order toVanillaOrder(final TransactionOuterClass.ExchangeTransactionData.Order order) {
         final Order.Type orderType = order.getOrderSide() == TransactionOuterClass.ExchangeTransactionData.Order.Side.BUY ? Order.Type.BUY : Order.Type.SELL;
         final AssetPair assetPair = new AssetPair(toVanillaAssetId(order.getAssetPair().getAmountAssetId()), toVanillaAssetId(order.getAssetPair().getPriceAssetId()));
+        final PublicKeyAccount senderPublicKey = new PublicKeyAccount(order.getSenderPublicKey().toByteArray(), (byte) order.getChainId());
+        final PublicKeyAccount matcherPk = new PublicKeyAccount(order.getMatcherPublicKey().toByteArray(), (byte) order.getChainId());
 
-        return new Order(orderType, assetPair, order.getAmount(), order.getPrice(), order.getTimestamp(), order.getExpiration(), order.getMatcherFee().getAmount(), new PublicKeyAccount(order.getSenderPublicKey().toByteArray(), (byte) order.getChainId()), new PublicKeyAccount(order.getMatcherPublicKey().toByteArray(), (byte) order.getChainId()), toSignature(order.getProofsList()));
+        switch (order.getVersion()) {
+            case Order.V1:
+                return new OrderV1(senderPublicKey, matcherPk, orderType, assetPair, order.getAmount(), order.getPrice(), order.getTimestamp(), order.getExpiration(), order.getMatcherFee().getAmount(), toSignature(order.getProofsList()));
+            case Order.V2:
+                return new OrderV2(senderPublicKey, matcherPk, orderType, assetPair, order.getAmount(), order.getPrice(), order.getTimestamp(), order.getExpiration(), order.getMatcherFee().getAmount(), (byte) order.getVersion(), toVanillaProofs(order.getProofsList()));
+            default:
+                throw new IllegalArgumentException("Order not supported: " + order);
+        }
     }
 
     public static TransactionOuterClass.ExchangeTransactionData.Order toPBOrder(final Order order) {
         final TransactionOuterClass.ExchangeTransactionData.Order.Side orderType = order.getOrderType() == Order.Type.BUY ? TransactionOuterClass.ExchangeTransactionData.Order.Side.BUY : TransactionOuterClass.ExchangeTransactionData.Order.Side.SELL;
+
+        final List<ByteString> proofs = new ArrayList<ByteString>(order.getProofs().size());
+        for (com.wavesplatform.wavesj.ByteString proof : order.getProofs()) proofs.add(toPBByteString(proof));
 
         return TransactionOuterClass.ExchangeTransactionData.Order.newBuilder()
                 .setAmount(order.getAmount())
@@ -305,7 +327,7 @@ public class PBTransactions {
                 .setOrderSide(orderType)
                 .setSenderPublicKey(ByteString.copyFrom(order.getSenderPublicKey().getPublicKey()))
                 .setVersion(1)
-                .addProofs(toPBByteString(order.getSignature()))
+                .addAllProofs(proofs)
                 .build();
     }
 
