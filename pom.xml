@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>0.14.2</version>
+    <version>0.15.0</version>
     <packaging>jar</packaging>
 
     <name>WavesJ</name>
