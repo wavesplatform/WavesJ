@@ -23,7 +23,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
     }
 
     @Override
-    public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         TreeNode treeNode = jsonParser.getCodec().readTree(jsonParser);
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
@@ -131,6 +131,9 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 break;
             case InvokeScriptTransaction.CONTRACT_INVOKE:
                 t = InvokeScriptTransaction.class;
+                break;
+            case SetAssetScriptTransaction.SET_ASSET_SCRIPT:
+                t = SetAssetScriptTransaction.class;
                 break;
             default:
                 t = UnknownTransaction.class;
