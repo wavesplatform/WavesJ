@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 public class GRPCTest {
     public static void main(String[] args) {
-        final ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 6870)
+        final ManagedChannel channel = ManagedChannelBuilder.forAddress("mainnet-aws-fr-3.wavesnodes.com", 6870)
                 .usePlaintext()
                 .build();
 
