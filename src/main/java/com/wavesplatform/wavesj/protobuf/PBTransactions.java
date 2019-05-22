@@ -72,7 +72,7 @@ public class PBTransactions {
                     return new IssueTransactionV1(senderPublicKey, new String(issue.getName().toByteArray()), new String(issue.getDescription().toByteArray()), issue.getAmount(), (byte) issue.getDecimals(), issue.getReissuable(), feeAmount, timestamp, signature);
 
                 case Transaction.V2:
-                    return new IssueTransactionV2(senderPublicKey, (byte) tx.getChainId(), new String(issue.getName().toByteArray()), new String(issue.getDescription().toByteArray()), issue.getAmount(), (byte) issue.getDecimals(), issue.getReissuable(), new String(issue.getScript().getBytes().toByteArray()), feeAmount, timestamp, proofs);
+                    return new IssueTransactionV2(senderPublicKey, (byte) tx.getChainId(), new String(issue.getName().toByteArray()), new String(issue.getDescription().toByteArray()), issue.getAmount(), (byte) issue.getDecimals(), issue.getReissuable(), Base58.encode(issue.getScript().getBytes().toByteArray()), feeAmount, timestamp, proofs);
             }
         } else if (tx.hasReissue()) {
             final TransactionOuterClass.ReissueTransactionData reissue = tx.getReissue();
@@ -84,10 +84,11 @@ public class PBTransactions {
                     return new ReissueTransactionV2(senderPublicKey, (byte) tx.getChainId(), toVanillaAssetId(reissue.getAssetAmount().getAssetId()), reissue.getAssetAmount().getAmount(), reissue.getReissuable(), feeAmount, timestamp, proofs);
             }
         } else if (tx.hasSetAssetScript()) {
-            // ???
+            final TransactionOuterClass.SetAssetScriptTransactionData sas = tx.getSetAssetScript();
+            return new SetAssetScriptTransaction(senderPublicKey, (byte) tx.getChainId(), toVanillaAssetId(sas.getAssetId()), Base58.encode(sas.getScript().getBytes().toByteArray()), feeAmount, timestamp, proofs);
         } else if (tx.hasSetScript()) {
             final TransactionOuterClass.SetScriptTransactionData setScript = tx.getSetScript();
-            return new SetScriptTransaction(senderPublicKey, new String(setScript.getScript().getBytes().toByteArray()), (byte) tx.getChainId(), feeAmount, timestamp, proofs);
+            return new SetScriptTransaction(senderPublicKey, Base58.encode(setScript.getScript().getBytes().toByteArray()), (byte) tx.getChainId(), feeAmount, timestamp, proofs);
         } else if (tx.hasTransfer()) {
             final TransactionOuterClass.TransferTransactionData transfer = tx.getTransfer();
             switch (tx.getVersion()) {
@@ -144,7 +145,7 @@ public class PBTransactions {
 
             ByteString script = ByteString.EMPTY;
             if (issue instanceof IssueTransactionV2)
-                script = ByteString.copyFrom(((IssueTransactionV2) issue).getScript().getBytes());
+                script = ByteString.copyFrom(Base58.decode(((IssueTransactionV2) issue).getScript()));
 
             final TransactionOuterClass.IssueTransactionData data = TransactionOuterClass.IssueTransactionData.newBuilder()
                     .setAmount(issue.getQuantity())
@@ -171,9 +172,17 @@ public class PBTransactions {
         } else if (tx instanceof SetScriptTransaction) {
             final SetScriptTransaction setScript = (SetScriptTransaction) tx;
             final TransactionOuterClass.SetScriptTransactionData data = TransactionOuterClass.SetScriptTransactionData.newBuilder()
-                    .setScript(ScriptOuterClass.Script.newBuilder().setBytes(ByteString.copyFrom(setScript.getScript().getBytes())).build())
+                    .setScript(ScriptOuterClass.Script.newBuilder().setBytes(ByteString.copyFrom(Base58.decode(setScript.getScript()))).build())
                     .build();
             base.setSetScript(data);
+        } else if (tx instanceof SetAssetScriptTransaction) {
+            final SetAssetScriptTransaction sas = (SetAssetScriptTransaction) tx;
+            final TransactionOuterClass.SetAssetScriptTransactionData data = TransactionOuterClass.SetAssetScriptTransactionData
+                    .newBuilder()
+                    .setAssetId(assetIdToBytes(sas.getAssetId()))
+                    .setScript(ScriptOuterClass.Script.newBuilder().setBytes(ByteString.copyFrom(Base58.decode(sas.getScript()))).build())
+                    .build();
+            base.setSetAssetScript(data);
         } else if (tx instanceof DataTransaction) {
             final DataTransaction dataTransaction = (DataTransaction) tx;
 
@@ -261,24 +270,24 @@ public class PBTransactions {
     }
 
     public static DataEntry<?> toVanillaDataEntry(final TransactionOuterClass.DataTransactionData.DataEntry dataEntry) {
-        DataEntry<?> vd = null;
+        DataEntry<?> result;
         switch (dataEntry.getValueCase()) {
             case STRING_VALUE:
-                vd = new DataEntry.StringEntry(dataEntry.getKey(), dataEntry.getStringValue());
+                result = new DataEntry.StringEntry(dataEntry.getKey(), dataEntry.getStringValue());
                 break;
             case BOOL_VALUE:
-                vd = new DataEntry.BooleanEntry(dataEntry.getKey(), dataEntry.getBoolValue());
+                result = new DataEntry.BooleanEntry(dataEntry.getKey(), dataEntry.getBoolValue());
                 break;
             case INT_VALUE:
-                vd = new DataEntry.LongEntry(dataEntry.getKey(), dataEntry.getIntValue());
+                result = new DataEntry.LongEntry(dataEntry.getKey(), dataEntry.getIntValue());
                 break;
             case BINARY_VALUE:
-                vd = new DataEntry.BinaryEntry(dataEntry.getKey(), toVanillaByteString(dataEntry.getBinaryValue()));
+                result = new DataEntry.BinaryEntry(dataEntry.getKey(), toVanillaByteString(dataEntry.getBinaryValue()));
                 break;
             default:
                 throw new IllegalArgumentException("Not supported: " + dataEntry);
         }
-        return vd;
+        return result;
     }
 
     public static TransactionOuterClass.DataTransactionData.DataEntry toPBDataEntry(final DataEntry<?> dataEntry) {
