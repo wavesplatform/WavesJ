@@ -88,7 +88,7 @@ public class ByteUtils {
     }
 
     public static String hash(byte[] bytes) {
-        return Base58.encode(Hash.hash(bytes, 0, bytes.length, Hash.BLAKE2B256));
+        return Base58.encode(Hash.blake2b(bytes, 0, bytes.length));
     }
 
     public static String sign(PrivateKeyAccount account, ByteBuffer buffer) {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.wavesplatform.wavesj.*;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -312,6 +313,50 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
             }
         }
 
+        public ByteBuffer toBytes() {
+            final ByteBuffer buf;
+            try {
+                final int nameLength = name.getBytes("UTF-8").length;
+                int argsLength = 4;
+                for (FunctionalArg<?> arg : args) argsLength += arg.bytesSize();
+                buf = ByteBuffer.allocate(2 + 4 + nameLength + 4 + argsLength);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+
+            // special bytes to indicate function call. Used in Serde serializer
+            buf.put(E_FUNCALL);
+            buf.put(FH_USER);
+
+            // write function name
+            ByteUtils.putString(buf, name, ByteUtils.BytesFormatter.LENGTH_AS_INT);
+
+            // write function's arguments
+            buf.putInt(args.size());
+            for (FunctionalArg<?> arg : args) {
+                arg.write(buf);
+            }
+            buf.flip();
+            return buf.compact().asReadOnlyBuffer();
+        }
+
+        public static FunctionCall fromBytes(final ByteBuffer buf) {
+            buf.position(2);
+            final byte[] nameBytes = new byte[buf.getInt()];
+            buf.get(nameBytes);
+
+            final int argsSize = buf.getInt();
+            assert argsSize >= 0 && argsSize <= 22;
+            final LinkedList<FunctionalArg<?>> args = new LinkedList<FunctionalArg<?>>();
+            for (int i = 0; i < argsSize; i++) args.add(FunctionalArg.fromBytes(buf));
+
+            try {
+                return new FunctionCall(new String(nameBytes, "UTF-8"), args);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public String getName() {
             return name;
         }
@@ -364,6 +409,38 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
 
         public abstract void write(ByteBuffer buf);
 
+        public static FunctionalArg<?> fromBytes(ByteBuffer buf) {
+            switch (buf.get()) {
+                case StringArg.E_STRING:
+                    final byte[] string = new byte[buf.getInt()];
+                    buf.get(string);
+                    try {
+                        return new StringArg(new String(string, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                case BinaryArg.E_BYTES:
+                    final byte[] bytes = new byte[buf.getInt()];
+                    buf.get(bytes);
+                    return new BinaryArg(new ByteString(bytes));
+
+                case LongArg.E_LONG:
+                    return new LongArg(buf.getLong());
+
+                case BooleanArg.E_TRUE:
+                    return new BooleanArg(true);
+
+                case BooleanArg.E_FALSE:
+                    return new BooleanArg(false);
+
+                default:
+                    throw new IllegalArgumentException("Data type not supported");
+            }
+        }
+
+        public abstract int bytesSize();
+
         public T getValue() {
             return value;
         }
@@ -408,6 +485,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
             buf.put(E_LONG);
             buf.putLong(value);
         }
+
+        @Override
+        public int bytesSize() {
+            return 1 + 8;
+        }
     }
 
     public static class BinaryArg extends FunctionalArg<ByteString> {
@@ -430,6 +512,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
             buf.put(E_BYTES);
             ByteUtils.putBytes(buf, binary, ByteUtils.BytesFormatter.LENGTH_AS_INT);
         }
+
+        @Override
+        public int bytesSize() {
+            return 1 + 4 + value.getBytes().length;
+        }
     }
 
     public static class StringArg extends FunctionalArg<String> {
@@ -450,6 +537,15 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         public void write(ByteBuffer buf) {
             buf.put(E_STRING);
             ByteUtils.putString(buf, value, ByteUtils.BytesFormatter.LENGTH_AS_INT);
+        }
+
+        @Override
+        public int bytesSize() {
+            try {
+                return 1 + 4 + value.getBytes("UTF-8").length;
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -475,6 +571,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
             } else {
                 buf.put(E_FALSE);
             }
+        }
+
+        @Override
+        public int bytesSize() {
+            return 1;
         }
     }
 

@@ -15,7 +15,7 @@ public class Hash {
         return hash(blake2b, 0, blake2b.length, Hash.KECCAK256);
     }
 
-    public static byte[] fastHash(byte[] message, int ofs, int len) {
+    public static byte[] blake2b(byte[] message, int ofs, int len) {
         return hash(message, ofs, len, Hash.BLAKE2B256);
     }
 

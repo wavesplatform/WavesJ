@@ -64,7 +64,10 @@ public class PBTransactions {
         } else if (tx.hasGenesis()) {
             // ???
         } else if (tx.hasInvokeScript()) {
-            // ???
+            final TransactionOuterClass.InvokeScriptTransactionData data = tx.getInvokeScript();
+            final List<InvokeScriptTransaction.Payment> payments = new ArrayList<InvokeScriptTransaction.Payment>(data.getPaymentsCount());
+            for (TransactionOuterClass.Amount payment : data.getPaymentsList()) payments.add(new InvokeScriptTransaction.Payment(payment.getAmount(), toVanillaAssetId(payment.getAssetId().getIssuedAsset())));
+            return new InvokeScriptTransaction((byte)tx.getChainId(), senderPublicKey, Base58.encode(data.getDappAddress().toByteArray()), InvokeScriptTransaction.FunctionCall.fromBytes(data.getFunctionCall().asReadOnlyByteBuffer()), Collections.unmodifiableList(payments), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), timestamp, proofs);
         } else if (tx.hasIssue()) {
             final TransactionOuterClass.IssueTransactionData issue = tx.getIssue();
             switch (tx.getVersion()) {
@@ -239,6 +242,18 @@ public class PBTransactions {
                     .setOrders(1, toPBOrder(exchange.getOrder2()))
                     .build();
             base.setExchange(data);
+        } else if (tx instanceof InvokeScriptTransaction) {
+            final InvokeScriptTransaction ist = (InvokeScriptTransaction) tx;
+            final List<TransactionOuterClass.Amount> payments = new ArrayList<TransactionOuterClass.Amount>(ist.getPayments().size());
+            for (InvokeScriptTransaction.Payment payment : ist.getPayments())
+                payments.add(toPBAmount(payment.getAssetId(), payment.getAmount()));
+
+            final TransactionOuterClass.InvokeScriptTransactionData data = TransactionOuterClass.InvokeScriptTransactionData.newBuilder()
+                    .setDappAddress(ByteString.copyFrom(Base58.decode(ist.getdApp())))
+                    .setFunctionCall(ByteString.copyFrom(ist.getCall().toBytes()))
+                    .addAllPayments(payments)
+                    .build();
+            base.setInvokeScript(data);
         }
 
         List<ByteString> proofs = new ArrayList<ByteString>();
@@ -349,7 +364,7 @@ public class PBTransactions {
                         .put((byte) 1)
                         .put(recipient.getAddress().toByteArray());
                 withoutChecksum.flip();
-                final byte[] checksum = Hash.fastHash(withoutChecksum.array(), 0, withoutChecksum.capacity());
+                final byte[] checksum = Hash.blake2b(withoutChecksum.array(), 0, withoutChecksum.capacity());
 
                 final ByteBuffer addrBytes = ByteBuffer.allocate(withoutChecksum.capacity() + 4)
                         .put(withoutChecksum)
