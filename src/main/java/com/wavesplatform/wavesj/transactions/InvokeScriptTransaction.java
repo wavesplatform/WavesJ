@@ -341,7 +341,7 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
         }
 
         public static FunctionCall fromBytes(final ByteBuffer buf) {
-            buf.position(2);
+            buf.position(buf.position() + 2);
             final byte[] nameBytes = new byte[buf.getInt()];
             buf.get(nameBytes);
 
