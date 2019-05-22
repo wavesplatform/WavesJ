@@ -61,9 +61,7 @@ public class PBTransactions {
                     return new ExchangeTransactionV2(senderPublicKey, toVanillaOrder(exchange.getOrders(0)), toVanillaOrder(exchange.getOrders(1)), exchange.getAmount(), exchange.getPrice(), exchange.getBuyMatcherFee(), exchange.getSellMatcherFee(), feeAmount, timestamp, proofs);
             }
 
-        } else if (tx.hasGenesis()) {
-            // ???
-        } else if (tx.hasInvokeScript()) {
+        }  else if (tx.hasInvokeScript()) {
             final TransactionOuterClass.InvokeScriptTransactionData data = tx.getInvokeScript();
             final List<InvokeScriptTransaction.Payment> payments = new ArrayList<InvokeScriptTransaction.Payment>(data.getPaymentsCount());
             for (TransactionOuterClass.Amount payment : data.getPaymentsList()) payments.add(new InvokeScriptTransaction.Payment(payment.getAmount(), toVanillaAssetId(payment.getAssetId().getIssuedAsset())));
@@ -101,8 +99,6 @@ public class PBTransactions {
                 case Transaction.V2:
                     return new TransferTransactionV2(senderPublicKey, toRecipientString(transfer.getRecipient(), (byte) tx.getChainId()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId().getIssuedAsset()), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), toVanillaByteString(transfer.getAttachment()), timestamp, proofs);
             }
-        } else if (tx.hasPayment()) {
-            // ???
         } else if (tx.hasLease()) {
             final TransactionOuterClass.LeaseTransactionData lease = tx.getLease();
             switch (tx.getVersion()) {
