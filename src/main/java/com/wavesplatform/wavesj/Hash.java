@@ -6,35 +6,43 @@ import org.bouncycastle.crypto.digests.KeccakDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
 public class Hash {
-    public static final ThreadLocal<Digest> BLAKE2B256 = new ThreadLocal<Digest>();
-    public static final ThreadLocal<Digest> KECCAK256 = new ThreadLocal<Digest>();
-    public static final ThreadLocal<Digest> SHA256 = new ThreadLocal<Digest>();
-
-    private static Digest digest(ThreadLocal<Digest> cache) {
-        Digest d = cache.get();
-        if (d == null) {
-            if (cache == BLAKE2B256) {
-                d = new Blake2bDigest(256);
-            } else if (cache == KECCAK256) {
-                d = new KeccakDigest(256);
-            } else if (cache == SHA256) {
-                d = new SHA256Digest();
-            }
-            cache.set(d);
-        }
-        return d;
-    }
-
-    protected static byte[] hash(byte[] message, int ofs, int len, ThreadLocal<Digest> alg) {
-        Digest d = digest(alg);
-        byte[] res = new byte[d.getDigestSize()];
-        d.update(message, ofs, len);
-        d.doFinal(res, 0);
-        return res;
-    }
+    private static final ThreadLocal<Digest> BLAKE2B256 = new ThreadLocal<Digest>();
+    private static final ThreadLocal<Digest> KECCAK256 = new ThreadLocal<Digest>();
+    private static final ThreadLocal<Digest> SHA256 = new ThreadLocal<Digest>();
 
     public static byte[] secureHash(byte[] message, int ofs, int len) {
-        byte[] blake2b = hash(message, ofs, len, Hash.BLAKE2B256);
+        final byte[] blake2b = hash(message, ofs, len, Hash.BLAKE2B256);
         return hash(blake2b, 0, blake2b.length, Hash.KECCAK256);
+    }
+
+    public static byte[] blake2b(byte[] message, int ofs, int len) {
+        return hash(message, ofs, len, Hash.BLAKE2B256);
+    }
+
+    public static byte[] sha256(byte[] message, int ofs, int len) {
+        return hash(message, ofs, len, Hash.SHA256);
+    }
+
+    private static Digest digest(ThreadLocal<Digest> cache) {
+        Digest digest = cache.get();
+        if (digest == null) {
+            if (cache == BLAKE2B256) {
+                digest = new Blake2bDigest(256);
+            } else if (cache == KECCAK256) {
+                digest = new KeccakDigest(256);
+            } else if (cache == SHA256) {
+                digest = new SHA256Digest();
+            }
+            cache.set(digest);
+        }
+        return digest;
+    }
+
+    private static byte[] hash(byte[] message, int ofs, int len, ThreadLocal<Digest> alg) {
+        final Digest digest = digest(alg);
+        final byte[] result = new byte[digest.getDigestSize()];
+        digest.update(message, ofs, len);
+        digest.doFinal(result, 0);
+        return result;
     }
 }
