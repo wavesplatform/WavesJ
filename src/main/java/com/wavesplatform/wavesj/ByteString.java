@@ -1,46 +1,54 @@
 package com.wavesplatform.wavesj;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
 public class ByteString implements Serializable {
     private byte[] bytes;
-    private String base58String;
+    private Supplier<String> base58;
 
-    public ByteString(String base58String) throws IllegalArgumentException {
+    public ByteString(final String base58String) throws IllegalArgumentException {
         // to check valid base58 string
         if (base58String != null) {
             this.bytes = Base58.decode(base58String);
-            this.base58String = base58String;
+            this.base58 = Suppliers.memoize(new Supplier<String>() {
+                @Override
+                public String get() {
+                    return base58String;
+                }
+            });
         } else {
-            this.base58String = EMPTY.base58String;
+            this.base58 = Suppliers.memoize(new Supplier<String>() {
+                @Override
+                public String get() {
+                    return "";
+                }
+            });
             this.bytes = EMPTY.bytes;
         }
     }
 
-    public ByteString(byte[] bytes) {
+    public ByteString(final byte[] bytes) {
         this.bytes = bytes;
-        if (bytes == null) this.base58String = EMPTY.base58String;
+        this.base58 = Suppliers.memoize(new Supplier<String>() {
+            @Override
+            public String get() {
+                return (bytes == null) ? "" : Base58.encode(bytes);
+            }
+        });
     }
 
     public static ByteString EMPTY = new ByteString(new byte[0]);
 
     public String getBase58String() {
-        String base58String = this.base58String;
-        if (base58String == null) {
-            base58String = Base58.encode(this.bytes);
-            this.base58String = base58String;
-        }
-        return base58String;
+        return base58.get();
     }
 
     public byte[] getBytes() {
-        byte[] bytes = this.bytes;
-        if (bytes == null) {
-            bytes = Base58.decode(this.base58String);
-            this.bytes = bytes;
-        }
-        return bytes;
+        return this.bytes;
     }
 
 
