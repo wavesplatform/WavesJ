@@ -65,7 +65,7 @@ public class PBTransactions {
             final TransactionOuterClass.InvokeScriptTransactionData data = tx.getInvokeScript();
             final List<InvokeScriptTransaction.Payment> payments = new ArrayList<InvokeScriptTransaction.Payment>(data.getPaymentsCount());
             for (TransactionOuterClass.Amount payment : data.getPaymentsList()) payments.add(new InvokeScriptTransaction.Payment(payment.getAmount(), toVanillaAssetId(payment.getAssetId().getIssuedAsset())));
-            return new InvokeScriptTransaction((byte)tx.getChainId(), senderPublicKey, Base58.encode(data.getDappAddress().toByteArray()), InvokeScriptTransaction.FunctionCall.fromBytes(data.getFunctionCall().asReadOnlyByteBuffer()), Collections.unmodifiableList(payments), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), timestamp, proofs);
+            return new InvokeScriptTransaction((byte) tx.getChainId(), senderPublicKey, Base58.encode(data.getDApp().toByteArray()), InvokeScriptTransaction.FunctionCall.fromBytes(data.getFunctionCall().asReadOnlyByteBuffer()), Collections.unmodifiableList(payments), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), timestamp, proofs);
         } else if (tx.hasIssue()) {
             final TransactionOuterClass.IssueTransactionData issue = tx.getIssue();
             switch (tx.getVersion()) {
@@ -245,7 +245,7 @@ public class PBTransactions {
                 payments.add(toPBAmount(payment.getAssetId(), payment.getAmount()));
 
             final TransactionOuterClass.InvokeScriptTransactionData data = TransactionOuterClass.InvokeScriptTransactionData.newBuilder()
-                    .setDappAddress(ByteString.copyFrom(Base58.decode(ist.getdApp())))
+                    .setDApp(toPBRecipient(ist.getdApp()))
                     .setFunctionCall(ByteString.copyFrom(ist.getCall().toBytes()))
                     .addAllPayments(payments)
                     .build();
@@ -270,6 +270,12 @@ public class PBTransactions {
         if (assetId.isEmpty()) return Asset.WAVES;
         else return Asset.normalize(Base58.encode(assetId.toByteArray()));
     }
+
+    public static String toVanillaAssetId(final TransactionOuterClass.AssetId assetId) {
+        if (assetId.hasWaves()) return Asset.WAVES;
+        else return Asset.normalize(Base58.encode(assetId.getIssuedAsset().toByteArray()));
+    }
+
 
     public static ByteString assetIdToBytes(final String assetId) {
         if (Asset.isWaves(assetId)) return ByteString.EMPTY;
@@ -339,8 +345,8 @@ public class PBTransactions {
                 .setAmount(order.getAmount())
                 .setPrice(order.getPrice())
                 .setAssetPair(TransactionOuterClass.ExchangeTransactionData.Order.AssetPair.newBuilder()
-                        .setAmountAssetId(assetIdToBytes(order.getAssetPair().getAmountAsset()))
-                        .setPriceAssetId(assetIdToBytes(order.getAssetPair().getPriceAsset())).build())
+                        .setAmountAssetId(createPBAssetId(assetIdToBytes(order.getAssetPair().getAmountAsset())))
+                        .setPriceAssetId(createPBAssetId(assetIdToBytes(order.getAssetPair().getPriceAsset()))).build())
                 .setExpiration(order.getExpiration())
                 .setMatcherFee(TransactionOuterClass.Amount.newBuilder().setAmount(order.getMatcherFee()).build())
                 .setMatcherPublicKey(ByteString.copyFrom(order.getMatcherPublicKey().getPublicKey()))
