@@ -14,6 +14,7 @@ public class ByteString implements Serializable {
             this.base58String = base58String;
         } else {
             this.base58String = EMPTY.base58String;
+            this.bytes = EMPTY.bytes;
         }
     }
 
