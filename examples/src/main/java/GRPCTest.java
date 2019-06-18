@@ -12,6 +12,11 @@ public class GRPCTest {
                 .usePlaintext()
                 .build();
 
+        final BlocksApiGrpc.BlocksApiBlockingStub blocksApiBlockingStub = BlocksApiGrpc.newBlockingStub(channel);
+        final BlocksApiOuterClass.BlockWithHeight block = blocksApiBlockingStub.getBlock(BlocksApiOuterClass.BlockRequest.newBuilder().setHeight(1000).build());
+
+        System.out.println(block);
+
         final TransactionsApiGrpc.TransactionsApiBlockingStub blockingStub = TransactionsApiGrpc.newBlockingStub(channel);
         final TransactionsRequest transactionsRequest = TransactionsRequest.newBuilder()
                 .setRecipient(RecipientOuterClass.Recipient.newBuilder().setAlias("test_recipient").build())
