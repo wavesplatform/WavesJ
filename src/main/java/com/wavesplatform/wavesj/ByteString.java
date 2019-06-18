@@ -1,32 +1,54 @@
 package com.wavesplatform.wavesj;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class ByteString implements Serializable {
-    private String base58String;
+    private byte[] bytes;
+    private Supplier<String> base58;
 
-    public ByteString(String base58String) throws IllegalArgumentException {
+    public ByteString(final String base58String) throws IllegalArgumentException {
         // to check valid base58 string
         if (base58String != null) {
-            Base58.decode(base58String);
-            this.base58String = base58String;
+            this.bytes = Base58.decode(base58String);
+            this.base58 = Suppliers.memoize(new Supplier<String>() {
+                @Override
+                public String get() {
+                    return base58String;
+                }
+            });
         } else {
-            this.base58String = EMPTY.base58String;
+            this.base58 = Suppliers.memoize(new Supplier<String>() {
+                @Override
+                public String get() {
+                    return "";
+                }
+            });
+            this.bytes = EMPTY.bytes;
         }
     }
 
-    public ByteString(byte[] bytes) {
-        this.base58String = Base58.encode(bytes);
+    public ByteString(final byte[] bytes) {
+        this.bytes = bytes;
+        this.base58 = Suppliers.memoize(new Supplier<String>() {
+            @Override
+            public String get() {
+                return (bytes == null) ? "" : Base58.encode(bytes);
+            }
+        });
     }
 
     public static ByteString EMPTY = new ByteString(new byte[0]);
 
     public String getBase58String() {
-        return base58String;
+        return base58.get();
     }
 
     public byte[] getBytes() {
-        return Base58.decode(base58String);
+        return this.bytes;
     }
 
 
@@ -40,13 +62,15 @@ public class ByteString implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ByteString that = (ByteString) o;
-
-        return getBase58String() != null ? getBase58String().equals(that.getBase58String()) : that.getBase58String() == null;
+        final ByteString that = (ByteString) o;
+        final byte[] leftBytes = getBytes();
+        final byte[] rightBytes = that.getBytes();
+        return leftBytes != null ? Arrays.equals(leftBytes, rightBytes) : rightBytes == null;
     }
 
     @Override
     public int hashCode() {
-        return getBase58String() != null ? getBase58String().hashCode() : 0;
+        final byte[] bytes = getBytes();
+        return bytes != null ? Arrays.hashCode(bytes) : 0;
     }
 }
