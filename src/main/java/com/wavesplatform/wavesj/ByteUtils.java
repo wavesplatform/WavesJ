@@ -81,7 +81,11 @@ public class ByteUtils {
             // assume an alias
             buffer.put((byte) 0x02).put(chainId).putShort((short) recipient.length()).put(recipient.getBytes(UTF8));
             return String.format("alias:%c:%s", chainId, recipient);
-        } else {
+        } else if (recipient.startsWith("alias:")){
+            String recipientAlias = recipient.split(":")[2];
+            buffer.put((byte) 0x02).put(chainId).putShort((short) recipientAlias.length()).put(recipientAlias.getBytes(UTF8));
+            return recipient;
+        }else {
             buffer.put(Base58.decode(recipient));
             return recipient;
         }

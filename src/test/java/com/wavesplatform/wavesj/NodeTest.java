@@ -111,9 +111,16 @@ public class NodeTest {
     @Test
     public void checkExxhangeTxV2() throws IOException, URISyntaxException {
         Node node = new Node("https://nodes.wavesplatform.com", 'W');
-        //Transaction tx = node.getTransaction("7hTDfrz6VQMqB8CVZt338q1xkADi694ah2NDHrmLBvwo");
         Transaction tx = node.getTransaction("Hum6JHcCAnxKE25UarHVxYy4EBCUdnPEjPjKZpAeynE8");
         System.out.println(tx.getId().getBase58String());
+    }
+
+    @Test
+    public void aliasesTest() throws IOException, URISyntaxException {
+        Node node = new Node("http://nodes.wavesnodes.com", 'W');
+        for (Transaction t: node.getBlock(1589188).getTransactions()) {
+            System.out.println(t.getId());
+        }
     }
 
     @Test
