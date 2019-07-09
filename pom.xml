@@ -157,7 +157,7 @@
     <dependencies>
         <dependency>
             <groupId>com.wavesplatform</groupId>
-            <artifactId>waves-node-proto-classes</artifactId>
+            <artifactId>waves-node-proto</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
