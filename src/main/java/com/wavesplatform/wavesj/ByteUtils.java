@@ -77,15 +77,15 @@ public class ByteUtils {
     }
 
     public static String putRecipient(ByteBuffer buffer, byte chainId, String recipient) {
-        if (recipient.length() <= 30) {
-            // assume an alias
-            buffer.put((byte) 0x02).put(chainId).putShort((short) recipient.length()).put(recipient.getBytes(UTF8));
-            return String.format("alias:%c:%s", chainId, recipient);
-        } else if (recipient.startsWith("alias:")){
+        if (recipient.startsWith("alias:")) {
             String recipientAlias = recipient.split(":")[2];
             buffer.put((byte) 0x02).put(chainId).putShort((short) recipientAlias.length()).put(recipientAlias.getBytes(UTF8));
             return recipient;
-        }else {
+        } else if (recipient.length() <= 30) {
+            // assume an alias
+            buffer.put((byte) 0x02).put(chainId).putShort((short) recipient.length()).put(recipient.getBytes(UTF8));
+            return String.format("alias:%c:%s", chainId, recipient);
+        } else {
             buffer.put(Base58.decode(recipient));
             return recipient;
         }
