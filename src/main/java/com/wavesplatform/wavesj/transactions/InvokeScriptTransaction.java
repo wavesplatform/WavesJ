@@ -298,6 +298,11 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
             return this;
         }
 
+        public FunctionCall addArg(FunctionalArg val) {
+            args.add(val);
+            return this;
+        }
+
         public void write(ByteBuffer buf) {
             // special bytes to indicate function call. Used in Serde serializer
             buf.put(E_FUNCALL);
