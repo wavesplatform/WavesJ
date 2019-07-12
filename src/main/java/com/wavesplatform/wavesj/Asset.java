@@ -1,6 +1,7 @@
 package com.wavesplatform.wavesj;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 public abstract class Asset {
@@ -18,7 +19,7 @@ public abstract class Asset {
     public static final int DEFAULT_SCALE = 12;
 
     public static long toWavelets(double amount) {
-        return (long) (amount * TOKEN);
+        return (WAVELETS_MULT.multiply(new BigDecimal(amount, MathContext.DECIMAL64))).longValue();
     }
 
     public static long toWavelets(long amount) {
