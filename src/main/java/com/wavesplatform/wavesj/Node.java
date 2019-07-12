@@ -119,6 +119,14 @@ public class Node {
                 .build();
     }
 
+    public URI getUri() {
+        return uri;
+    }
+
+    public byte getChainId() {
+        return chainId;
+    }
+
     public String getVersion() throws IOException {
         return send("/node/version", "version").asText();
     }
