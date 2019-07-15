@@ -1,3 +1,5 @@
+package com.wavesplatform.wavesj.examples.src.main.java;
+
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.matcher.Order;
 
