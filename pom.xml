@@ -103,6 +103,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludePackageNames>
+                        <excludePackageName>
+                            com.wavesplatform.protobuf
+                        </excludePackageName>
+                    </excludePackageNames>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
