@@ -2,7 +2,9 @@ package com.wavesplatform.wavesj.transactions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.json.utils.ConversionUtils;
 import com.wavesplatform.wavesj.matcher.Order;
 
 import java.nio.ByteBuffer;
@@ -65,25 +67,25 @@ public class ExchangeTransaction extends TransactionWithSignature {
     }
 
     @JsonCreator
-    public ExchangeTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-                               @JsonProperty("amount") long amount,
-                               @JsonProperty("price") long price,
+    ExchangeTransaction(@JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
+                               @JsonProperty("amount") JsonNode amount,
+                               @JsonProperty("price") JsonNode price,
                                @JsonProperty("order1") Order buyOrder,
                                @JsonProperty("order2") Order sellOrder,
-                               @JsonProperty("buyMatcherFee") long buyMatcherFee,
-                               @JsonProperty("sellMatcherFee") long sellMatcherFee,
-                               @JsonProperty("fee") long fee,
-                               @JsonProperty("timestamp") long timestamp,
+                               @JsonProperty("buyMatcherFee") JsonNode buyMatcherFee,
+                               @JsonProperty("sellMatcherFee") JsonNode sellMatcherFee,
+                               @JsonProperty("fee") JsonNode fee,
+                               @JsonProperty("timestamp") JsonNode timestamp,
                                @JsonProperty("signature") ByteString signature) {
-        this.amount = amount;
-        this.price = price;
-        this.buyMatcherFee = buyMatcherFee;
-        this.sellMatcherFee = sellMatcherFee;
-        this.fee = fee;
+        this.amount = ConversionUtils.toDefaultAmtFormat(amount);
+        this.price = ConversionUtils.toDefaultAmtFormat(price);
+        this.buyMatcherFee = ConversionUtils.toDefaultAmtFormat(buyMatcherFee);
+        this.sellMatcherFee = ConversionUtils.toDefaultAmtFormat(sellMatcherFee);
+        this.fee = ConversionUtils.toDefaultAmtFormat(fee);
         this.buyOrder = buyOrder;
         this.sellOrder = sellOrder;
         this.senderPublicKey = senderPublicKey;
-        this.timestamp = timestamp;
+        this.timestamp = ConversionUtils.toTimestamp(timestamp);
         this.signature = signature;
     }
 

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.json.utils.ConversionUtils;
 
 import java.nio.ByteBuffer;
 
@@ -126,25 +128,25 @@ public class Order extends ObjectWithSignature implements ApiJson {
             @JsonProperty("id") String id,
             @JsonProperty("type") Order.Type orderType,
             @JsonProperty("assetPair") AssetPair assetPair,
-            @JsonProperty("amount") long amount,
-            @JsonProperty("price") long price,
-            @JsonProperty("timestamp") long timestamp,
+            @JsonProperty("amount") JsonNode amount,
+            @JsonProperty("price") JsonNode price,
+            @JsonProperty("timestamp") JsonNode timestamp,
             @JsonProperty("filled") long filled,
             @JsonProperty("status") Order.Status status,
-            @JsonProperty("expiration") long expiration,
-            @JsonProperty("matcherFee") long matcherFee,
+            @JsonProperty("expiration") JsonNode expiration,
+            @JsonProperty("matcherFee") JsonNode matcherFee,
             @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
             @JsonProperty("matcherKey") PublicKeyAccount matcherKey,
             @JsonProperty("signature") ByteString signature) {
         this.orderType = orderType;
         this.assetPair = assetPair;
-        this.amount = amount;
-        this.price = price;
-        this.timestamp = timestamp;
+        this.amount = ConversionUtils.toDefaultAmtFormat(amount);
+        this.price = ConversionUtils.toDefaultAmtFormat(price);
+        this.timestamp = ConversionUtils.toTimestamp(timestamp);
         this.status = status;
         this.filled = filled;
-        this.expiration = expiration;
-        this.matcherFee = matcherFee;
+        this.expiration = ConversionUtils.toTimestamp(expiration);
+        this.matcherFee = ConversionUtils.toDefaultAmtFormat(matcherFee);
         this.senderPublicKey = senderPublicKey;
         this.matcherPublicKey = matcherKey;
         this.signature = signature;

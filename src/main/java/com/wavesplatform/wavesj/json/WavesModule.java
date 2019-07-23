@@ -1,6 +1,6 @@
 package com.wavesplatform.wavesj.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.json.deser.*;
@@ -14,7 +14,7 @@ public class WavesModule extends SimpleModule {
         addDeserializer(ByteString.class, new ByteStringDeser());
         addDeserializer(Alias.class, new AliasDeser(chainId));
         addDeserializer(Order.Status.class, new OrderStatusDeser());
-        addDeserializer(Transaction.class, new TransactionDeserializer(objectMapper));
+        addDeserializer(Transaction.class, initTransactionDeserializer(objectMapper));
 
         addSerializer(PublicKeyAccount.class, new PublicKeyAccountSer());
         addSerializer(ByteString.class, new ByteStringSer());
@@ -22,5 +22,9 @@ public class WavesModule extends SimpleModule {
         addSerializer(AssetPair.class, new AssetPairSer());
         addSerializer(Order.Type.class, new OrderTypeSer());
         addSerializer(ContractInvocationTransaction.BinaryArg.class, new InvocationBinaryArgSer());
+    }
+
+    protected StdDeserializer<Transaction> initTransactionDeserializer(WavesJsonMapper objectMapper) {
+        return new TransactionDeserializer(objectMapper);
     }
 }

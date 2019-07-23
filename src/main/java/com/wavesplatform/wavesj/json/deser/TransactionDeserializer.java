@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class TransactionDeserializer extends StdDeserializer<Transaction> {
 
-    private WavesJsonMapper objectMapper;
+    protected WavesJsonMapper objectMapper;
 
     public TransactionDeserializer(WavesJsonMapper objectMapper) {
         super(Transaction.class);
@@ -24,8 +24,12 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
     }
 
     @Override
-    public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         TreeNode treeNode = jsonParser.getCodec().readTree(jsonParser);
+        return deserialize(treeNode);
+    }
+
+    protected Transaction deserialize(TreeNode treeNode) throws JsonProcessingException {
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
         byte chainId = objectMapper.getChainId();
@@ -36,7 +40,13 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         // todo omfg remove after 0.15.4 release
         ((ObjectNode)treeNode).put("chainId", chainId);
 
-        Class t = null;
+        Class<? extends Transaction> t = getType(type, version);
+
+        return objectMapper.treeToValue(treeNode, t);
+    }
+
+    protected Class<? extends Transaction> getType(int type, int version) {
+        Class<? extends Transaction> t = null;
         switch (type) {
             case AliasTransaction.ALIAS:
                 switch (version) {
@@ -129,7 +139,6 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             default:
                 t = UnknownTransaction.class;
         }
-
-        return (Transaction) objectMapper.treeToValue(treeNode, t);
+        return t;
     }
 }

@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj.json.deser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wavesplatform.wavesj.Transaction;
 import com.wavesplatform.wavesj.json.WavesJsonMapper;
+import com.wavesplatform.wavesj.json.dataservices.DataSrvJsonMapper;
 
 import java.io.IOException;
 
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TransactionDeserTest {
     ObjectMapper mapper = new WavesJsonMapper((byte) 'T');
+    ObjectMapper dsMapper = new DataSrvJsonMapper((byte) 'T');
 
     protected <T extends Transaction> T deserializationTest(String json, T tx, Class<T> txClass) throws IOException {
         T deserialized = mapper.readValue(json, txClass);
