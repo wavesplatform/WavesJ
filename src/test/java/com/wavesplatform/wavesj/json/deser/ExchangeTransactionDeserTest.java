@@ -1,6 +1,8 @@
 package com.wavesplatform.wavesj.json.deser;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.json.dataservices.DataSrvTxWrapper;
 import com.wavesplatform.wavesj.matcher.Order;
 import com.wavesplatform.wavesj.transactions.ExchangeTransaction;
 import org.junit.Assert;
@@ -39,5 +41,19 @@ public class ExchangeTransactionDeserTest extends TransactionDeserTest {
         Assert.assertNotNull(txDataSrv);
 
         Assert.assertEquals(txNodeApi, txDataSrv);
+    }
+
+    @Test
+    public void dataSrvFormatParsingCompatibility2Test() throws Exception {
+        ExchangeTransaction txNodeApi = mapper.readValue(NODE_FORMAT, ExchangeTransaction.class);
+        Assert.assertNotNull(txNodeApi);
+
+        TypeReference<DataSrvTxWrapper<ExchangeTransaction>> t = new TypeReference<DataSrvTxWrapper<ExchangeTransaction>>() {};
+
+        DataSrvTxWrapper<ExchangeTransaction> txDataSrv =
+                dsMapper.readValue(DATA_SRV_FORMAT, t);
+        Assert.assertNotNull(txDataSrv);
+
+        Assert.assertEquals(txNodeApi, txDataSrv.getTx());
     }
 }
