@@ -1,7 +1,6 @@
 package com.wavesplatform.wavesj.json.deser;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -35,7 +34,16 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         // todo omfg remove after 0.15.4 release
         ((ObjectNode) treeNode).put("chainId", chainId);
 
-        Class t = null;
+        TreeNode stateChangesNode = treeNode.path("stateChanges");
+        boolean debugAvailable = stateChangesNode != null && stateChangesNode.isObject();
+
+        Class<? extends Transaction> t = getType(type, version, debugAvailable);
+
+        return objectMapper.treeToValue(treeNode, t);
+    }
+
+    private Class<? extends Transaction> getType(int type, int version, boolean debugAvailable) {
+        Class<? extends Transaction> t = null;
         switch (type) {
             case AliasTransaction.ALIAS:
                 switch (version) {
@@ -130,7 +138,11 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 }
                 break;
             case InvokeScriptTransaction.CONTRACT_INVOKE:
-                t = InvokeScriptTransaction.class;
+                if (debugAvailable) {
+                    t = InvokeScriptTransactionStCh.class;
+                } else {
+                    t = InvokeScriptTransaction.class;
+                }
                 break;
             case SetAssetScriptTransaction.SET_ASSET_SCRIPT:
                 t = SetAssetScriptTransaction.class;
@@ -138,7 +150,6 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             default:
                 t = UnknownTransaction.class;
         }
-
-        return (Transaction) objectMapper.treeToValue(treeNode, t);
+        return t;
     }
 }

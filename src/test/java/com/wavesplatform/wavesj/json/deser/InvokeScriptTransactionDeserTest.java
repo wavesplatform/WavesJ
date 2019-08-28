@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj.json.deser;
 
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransactionStCh;
 import com.wavesplatform.wavesj.transactions.InvokeScriptTransactionTestData;
 import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 import org.junit.Test;
@@ -32,4 +33,12 @@ public class InvokeScriptTransactionDeserTest extends TransactionDeserTest {
                 InvokeScriptTransaction.class);
     }
 
+    @Test
+    public void testDeserForTxWithStateChanges() throws IOException {
+        deserializationTest(
+                InvokeScriptTransactionTestData.txWithStateChangesJson(),
+                InvokeScriptTransactionTestData.txWithStateChanges(),
+                InvokeScriptTransactionStCh.class
+        );
+    }
 }

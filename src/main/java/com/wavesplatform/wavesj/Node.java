@@ -9,7 +9,6 @@ import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
 import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 import com.wavesplatform.wavesj.transactions.LeaseTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
 import org.apache.http.HttpResponse;
@@ -29,9 +28,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
 
@@ -61,6 +58,8 @@ public class Node {
     private static final TypeReference<List<DataEntry>> ADDRESS_DATA = new TypeReference<List<DataEntry>>() {
     };
     private static final TypeReference<DataEntry> ADDRESS_DATA_BY_KEY = new TypeReference<DataEntry>() {
+    };
+    private static final TypeReference<List<Transaction>> LIST_TX = new TypeReference<List<Transaction>>() {
     };
 
     private final URI uri;
@@ -204,6 +203,10 @@ public class Node {
         return wavesJsonMapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
     }
 
+    public Transaction getStateChanges(String txId) throws IOException {
+        return wavesJsonMapper.convertValue(send("/debug/stateChanges/info/" + txId), Transaction.class);
+    }
+
     /**
      * Returns transactions by address with limit.
      *
@@ -232,6 +235,48 @@ public class Node {
         }
         return wavesJsonMapper.<List<List<Transaction>>>convertValue(send(requestUrl), new TypeReference<List<List<Transaction>>>() {
         }).get(0);
+    }
+
+    public List<Transaction> getAddressStateChanges(String address, int limit, String after) throws IOException {
+        if (address == null || address.isEmpty()) {
+            throw new IllegalArgumentException("address attribute couldn't be null or empty");
+        }
+
+        if (limit <= 0 || limit > 1000) {
+            limit = 1000;
+        }
+
+        String requestUrl = String.format("/debug/stateChanges/address/%s/limit/%d", address, limit);
+        if (after != null) {
+            requestUrl += "?after=" + after;
+        }
+
+        return wavesJsonMapper.convertValue(send(requestUrl), LIST_TX);
+    }
+
+    /**
+     * Returns iterator with dynamic transactions loading to navigate over all account transactions including state changes
+     * information
+     *
+     * Be careful. Some nodes could turn OFF information about state changes.
+     * Also iterator can throw {@link AllTxIterator.WrappedIOException} in case of any network failures
+     *
+     * @param address account address
+     * @param pageSize page size to navigate over all transactions
+     * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
+     * @throws IOException in case of any network failures
+     */
+    public Iterator<Transaction> getAllAddressStateChanges(String address, int pageSize) throws IOException {
+        try {
+            return new AllTxIterator(address, pageSize, new AllTxIterator.TransactionsLazyLoader<List<? extends Transaction>>() {
+                @Override
+                public List<? extends Transaction> load(String address, int limit, String after) throws IOException {
+                    return Node.this.getAddressStateChanges(address, limit, after);
+                }
+            });
+        } catch (AllTxIterator.WrappedIOException ex) {
+            throw ex.unwrap();
+        }
     }
 
     /**
