@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class TransactionDeserializer extends StdDeserializer<Transaction> {
 
-    private WavesJsonMapper objectMapper;
+    protected WavesJsonMapper objectMapper;
 
     public TransactionDeserializer(WavesJsonMapper objectMapper) {
         super(Transaction.class);
@@ -42,7 +42,7 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         return objectMapper.treeToValue(treeNode, t);
     }
 
-    private Class<? extends Transaction> getType(int type, int version, boolean debugAvailable) {
+    protected Class<? extends Transaction> getType(int type, int version, boolean debugAvailable) {
         Class<? extends Transaction> t = null;
         switch (type) {
             case AliasTransaction.ALIAS:
