@@ -25,14 +25,14 @@ public class InvokeScriptTransaction extends TransactionWithProofs<InvokeScriptT
     private static final int MAX_TX_SIZE = 5 * KBYTE;
     private byte chainId;
     private PublicKeyAccount senderPublicKey;
-    private @JsonProperty("dApp")
-    String dApp;
+    private String dApp;
     private FunctionCall call;
-    private @JsonProperty("payment")
-    List<Payment> payments = new ArrayList<Payment>();
     private long fee;
     private String feeAssetId;
     private long timestamp;
+
+    @JsonProperty("payment")
+    private List<Payment> payments = new ArrayList<Payment>();
 
     @JsonCreator
     public InvokeScriptTransaction(@JsonProperty("chainId") byte chainId,
