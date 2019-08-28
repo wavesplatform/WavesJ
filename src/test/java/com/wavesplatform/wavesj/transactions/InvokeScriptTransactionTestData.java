@@ -1,15 +1,14 @@
-package com.wavesplatform.wavesj.json;
+package com.wavesplatform.wavesj.transactions;
 
 import com.wavesplatform.wavesj.ByteString;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.json.ser.TransactionSerTest;
-import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 
 import static com.wavesplatform.wavesj.Asset.toWavelets;
 import static java.util.Collections.singletonList;
 
 
-public final class InvokeScriptTransactionTxTestData {
+public final class InvokeScriptTransactionTestData {
     private static final byte chainId = TransactionSerTest.chainId;
 
     public static final PublicKeyAccount SENDER_PUB =

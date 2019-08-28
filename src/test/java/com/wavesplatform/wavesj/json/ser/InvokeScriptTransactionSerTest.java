@@ -1,6 +1,6 @@
 package com.wavesplatform.wavesj.json.ser;
 
-import com.wavesplatform.wavesj.json.InvokeScriptTransactionTxTestData;
+import com.wavesplatform.wavesj.transactions.InvokeScriptTransactionTestData;
 import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
 import org.junit.Test;
 
@@ -25,28 +25,28 @@ public class InvokeScriptTransactionSerTest extends TransactionSerTest {
     @Test
     public void testV1SerTxFull() throws IOException {
         serializationRoadtripTest(
-                InvokeScriptTransactionTxTestData.txFull(),
+                InvokeScriptTransactionTestData.txFull(),
                 InvokeScriptTransaction.class);
     }
 
     @Test
     public void testV1SerTxNoFunctionalCall() throws IOException {
         serializationRoadtripTest(
-                InvokeScriptTransactionTxTestData.txNoFunctionCall(),
+                InvokeScriptTransactionTestData.txNoFunctionCall(),
                 InvokeScriptTransaction.class);
     }
 
     @Test
     public void testV1SerTxNoPayment() throws IOException {
         serializationRoadtripTest(
-                InvokeScriptTransactionTxTestData.txNoPayment(),
+                InvokeScriptTransactionTestData.txNoPayment(),
                 InvokeScriptTransaction.class);
     }
 
     @Test
     public void testV1SerTxNoFunctionalCallAndPayment() throws IOException {
         serializationRoadtripTest(
-                InvokeScriptTransactionTxTestData.txNoFunctionCallAndPayment(),
+                InvokeScriptTransactionTestData.txNoFunctionCallAndPayment(),
                 InvokeScriptTransaction.class);
     }
 
