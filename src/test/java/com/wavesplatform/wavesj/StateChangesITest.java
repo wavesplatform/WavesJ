@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 public class StateChangesITest extends BaseITest {
 
@@ -32,17 +31,15 @@ public class StateChangesITest extends BaseITest {
 
     @Test
     public void successAllAddressStateChanges() throws IOException {
-        Iterator<TransactionStCh> it = node.getAllAddressStateChanges("3MpRhvzNbdQj2NErTX9w5642hyz7ht5aRza", 5);
         int totalCount = 0;
         int stateChangesCount = 0;
-        while (it.hasNext()) {
-            TransactionStCh tx = it.next();
+        for (TransactionStCh tx : node.getAllAddressStateChanges("3MpRhvzNbdQj2NErTX9w5642hyz7ht5aRza", 5)) {
             totalCount++;
 
             if (tx.isStateChangesSupported()) {
                 stateChangesCount++;
                 Assert.assertNotNull(tx.getStateChanges());
-                Assert.assertEquals (1, tx.getStateChanges().getData().size());
+                Assert.assertEquals(1, tx.getStateChanges().getData().size());
                 Assert.assertEquals(0, tx.getStateChanges().getTransfers().size());
                 DataEntry<?> data1 = tx.getStateChanges().getData().iterator().next();
 

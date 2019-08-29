@@ -12,10 +12,8 @@ public class AllTxIteratorITest extends BaseITest {
     @Test
     public void testDynamicLoad() {
         TestNode node = new TestNode();
-        Iterator<TransactionStCh> it = node.getAllAddressStateChanges("3MpRhvzNbdQj2NErTX9w5642hyz7ht5aRza", 3);
         int txCount = 0;
-        while (it.hasNext()) {
-            it.next();
+        for (TransactionStCh tx: node.getAllAddressStateChanges("3MpRhvzNbdQj2NErTX9w5642hyz7ht5aRza", 3)) {
             ++txCount;
         }
         Assert.assertEquals(8, txCount);
@@ -29,7 +27,7 @@ public class AllTxIteratorITest extends BaseITest {
 
     private static class TestNode extends Node {
         @Override
-        public Iterator<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) {
+        public Iterable<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) {
             return new TestTxIterator(address, pageSize, new AllTxIterator.TransactionsLazyLoader<List<TransactionStCh>>() {
                 @Override
                 public List<TransactionStCh> load(String address, int limit, String after) throws IOException {

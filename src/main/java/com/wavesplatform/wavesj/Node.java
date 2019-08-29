@@ -267,7 +267,7 @@ public class Node {
      * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
      * @throws IOException in case of any network failures
      */
-    public Iterator<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException {
+    public Iterable<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException {
         try {
             return new AllTxIterator<TransactionStCh>(address, pageSize, new TransactionsLazyLoader<List<TransactionStCh>>() {
                 @Override

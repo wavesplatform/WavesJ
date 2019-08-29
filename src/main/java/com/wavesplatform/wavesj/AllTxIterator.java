@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class AllTxIterator<T extends Transaction> implements Iterator<T>  {
+public class AllTxIterator<T extends Transaction> implements Iterator<T>, Iterable<T>  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("com.wavesplatform.wavesj");
 
@@ -68,6 +68,11 @@ public class AllTxIterator<T extends Transaction> implements Iterator<T>  {
     @Override
     public void remove() {
         throw new UnsupportedOperationException("remove");
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return this;
     }
 
     public interface TransactionsLazyLoader<T> {
