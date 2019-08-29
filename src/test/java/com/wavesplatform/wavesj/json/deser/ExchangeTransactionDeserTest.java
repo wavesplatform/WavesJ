@@ -66,6 +66,7 @@ public class ExchangeTransactionDeserTest extends TransactionDeserTest {
                         "\"sender\":\"3N22UCTvst8N1i1XDvGHzyqdgmZgwDKbp44\"," +
                         "\"senderPublicKey\":\"Fvk5DXmfyWVZqQVBowUBMwYtRAHDtdyZNNeRrwSjt6KP\"," +
                         "\"fee\":1," +
+                        "\"version\":1," +
                         "\"timestamp\":1526992336241," +
                         "\"signature\":" +
                         "\"5NxNhjMrrH5EWjSFnVnPbanpThic6fnNL48APVAkwq19y2FpQp4tNSqoAZgboC2ykUfqQs9suwBQj6wERmsWWNqa\"," +
