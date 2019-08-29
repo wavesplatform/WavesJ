@@ -12,17 +12,17 @@ import com.wavesplatform.wavesj.transactions.*;
 
 import java.io.IOException;
 
-public class TransactionDeserializer extends StdDeserializer<Transaction> {
+public class TransactionDeserializer<T extends Transaction> extends StdDeserializer<T> {
 
     protected WavesJsonMapper objectMapper;
 
-    public TransactionDeserializer(WavesJsonMapper objectMapper) {
-        super(Transaction.class);
+    public TransactionDeserializer(WavesJsonMapper objectMapper, Class<T> clazz) {
+        super(clazz);
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         TreeNode treeNode = jsonParser.getCodec().readTree(jsonParser);
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
@@ -37,12 +37,12 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         TreeNode stateChangesNode = treeNode.path("stateChanges");
         boolean debugAvailable = stateChangesNode != null && stateChangesNode.isObject();
 
-        Class<? extends Transaction> t = getType(type, version, debugAvailable);
+        Class<? extends T> t = getType(type, version, debugAvailable);
 
         return objectMapper.treeToValue(treeNode, t);
     }
 
-    protected Class<? extends Transaction> getType(int type, int version, boolean debugAvailable) {
+    protected Class<? extends T> getType(int type, int version, boolean debugAvailable) {
         Class<? extends Transaction> t = null;
         switch (type) {
             case AliasTransaction.ALIAS:
@@ -150,6 +150,9 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
             default:
                 t = UnknownTransaction.class;
         }
-        return t;
+
+        @SuppressWarnings("unchecked")
+        Class<? extends T> tt = (Class<? extends T>) t;
+        return tt;
     }
 }

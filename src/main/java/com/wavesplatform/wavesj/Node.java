@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.wavesplatform.wavesj.AllTxIterator.TransactionsLazyLoader;
 import com.wavesplatform.wavesj.json.WavesJsonMapper;
 import com.wavesplatform.wavesj.matcher.CancelOrder;
 import com.wavesplatform.wavesj.matcher.DeleteOrder;
@@ -59,7 +60,7 @@ public class Node {
     };
     private static final TypeReference<DataEntry> ADDRESS_DATA_BY_KEY = new TypeReference<DataEntry>() {
     };
-    private static final TypeReference<List<Transaction>> LIST_TX = new TypeReference<List<Transaction>>() {
+    private static final TypeReference<List<TransactionStCh>> LIST_TX_ST = new TypeReference<List<TransactionStCh>>() {
     };
 
     private final URI uri;
@@ -203,8 +204,8 @@ public class Node {
         return wavesJsonMapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
     }
 
-    public Transaction getStateChanges(String txId) throws IOException {
-        return wavesJsonMapper.convertValue(send("/debug/stateChanges/info/" + txId), Transaction.class);
+    public TransactionStCh getStateChanges(String txId) throws IOException {
+        return wavesJsonMapper.convertValue(send("/debug/stateChanges/info/" + txId), TransactionStCh.class);
     }
 
     /**
@@ -237,7 +238,7 @@ public class Node {
         }).get(0);
     }
 
-    public List<Transaction> getAddressStateChanges(String address, int limit, String after) throws IOException {
+    public List<TransactionStCh> getAddressStateChanges(String address, int limit, String after) throws IOException {
         if (address == null || address.isEmpty()) {
             throw new IllegalArgumentException("address attribute couldn't be null or empty");
         }
@@ -251,7 +252,7 @@ public class Node {
             requestUrl += "?after=" + after;
         }
 
-        return wavesJsonMapper.convertValue(send(requestUrl), LIST_TX);
+        return wavesJsonMapper.convertValue(send(requestUrl), LIST_TX_ST);
     }
 
     /**
@@ -266,12 +267,12 @@ public class Node {
      * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
      * @throws IOException in case of any network failures
      */
-    public Iterator<Transaction> getAllAddressStateChanges(String address, int pageSize) throws IOException {
+    public Iterator<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException {
         try {
-            return new AllTxIterator(address, pageSize, new AllTxIterator.TransactionsLazyLoader<List<? extends Transaction>>() {
+            return new AllTxIterator<TransactionStCh>(address, pageSize, new TransactionsLazyLoader<List<TransactionStCh>>() {
                 @Override
-                public List<? extends Transaction> load(String address, int limit, String after) throws IOException {
-                    return Node.this.getAddressStateChanges(address, limit, after);
+                public List<TransactionStCh> load(String address, int limit, String after) throws IOException {
+                    return Node.this.getAddressStateChanges(address, limit, after) ;
                 }
             });
         } catch (AllTxIterator.WrappedIOException ex) {

@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class AllTxIterator implements Iterator<Transaction> {
+public class AllTxIterator<T extends Transaction> implements Iterator<T>  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("com.wavesplatform.wavesj");
 
@@ -17,10 +17,10 @@ public class AllTxIterator implements Iterator<Transaction> {
     private boolean hasNext;
     private Transaction lastSuccessNext;
     private String address;
-    private Iterator<? extends Transaction> dataIt;
-    private TransactionsLazyLoader<List<? extends Transaction>> txSupplier;
+    private Iterator<T> dataIt;
+    private TransactionsLazyLoader<List<T>> txSupplier;
 
-    public AllTxIterator(String address, int pageSize, TransactionsLazyLoader<List<? extends Transaction>> txSupplier) {
+    public AllTxIterator(String address, int pageSize, TransactionsLazyLoader<List<T>> txSupplier) {
         this.address = address;
         this.pageSize = pageSize;
         this.txSupplier = txSupplier;
@@ -33,7 +33,7 @@ public class AllTxIterator implements Iterator<Transaction> {
             String lastId = lastSuccessNext != null ? lastSuccessNext.getId().getBase58String() : null;
             LOGGER.debug("Dynamic load for remaining transactions: address={} page_size={} after_tx={}",
                     address, pageSize, lastId);
-            List<? extends Transaction> txs = txSupplier.load(address, pageSize, lastId);
+            List<T> txs = txSupplier.load(address, pageSize, lastId);
             LOGGER.debug("Dynamic load for remaining transactions: loaded={}", txs.size());
             dataIt = txs.iterator();
             dataSize = txs.size();
@@ -49,8 +49,8 @@ public class AllTxIterator implements Iterator<Transaction> {
     }
 
     @Override
-    public Transaction next() {
-        Transaction next;
+    public T next() {
+        T next;
         if (hasNext) {
             next = dataIt.next();
             lastSuccessNext = next;

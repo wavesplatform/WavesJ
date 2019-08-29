@@ -12,7 +12,7 @@ public class AllTxIteratorITest extends BaseITest {
     @Test
     public void testDynamicLoad() {
         TestNode node = new TestNode();
-        Iterator<Transaction> it = node.getAllAddressStateChanges("3MpRhvzNbdQj2NErTX9w5642hyz7ht5aRza", 3);
+        Iterator<TransactionStCh> it = node.getAllAddressStateChanges("3MpRhvzNbdQj2NErTX9w5642hyz7ht5aRza", 3);
         int txCount = 0;
         while (it.hasNext()) {
             it.next();
@@ -29,20 +29,20 @@ public class AllTxIteratorITest extends BaseITest {
 
     private static class TestNode extends Node {
         @Override
-        public Iterator<Transaction> getAllAddressStateChanges(String address, int pageSize) {
-            return new TestTxIterator(address, pageSize, new AllTxIterator.TransactionsLazyLoader<List<? extends Transaction>>() {
+        public Iterator<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) {
+            return new TestTxIterator(address, pageSize, new AllTxIterator.TransactionsLazyLoader<List<TransactionStCh>>() {
                 @Override
-                public List<? extends Transaction> load(String address, int limit, String after) throws IOException {
-                    return TestNode.this.getAddressStateChanges(address, limit, after);
+                public List<TransactionStCh> load(String address, int limit, String after) throws IOException {
+                    return TestNode.this.getAddressStateChanges(address, limit, after) ;
                 }
             });
         }
     }
 
-    private static class TestTxIterator extends AllTxIterator {
+    private static class TestTxIterator extends AllTxIterator<TransactionStCh> {
         static int fetchesCount = 0;
 
-        TestTxIterator(String address, int pageSize, TransactionsLazyLoader<List<? extends Transaction>> txSupplier) {
+        public TestTxIterator(String address, int pageSize, TransactionsLazyLoader<List<TransactionStCh>> txSupplier) {
             super(address, pageSize, txSupplier);
         }
 

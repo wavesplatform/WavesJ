@@ -32,7 +32,13 @@ public class InvokeScriptTransactionStCh extends InvokeScriptTransaction {
         this.stateChanges = stateChanges;
     }
 
+    @Override
     public StateChanges getStateChanges() {
         return stateChanges;
+    }
+
+    @Override
+    public boolean isStateChangesSupported() {
+        return true;
     }
 }

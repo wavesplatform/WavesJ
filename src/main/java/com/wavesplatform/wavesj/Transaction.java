@@ -28,4 +28,6 @@ public interface Transaction extends ApiJson, Signable {
     byte getType();
 
     byte getVersion();
+
+    boolean isStateChangesSupported();
 }
