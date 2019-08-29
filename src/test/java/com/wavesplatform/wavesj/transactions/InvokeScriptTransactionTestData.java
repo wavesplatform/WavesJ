@@ -168,13 +168,13 @@ public final class InvokeScriptTransactionTestData {
                 null,
                 1561727253494L,
                 singletonList(new ByteString("4vUu8wkcvXvGX8S9RK2KQd6NzaQ8FqJgUK1zE9oMJxW3CEbT132si8FvcJ6UriYMKfSBkz8WPHnF6jLhNbYt1Ts2")),
-                new InvokeScriptTransactionStCh.StateChanges(
+                new StateChanges(
                         Arrays.<DataEntry<?>>asList(
                                 new DataEntry.StringEntry("CjX7LkS5G9Yq3XR2VPBkRY4Su8WbaR4KmjLqDh4Jz1VM",
                                         "03WON_03124_44144YmNQFhw3ZaT3PoS3pz8YQmwfzWsr5QJXBZh1EbVrZ_06562004_09380000000_014"),
                                 new DataEntry.LongEntry("$RESERVED_AMOUNT",
                                         0)),
-                        singletonList(new InvokeScriptTransactionStCh.OutTransfer(
+                        singletonList(new StateChanges.OutTransfer(
                                 "3N4yERKjhFqYXKV1D2RJLWCzmDqerCCvpNq",
                                 380000000L, null))
                 )
