@@ -105,7 +105,7 @@ public class Node {
         this.uri = new URI(uri);
         this.wavesJsonMapper = new WavesJsonMapper(chainId);
         this.client = httpClient;
-        this.chainId =  chainId;
+        this.chainId = chainId;
     }
 
     private HttpClient createDefaultClient() {
@@ -176,12 +176,12 @@ public class Node {
         return wavesJsonMapper.convertValue(send("/assets/balance/" + address, "balances"), ASSET_BALANCE_LIST);
     }
 
-    public List<DataEntry> getData(String address) throws IOException{
-        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s", address)),ADDRESS_DATA);
+    public List<DataEntry> getData(String address) throws IOException {
+        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s", address)), ADDRESS_DATA);
     }
 
-    public DataEntry getDataByKey(String address, String key) throws IOException{
-        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s/%s", address, key)),ADDRESS_DATA_BY_KEY);
+    public DataEntry getDataByKey(String address, String key) throws IOException {
+        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s/%s", address, key)), ADDRESS_DATA_BY_KEY);
     }
 
     public AssetDetails getAssetDetails(String assetId) throws IOException {
@@ -206,8 +206,9 @@ public class Node {
 
     /**
      * Returns transactions by address with limit.
+     *
      * @param address address
-     * @param limit transactions limit
+     * @param limit   transactions limit
      * @return list of transactions
      * @throws IOException if something going wrong
      */
@@ -217,9 +218,10 @@ public class Node {
 
     /**
      * Returns transactions by address with limit after passed transaction id.
+     *
      * @param address address
-     * @param limit transactions limit
-     * @param after separate transaction id
+     * @param limit   transactions limit
+     * @param after   separate transaction id
      * @return list of transactions
      * @throws IOException if something going wrong
      */
@@ -228,7 +230,8 @@ public class Node {
         if (after != null) {
             requestUrl += String.format("?after=%s", after);
         }
-        return wavesJsonMapper.<List<List<Transaction>>>convertValue(send(requestUrl),new TypeReference<List<List<Transaction>>>(){}).get(0);
+        return wavesJsonMapper.<List<List<Transaction>>>convertValue(send(requestUrl), new TypeReference<List<List<Transaction>>>() {
+        }).get(0);
     }
 
     /**
@@ -287,6 +290,27 @@ public class Node {
      */
     public Block getBlock(String signature) throws IOException {
         return wavesJsonMapper.convertValue(send("/blocks/signature/" + signature), Block.class);
+    }
+
+    /**
+     * Returns current blockchain rewards info
+     *
+     * @return
+     * @throws IOException
+     */
+    public Rewards getBlockchainRewards() throws IOException {
+        return wavesJsonMapper.convertValue(send("/blockchain/rewards"), Rewards.class);
+    }
+
+
+    /**
+     * Returns miner’s reward status at height
+     *
+     * @return
+     * @throws IOException
+     */
+    public Rewards getBlockchainRewards(int height) throws IOException {
+        return wavesJsonMapper.convertValue(send(String.format("/blockchain/rewards/%d", height)), Rewards.class);
     }
 
     public boolean validateAddresses(String address) throws IOException {
@@ -362,61 +386,64 @@ public class Node {
         return send(Transactions.makeMassTransferTx(from, assetId, transfers, fee, message));
     }
 
-    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId, long timestamp)throws IOException{
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId, long timestamp) throws IOException {
         return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId, timestamp));
     }
 
-    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId)throws IOException{
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId) throws IOException {
         return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId));
     }
 
-    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp)throws IOException{
+    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp) throws IOException {
         return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId, timestamp));
     }
 
     /**
      * send invoke script tx with call function without arguments
-     * @param from account private key
-     * @param chainId chain id
-     * @param dApp dapp address
+     *
+     * @param from         account private key
+     * @param chainId      chain id
+     * @param dApp         dapp address
      * @param functionName function name to call
-     * @param fee threasaction fee
-     * @param feeAssetId transaction fee
+     * @param fee          threasaction fee
+     * @param feeAssetId   transaction fee
      * @return invoke script transaction id
      * @throws IOException
      */
-    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId)throws IOException{
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId) throws IOException {
         return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId));
     }
 
     /**
      * send invoke script tx withour payments
-     * @param from account private key
-     * @param chainId chain id
-     * @param dApp dapp address
-     * @param call function call
-     * @param fee threasaction fee
+     *
+     * @param from       account private key
+     * @param chainId    chain id
+     * @param dApp       dapp address
+     * @param call       function call
+     * @param fee        threasaction fee
      * @param feeAssetId transaction fee
-     * @param timestamp tx timestamp
+     * @param timestamp  tx timestamp
      * @return invoke script transaction id
      * @throws IOException
      */
-    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId, long timestamp)throws IOException{
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId, long timestamp) throws IOException {
         return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId, timestamp));
     }
 
     /**
      * send invoke script tx withour payments
-     * @param from account private key
-     * @param chainId chain id
-     * @param dApp dapp address
-     * @param call function call
-     * @param fee threasaction fee
+     *
+     * @param from       account private key
+     * @param chainId    chain id
+     * @param dApp       dapp address
+     * @param call       function call
+     * @param fee        threasaction fee
      * @param feeAssetId transaction fee
      * @return invoke script transaction id
      * @throws IOException
      */
-    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId)throws IOException{
+    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId) throws IOException {
         return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId));
     }
 
@@ -425,10 +452,9 @@ public class Node {
     }
 
     public String exchange(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
-                                     long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
+                           long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
         return send(Transactions.makeExchangeTx(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
     }
-
 
 
     /**
@@ -459,8 +485,8 @@ public class Node {
      * @see Account#MAINNET
      * @see Account#TESTNET
      */
-    public String setAssetScript(PrivateKeyAccount from, byte chainId, String assetId, String script, long fee)  throws IOException {
-        return send(Transactions.makeSetAssetScriptTransaction(from,chainId, assetId, script, fee));
+    public String setAssetScript(PrivateKeyAccount from, byte chainId, String assetId, String script, long fee) throws IOException {
+        return send(Transactions.makeSetAssetScriptTransaction(from, chainId, assetId, script, fee));
     }
 
     /**
@@ -485,24 +511,44 @@ public class Node {
         return parse(exec(request("/matcher"))).asText();
     }
 
+    @Deprecated
     public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                               long price, long amount, long expiration, long matcherFee) throws IOException {
+                             long price, long amount, long expiration, long matcherFee) throws IOException {
         Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
-        JsonNode tree = parse(exec(request(tx)));
+        JsonNode tree = parse(exec(matcherRequest(tx, false)));
         // fix order status
         ObjectNode message = (ObjectNode) tree.get("message");
         message.put("status", tree.get("status").asText());
         return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
     }
 
+    public Order placeOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
+                             long price, long amount, long expiration, long matcherFee, boolean isMarket) throws IOException {
+        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
+        JsonNode tree = parse(exec(matcherRequest(tx, isMarket)));        // fix order status
+        ObjectNode message = (ObjectNode) tree.get("message");
+        message.put("status", tree.get("status").asText());
+        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
+    }
+
+    public Order placeLimitOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
+                             long price, long amount, long expiration, long matcherFee) throws IOException {
+        return placeOrder(account, matcherKey, assetPair, orderType, price, amount, expiration, matcherFee, false);
+    }
+
+    public Order marketOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
+                             long price, long amount, long expiration, long matcherFee) throws IOException {
+        return placeOrder(account, matcherKey, assetPair, orderType, price, amount, expiration, matcherFee, true);
+    }
+
     public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
         ApiJson tx = Transactions.makeOrderCancel(account, assetPair, orderId);
-        return parse(exec(request(tx)), "status").asText();
+        return parse(exec(matcherRequest(tx)), "status").asText();
     }
 
     public String cancelOrdersbyPair(PrivateKeyAccount account, AssetPair assetPair) throws IOException {
         ApiJson tx = Transactions.makeOrderCancel(account, assetPair);
-        return parse(exec(request(tx)), "status").asText();
+        return parse(exec(matcherRequest(tx)), "status").asText();
     }
 
     public String cancelAllOrders(PrivateKeyAccount account) throws IOException {
@@ -572,21 +618,36 @@ public class Node {
         return req;
     }
 
-    private HttpUriRequest request(ApiJson obj) throws JsonProcessingException {
+    private HttpUriRequest request(ApiJson obj, Boolean ...arg) throws JsonProcessingException {
         String endpoint;
         if (obj instanceof Transaction) {
             endpoint = "/transactions/broadcast";
-        } else if (obj instanceof Order) {
-            endpoint = "/matcher/orderbook";
+        } else {
+            throw new IllegalArgumentException();
+        }
+        HttpPost request = new HttpPost(uri.resolve(endpoint));
+        request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
+        return request;
+    }
+
+    private HttpUriRequest matcherRequest(ApiJson obj) throws JsonProcessingException {
+        return matcherRequest(obj, false);
+    }
+
+    private HttpUriRequest matcherRequest(ApiJson obj, boolean isMarket) throws JsonProcessingException {
+        String endpoint = "/matcher/orderbook";
+        if (obj instanceof Order) {
+            if (isMarket)
+                endpoint += "/market";
         } else if (obj instanceof DeleteOrder) {
             DeleteOrder d = (DeleteOrder) obj;
-            endpoint = "/matcher/orderbook/" + d.getAssetPair().getAmountAsset() + '/' + d.getAssetPair().getPriceAsset() + "/delete";
+            endpoint += d.getAssetPair().getAmountAsset() + '/' + d.getAssetPair().getPriceAsset() + "/delete";
         } else if (obj instanceof CancelOrder) {
             CancelOrder co = (CancelOrder) obj;
             if (co.getAssetPair() == null) {
-                endpoint = "/matcher/orderbook/cancel";
+                endpoint += "/cancel";
             } else
-                endpoint = "/matcher/orderbook/" + co.getAssetPair().getAmountAsset() + '/' + co.getAssetPair().getPriceAsset() + "/cancel";
+                endpoint += "/" + co.getAssetPair().getAmountAsset() + '/' + co.getAssetPair().getPriceAsset() + "/cancel";
         } else {
             throw new IllegalArgumentException();
         }

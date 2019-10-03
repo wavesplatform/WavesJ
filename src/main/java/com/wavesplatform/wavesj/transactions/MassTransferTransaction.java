@@ -27,7 +27,7 @@ public class MassTransferTransaction extends TransactionWithProofs<MassTransferT
     @JsonCreator
     public MassTransferTransaction(
             @JsonProperty("senderPublicKey") PublicKeyAccount senderPublicKey,
-            @JsonProperty("address") String assetId,
+            @JsonProperty("assetId") String assetId,
             @JsonProperty("transfers") Collection<Transfer> transfers,
             @JsonProperty("fee") long fee,
             @JsonProperty("attachment") ByteString attachment,

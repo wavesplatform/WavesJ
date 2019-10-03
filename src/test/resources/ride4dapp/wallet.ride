@@ -16,8 +16,8 @@ func depositImpl(pmt:AttachedPayment, caller:Address) = {
     }
 }
 
-@Default(i)
-func defaultDeposit() = {
+@Callable(i)
+func default() = {
     depositImpl(extract(i.payment), i.caller)
 }
 

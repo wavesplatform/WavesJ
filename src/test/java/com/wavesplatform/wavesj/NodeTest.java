@@ -85,6 +85,25 @@ public class NodeTest {
     }
 
     @Test
+    public void blockRewards() throws URISyntaxException, IOException {
+        Node node = new Node("https://nodes-stagenet.wavesnodes.com", 'S');
+        Rewards r = node.getBlockchainRewards();
+        int h = r.getHeight();
+        assertThat(r.getTerm(), equalTo(100000l));
+        assertThat(r.getMinIncrement(), equalTo(50000000l));
+        assertThat(r.getVotingInterval(), equalTo(10000));
+        assertThat(r.getVotingThreshold(), equalTo(5001));
+
+        Rewards rByH = node.getBlockchainRewards(h);
+        assertThat(r.getHeight(), equalTo(h));
+        assertThat(r.getTerm(), equalTo(100000l));
+        assertThat(r.getMinIncrement(), equalTo(50000000l));
+        assertThat(r.getVotingInterval(), equalTo(10000));
+        assertThat(r.getVotingThreshold(), equalTo(5001));
+    }
+
+
+    @Test
     public void testBlocksAndTransactions() throws IOException {
         Node node = new Node();
 

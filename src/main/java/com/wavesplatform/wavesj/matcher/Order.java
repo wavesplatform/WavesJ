@@ -10,6 +10,7 @@ import java.util.List;
 public interface Order  extends Signable, ApiJson {
     byte V1 = 1;
     byte V2 = 2;
+    byte V3 = 3;
 
     enum Type {
         BUY, SELL;

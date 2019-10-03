@@ -75,9 +75,10 @@ public class InvokeScriptITest extends BaseITest {
         script = script.replace(PLACEHOLDER_DONATION_ADDRESS, donationAcc.getAddress());
         Assert.assertNotNull("script should be not null", script);
 
+        String compiledScript = node.compileScript(script);
         long setScriptFee = toWavelets(0.01);
         LOGGER.info(level2() + "setting script fee={}", fromWavelets(setScriptFee));
-        node.setScript(smartAcc, script, chainId, setScriptFee);
+        node.setScript(smartAcc, compiledScript, chainId, setScriptFee);
         smartBalance = waitOnBalance(smartAcc.getAddress(), smartBalance, -1 * setScriptFee, EQUALS, DEFAULT_TIMEOUT);
         stageDone("#01", "deploying dApp script");
     }
@@ -93,6 +94,8 @@ public class InvokeScriptITest extends BaseITest {
         inv1Id = sendInv(deposit);
         stageDone("#02", "invoke deposit function without args (invest 2 Waves)");
     }
+
+
 
     /**
      * Invest 2 Waves - call default function
