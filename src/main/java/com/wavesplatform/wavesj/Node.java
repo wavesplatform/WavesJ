@@ -295,7 +295,7 @@ public class Node {
     /**
      * Returns current blockchain rewards info
      *
-     * @return
+     * @return @return Rewards
      * @throws IOException
      */
     public Rewards getBlockchainRewards() throws IOException {
@@ -306,8 +306,7 @@ public class Node {
     /**
      * Returns miner’s reward status at height
      *
-     * @return
-     * @throws IOException
+     * @return Rewards
      */
     public Rewards getBlockchainRewards(int height) throws IOException {
         return wavesJsonMapper.convertValue(send(String.format("/blockchain/rewards/%d", height)), Rewards.class);
@@ -529,6 +528,20 @@ public class Node {
         ObjectNode message = (ObjectNode) tree.get("message");
         message.put("status", tree.get("status").asText());
         return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
+    }
+
+    public Order placeOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
+                            long price, long amount, long expiration, long matcherFee, String matcherFeeAssetId, boolean isMarket) throws IOException {
+        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, matcherFeeAssetId);
+        JsonNode tree = parse(exec(matcherRequest(tx, isMarket)));        // fix order status
+        ObjectNode message = (ObjectNode) tree.get("message");
+        message.put("status", tree.get("status").asText());
+        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
+    }
+
+    public Order placeLimitOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
+                                 long price, long amount, long expiration, long matcherFee, String matcherFeeAssetId) throws IOException {
+        return placeOrder(account, matcherKey, assetPair, orderType, price, amount, expiration, matcherFee, matcherFeeAssetId, false);
     }
 
     public Order placeLimitOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,

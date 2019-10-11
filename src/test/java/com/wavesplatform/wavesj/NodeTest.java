@@ -27,11 +27,12 @@ public class NodeTest {
     private static final long AMOUNT = Asset.TOKEN;
     private static final long FEE = 100000;
     private static final long MFEE = 300000;
-    private static final String WBTC = "Fmg13HEHJHuZYbtJq8Da8wifJENq8uBxDuWoP9pVe2Qe";
-    private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC);
+    private static final String WBTC_TESTNET = "DWgwcZTMhSvnyYCoWLRUXXSH1RSkzThXLJhww9gwkqdn";
+    private static final AssetPair MARKET = new AssetPair(Asset.WAVES, WBTC_TESTNET);
 
     private static final PrivateKeyAccount alice =
             PrivateKeyAccount.fromPrivateKey("3ivuUQ7cCVxF3AtaLJ8nbdfEDD53EH3JyLn5ipgvo99v", Account.TESTNET);
+
     private static final PrivateKeyAccount bob =
             PrivateKeyAccount.fromPrivateKey("ABvpFcUobz1kN4tQeBcHA1WSMdwC6WSPhwCFv1MDZwPc", Account.TESTNET);
 
@@ -39,7 +40,7 @@ public class NodeTest {
     public ExpectedException expectedEx = ExpectedException.none();
 
     @Test
-    public void xxx() throws IOException {
+    public void testExchange() throws IOException {
         Node node = new Node();
 
         PrivateKeyAccount matcher =
@@ -66,7 +67,7 @@ public class NodeTest {
 
         String address = bob.getAddress();
         assertTrue(node.getBalance(address, 100) >= 0);
-        assertTrue(node.getBalance(address, WBTC) >= 0);
+        assertTrue(node.getBalance(address, WBTC_TESTNET) >= 0);
 
         long wavesBalance = node.getBalance(address);
         assertTrue(wavesBalance >= 0);
@@ -89,15 +90,15 @@ public class NodeTest {
         Node node = new Node("https://nodes-stagenet.wavesnodes.com", 'S');
         Rewards r = node.getBlockchainRewards();
         int h = r.getHeight();
-        assertThat(r.getTerm(), equalTo(100000l));
-        assertThat(r.getMinIncrement(), equalTo(50000000l));
+        assertThat(r.getTerm(), equalTo(100000L));
+        assertThat(r.getMinIncrement(), equalTo(50000000L));
         assertThat(r.getVotingInterval(), equalTo(10000));
         assertThat(r.getVotingThreshold(), equalTo(5001));
 
         Rewards rByH = node.getBlockchainRewards(h);
         assertThat(r.getHeight(), equalTo(h));
-        assertThat(r.getTerm(), equalTo(100000l));
-        assertThat(r.getMinIncrement(), equalTo(50000000l));
+        assertThat(r.getTerm(), equalTo(100000L));
+        assertThat(r.getMinIncrement(), equalTo(50000000L));
         assertThat(r.getVotingInterval(), equalTo(10000));
         assertThat(r.getVotingThreshold(), equalTo(5001));
     }
@@ -245,7 +246,7 @@ public class NodeTest {
         assertEquals(Order.Type.SELL, order.getOrderType());
         assertEquals(Order.Status.ACCEPTED, order.getStatus());
         assertEquals(Asset.WAVES, order.getAssetPair().getAmountAsset());
-        assertEquals(WBTC, order.getAssetPair().getPriceAsset());
+        assertEquals(WBTC_TESTNET, order.getAssetPair().getPriceAsset());
         assertEquals(Asset.TOKEN, order.getAmount());
         assertEquals(1, order.getPrice());
 
@@ -293,6 +294,29 @@ public class NodeTest {
     }
 
     @Test
+    public void testMatcherOV3() throws IOException, URISyntaxException {
+        Node matcher = new Node("https://matcher.testnet.wavesnodes.com/", 'T');
+        String matcherKey = matcher.getMatcherKey();
+
+        OrderBook orderBook = matcher.getOrderBook(MARKET);
+        assertNotNull(orderBook);
+
+        // Create an order
+        Order order = matcher.placeLimitOrder(alice, matcherKey,
+                MARKET, Order.Type.SELL,
+                30000, Asset.TOKEN,
+                System.currentTimeMillis() + 65000,
+                2010, WBTC_TESTNET);
+        assertNotNull(order.getId());
+        assertEquals(Order.Type.SELL, order.getOrderType());
+        assertEquals(Order.Status.ACCEPTED, order.getStatus());
+        assertEquals(Asset.WAVES, order.getAssetPair().getAmountAsset());
+        assertEquals(WBTC_TESTNET, order.getAssetPair().getPriceAsset());
+        assertEquals(Asset.TOKEN, order.getAmount());
+        assertEquals(30000, order.getPrice());
+    }
+
+        @Test
     public void testGetBalance() throws IOException {
         Node n = new Node();
         BalanceDetails bd = n.getBalanceDetails(alice.getAddress());

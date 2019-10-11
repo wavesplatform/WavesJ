@@ -205,6 +205,11 @@ public class OrderV3 extends ObjectWithProofs implements Order {
         return matcherFee;
     }
 
+
+    public String getMatcherFeeAssetId() {
+        return matcherFeeAssetId;
+    }
+
     @Override
     public PublicKeyAccount getSenderPublicKey() {
         return senderPublicKey;
@@ -217,7 +222,7 @@ public class OrderV3 extends ObjectWithProofs implements Order {
 
     @Override
     public byte getVersion() {
-        return Order.V2;
+        return Order.V3;
     }
 
     @JsonIgnore
