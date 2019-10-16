@@ -404,8 +404,8 @@ public class Node {
      * @param chainId      chain id
      * @param dApp         dapp address
      * @param functionName function name to call
-     * @param fee          threasaction fee
-     * @param feeAssetId   transaction fee
+     * @param fee          transaction fee
+     * @param feeAssetId   transaction fee assetId
      * @return invoke script transaction id
      * @throws IOException
      */
@@ -420,8 +420,8 @@ public class Node {
      * @param chainId    chain id
      * @param dApp       dapp address
      * @param call       function call
-     * @param fee        threasaction fee
-     * @param feeAssetId transaction fee
+     * @param fee        transaction fee
+     * @param feeAssetId transaction fee assetId
      * @param timestamp  tx timestamp
      * @return invoke script transaction id
      * @throws IOException
@@ -437,8 +437,8 @@ public class Node {
      * @param chainId    chain id
      * @param dApp       dapp address
      * @param call       function call
-     * @param fee        threasaction fee
-     * @param feeAssetId transaction fee
+     * @param fee        transaction fee
+     * @param feeAssetId transaction fee assetId
      * @return invoke script transaction id
      * @throws IOException
      */
@@ -462,7 +462,7 @@ public class Node {
      * @param from    the account
      * @param script  script text
      * @param chainId chain ID
-     * @param fee     object fee
+     * @param fee     transaction fee
      * @return object ID
      * @throws IOException if an error occurs
      * @see Account#MAINNET
@@ -478,7 +478,7 @@ public class Node {
      * @param from    the account
      * @param script  script text
      * @param chainId chain ID
-     * @param fee     object fee
+     * @param fee     transaction fee
      * @return transaction ID
      * @throws IOException if an error occurs
      * @see Account#MAINNET

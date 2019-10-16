@@ -1,4 +1,4 @@
-## 0.16
+## 0.16.0
 - Support Order version 3
 - Support blockchain rewards information
 
