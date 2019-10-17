@@ -166,13 +166,28 @@ public class Transactions {
         if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
             throw new IllegalArgumentException("spendAsset and receiveAsset should not be equal");
         }
-        return new OrderV2(account, new PublicKeyAccount(matcherKey, account.getChainId()), orderType, assetPair, amount, price, timestamp,
-                expiration, matcherFee, Order.V2);
+        return new OrderV3(account, new PublicKeyAccount(matcherKey, account.getChainId()), orderType, assetPair, amount, price, timestamp,
+                expiration, matcherFee, Asset.WAVES, Order.V3);
     }
+
+    public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                  AssetPair assetPair, long price, long amount, long expiration, long matcherFee, String matcherFeeAssetId, long timestamp) {
+        if (assetPair.getAmountAsset().equals(assetPair.getPriceAsset())) {
+            throw new IllegalArgumentException("spendAsset and receiveAsset should not be equal");
+        }
+        return new OrderV3(account, new PublicKeyAccount(matcherKey, account.getChainId()), orderType, assetPair, amount, price, timestamp,
+                expiration, matcherFee, matcherFeeAssetId, Order.V3);
+    }
+
 
     public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
                                   AssetPair assetPair, long price, long amount, long expiration, long matcherFee) {
         return makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, System.currentTimeMillis());
+    }
+
+    public static Order makeOrder(PrivateKeyAccount account, String matcherKey, Order.Type orderType,
+                                  AssetPair assetPair, long price, long amount, long expiration, long matcherFee, String matcherFeeAssetId) {
+        return makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, matcherFeeAssetId, System.currentTimeMillis());
     }
 
 

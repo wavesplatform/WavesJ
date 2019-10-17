@@ -1,3 +1,8 @@
+## 0.16.0
+- Support Order version 3
+- Support blockchain rewards information
+
+
 ## 0.14.1
 
 - Support for InvokeScript transaction

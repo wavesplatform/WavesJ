@@ -12,14 +12,14 @@ import org.junit.Test;
 import java.io.IOException;
 
 public class ExchangeScriptTransactionSerTest extends TransactionSerTest {
-    OrderV1 sell = new OrderV1(
+    Order sell = new OrderV1(
             new PublicKeyAccount("7E9Za8v8aT6EyU1sX91CVK7tWUeAetnNYDxzKZsyjyKV", (byte) 'T'),
             new PublicKeyAccount("Fvk5DXmfyWVZqQVBowUBMwYtRAHDtdyZNNeRrwSjt6KP", (byte) 'T'),
             Order.Type.SELL,
             new AssetPair(Asset.WAVES, "9ZDWzK53XT5bixkmMwTJi2YzgxCqn5dUajXFcT2HcFDy"),
             3, 5000000000L, 1526992336241L, 1529584336241L, 2,
             new ByteString("2R6JfmNjEnbXAA6nt8YuCzSf1effDS4Wkz8owpCD9BdCNn864SnambTuwgLRYzzeP5CAsKHEviYKAJ2157vdr5Zq"));
-    OrderV1 buy = new OrderV1(
+    Order buy = new OrderV1(
             new PublicKeyAccount("BqeJY8CP3PeUDaByz57iRekVUGtLxoow4XxPvXfHynaZ", (byte) 'T'),
             new PublicKeyAccount("Fvk5DXmfyWVZqQVBowUBMwYtRAHDtdyZNNeRrwSjt6KP", (byte) 'T'),
             Order.Type.BUY,
