@@ -150,7 +150,7 @@
     <dependencies>
         <dependency>
             <groupId>com.wavesplatform</groupId>
-            <artifactId>waves-node-proto</artifactId>
+            <artifactId>protobuf-schemas</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
