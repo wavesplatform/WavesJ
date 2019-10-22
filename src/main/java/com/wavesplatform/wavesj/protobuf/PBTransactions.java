@@ -1,7 +1,8 @@
 package com.wavesplatform.wavesj.protobuf;
 
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Empty;
+import com.wavesplatform.protobuf.AmountOuterClass;
+import com.wavesplatform.protobuf.order.OrderOuterClass;
 import com.wavesplatform.protobuf.transaction.RecipientOuterClass;
 import com.wavesplatform.protobuf.transaction.ScriptOuterClass;
 import com.wavesplatform.protobuf.transaction.TransactionOuterClass;
@@ -64,8 +65,8 @@ public class PBTransactions {
         }  else if (tx.hasInvokeScript()) {
             final TransactionOuterClass.InvokeScriptTransactionData data = tx.getInvokeScript();
             final List<InvokeScriptTransaction.Payment> payments = new ArrayList<InvokeScriptTransaction.Payment>(data.getPaymentsCount());
-            for (TransactionOuterClass.Amount payment : data.getPaymentsList()) payments.add(new InvokeScriptTransaction.Payment(payment.getAmount(), toVanillaAssetId(payment.getAssetId().getIssuedAsset())));
-            return new InvokeScriptTransaction((byte) tx.getChainId(), senderPublicKey, Base58.encode(data.getDApp().toByteArray()), InvokeScriptTransaction.FunctionCall.fromBytes(data.getFunctionCall().asReadOnlyByteBuffer()), Collections.unmodifiableList(payments), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), timestamp, proofs);
+            for (AmountOuterClass.Amount payment : data.getPaymentsList()) payments.add(new InvokeScriptTransaction.Payment(payment.getAmount(), toVanillaAssetId(payment.getAssetId())));
+            return new InvokeScriptTransaction((byte) tx.getChainId(), senderPublicKey, Base58.encode(data.getDApp().toByteArray()), InvokeScriptTransaction.FunctionCall.fromBytes(data.getFunctionCall().asReadOnlyByteBuffer()), Collections.unmodifiableList(payments), feeAmount, toVanillaAssetId(tx.getFee().getAssetId()), timestamp, proofs);
         } else if (tx.hasIssue()) {
             final TransactionOuterClass.IssueTransactionData issue = tx.getIssue();
             switch (tx.getVersion()) {
@@ -94,10 +95,10 @@ public class PBTransactions {
             final TransactionOuterClass.TransferTransactionData transfer = tx.getTransfer();
             switch (tx.getVersion()) {
                 case Transaction.V1:
-                    return new TransferTransactionV1(senderPublicKey, toRecipientString(transfer.getRecipient(), (byte) tx.getChainId()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId().getIssuedAsset()), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), toVanillaByteString(transfer.getAttachment()), timestamp, signature);
+                    return new TransferTransactionV1(senderPublicKey, toRecipientString(transfer.getRecipient(), (byte) tx.getChainId()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId()), feeAmount, toVanillaAssetId(tx.getFee().getAssetId()), toVanillaByteString(transfer.getAttachment()), timestamp, signature);
 
                 case Transaction.V2:
-                    return new TransferTransactionV2(senderPublicKey, toRecipientString(transfer.getRecipient(), (byte) tx.getChainId()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId().getIssuedAsset()), feeAmount, toVanillaAssetId(tx.getFee().getAssetId().getIssuedAsset()), toVanillaByteString(transfer.getAttachment()), timestamp, proofs);
+                    return new TransferTransactionV2(senderPublicKey, toRecipientString(transfer.getRecipient(), (byte) tx.getChainId()), transfer.getAmount().getAmount(), toVanillaAssetId(transfer.getAmount().getAssetId()), feeAmount, toVanillaAssetId(tx.getFee().getAssetId()), toVanillaByteString(transfer.getAttachment()), timestamp, proofs);
             }
         } else if (tx.hasLease()) {
             final TransactionOuterClass.LeaseTransactionData lease = tx.getLease();
@@ -124,7 +125,7 @@ public class PBTransactions {
                 final Transfer transfer1 = new Transfer(toRecipientString(transfer.getAddress(), (byte) tx.getChainId()), transfer.getAmount());
                 transfers.add(transfer1);
             }
-            return new MassTransferTransaction(senderPublicKey, toVanillaAssetId(massTransfer.getAssetId().getIssuedAsset()), Collections.unmodifiableList(transfers), feeAmount, toVanillaByteString(massTransfer.getAttachment()), timestamp, proofs);
+            return new MassTransferTransaction(senderPublicKey, toVanillaAssetId(massTransfer.getAssetId()), Collections.unmodifiableList(transfers), feeAmount, toVanillaByteString(massTransfer.getAttachment()), timestamp, proofs);
         } else if (tx.hasSponsorFee()) {
             final TransactionOuterClass.SponsorFeeTransactionData sponsorFee = tx.getSponsorFee();
             return new SponsorTransaction(senderPublicKey, toVanillaAssetId(sponsorFee.getMinFee().getAssetId()), sponsorFee.getMinFee().getAmount(), feeAmount, timestamp, proofs);
@@ -158,14 +159,14 @@ public class PBTransactions {
         } else if (tx instanceof ReissueTransaction) {
             final ReissueTransaction reissue = (ReissueTransaction) tx;
             final TransactionOuterClass.ReissueTransactionData data = TransactionOuterClass.ReissueTransactionData.newBuilder()
-                    .setAssetAmount(TransactionOuterClass.AssetAmount.newBuilder().setAssetId(assetIdToBytes(reissue.getAssetId())).setAmount(reissue.getQuantity()).build())
+                    .setAssetAmount(AmountOuterClass.Amount.newBuilder().setAssetId(assetIdToBytes(reissue.getAssetId())).setAmount(reissue.getQuantity()).build())
                     .setReissuable(reissue.isReissuable())
                     .build();
             base.setReissue(data);
         } else if (tx instanceof BurnTransaction) {
             final BurnTransaction burn = (BurnTransaction) tx;
             final TransactionOuterClass.BurnTransactionData data = TransactionOuterClass.BurnTransactionData.newBuilder()
-                    .setAssetAmount(TransactionOuterClass.AssetAmount.newBuilder().setAssetId(assetIdToBytes(burn.getAssetId())).setAmount(burn.getAmount()).build())
+                    .setAssetAmount(AmountOuterClass.Amount.newBuilder().setAssetId(assetIdToBytes(burn.getAssetId())).setAmount(burn.getAmount()).build())
                     .build();
             base.setBurn(data);
         } else if (tx instanceof SetScriptTransaction) {
@@ -205,7 +206,7 @@ public class PBTransactions {
             }
 
             final TransactionOuterClass.MassTransferTransactionData data = TransactionOuterClass.MassTransferTransactionData.newBuilder()
-                    .setAssetId(createPBAssetId(assetId))
+                    .setAssetId(assetId)
                     .setAttachment(toPBByteString(mtt.getAttachment()))
                     .addAllTransfers(transfers)
                     .build();
@@ -224,7 +225,7 @@ public class PBTransactions {
         } else if (tx instanceof SponsorTransaction) {
             final SponsorTransaction sponsor = (SponsorTransaction) tx;
             final TransactionOuterClass.SponsorFeeTransactionData data = TransactionOuterClass.SponsorFeeTransactionData.newBuilder()
-                    .setMinFee(TransactionOuterClass.AssetAmount.newBuilder().setAssetId(assetIdToBytes(sponsor.getAssetId())).setAmount(sponsor.getMinSponsoredAssetFee()).build())
+                    .setMinFee(AmountOuterClass.Amount.newBuilder().setAssetId(assetIdToBytes(sponsor.getAssetId())).setAmount(sponsor.getMinSponsoredAssetFee()).build())
                     .build();
             base.setSponsorFee(data);
         } else if (tx instanceof ExchangeTransaction) {
@@ -240,7 +241,7 @@ public class PBTransactions {
             base.setExchange(data);
         } else if (tx instanceof InvokeScriptTransaction) {
             final InvokeScriptTransaction ist = (InvokeScriptTransaction) tx;
-            final List<TransactionOuterClass.Amount> payments = new ArrayList<TransactionOuterClass.Amount>(ist.getPayments().size());
+            final List<AmountOuterClass.Amount> payments = new ArrayList<AmountOuterClass.Amount>(ist.getPayments().size());
             for (InvokeScriptTransaction.Payment payment : ist.getPayments())
                 payments.add(toPBAmount(payment.getAssetId(), payment.getAmount()));
 
@@ -271,19 +272,14 @@ public class PBTransactions {
         else return Asset.normalize(Base58.encode(assetId.toByteArray()));
     }
 
-    public static String toVanillaAssetId(final TransactionOuterClass.AssetId assetId) {
-        if (assetId.hasWaves()) return Asset.WAVES;
-        else return Asset.normalize(Base58.encode(assetId.getIssuedAsset().toByteArray()));
-    }
-
 
     public static ByteString assetIdToBytes(final String assetId) {
         if (Asset.isWaves(assetId)) return ByteString.EMPTY;
         else return ByteString.copyFrom(Base58.decode(assetId));
     }
 
-    public static TransactionOuterClass.Amount toPBAmount(final String assetId, final long amount) {
-        return TransactionOuterClass.Amount.newBuilder().setAssetId(createPBAssetId(assetIdToBytes(assetId))).build();
+    public static AmountOuterClass.Amount toPBAmount(final String assetId, final long amount) {
+        return AmountOuterClass.Amount.newBuilder().setAssetId(assetIdToBytes(assetId)).build();
     }
 
     public static DataEntry<?> toVanillaDataEntry(final TransactionOuterClass.DataTransactionData.DataEntry dataEntry) {
@@ -319,8 +315,8 @@ public class PBTransactions {
         return builder.setKey(dataEntry.getKey()).build();
     }
 
-    public static Order toVanillaOrder(final TransactionOuterClass.ExchangeTransactionData.Order order) {
-        final Order.Type orderType = order.getOrderSide() == TransactionOuterClass.ExchangeTransactionData.Order.Side.BUY ? Order.Type.BUY : Order.Type.SELL;
+    public static Order toVanillaOrder(final OrderOuterClass.Order order) {
+        final Order.Type orderType = order.getOrderSide() == OrderOuterClass.Order.Side.BUY ? Order.Type.BUY : Order.Type.SELL;
         final AssetPair assetPair = new AssetPair(toVanillaAssetId(order.getAssetPair().getAmountAssetId()), toVanillaAssetId(order.getAssetPair().getPriceAssetId()));
         final PublicKeyAccount senderPublicKey = new PublicKeyAccount(order.getSenderPublicKey().toByteArray(), (byte) order.getChainId());
         final PublicKeyAccount matcherPk = new PublicKeyAccount(order.getMatcherPublicKey().toByteArray(), (byte) order.getChainId());
@@ -335,20 +331,20 @@ public class PBTransactions {
         }
     }
 
-    public static TransactionOuterClass.ExchangeTransactionData.Order toPBOrder(final Order order) {
-        final TransactionOuterClass.ExchangeTransactionData.Order.Side orderType = order.getOrderType() == Order.Type.BUY ? TransactionOuterClass.ExchangeTransactionData.Order.Side.BUY : TransactionOuterClass.ExchangeTransactionData.Order.Side.SELL;
+    public static OrderOuterClass.Order toPBOrder(final Order order) {
+        final OrderOuterClass.Order.Side orderType = order.getOrderType() == Order.Type.BUY ? OrderOuterClass.Order.Side.BUY : OrderOuterClass.Order.Side.SELL;
 
         final List<ByteString> proofs = new ArrayList<ByteString>(order.getProofs().size());
         for (com.wavesplatform.wavesj.ByteString proof : order.getProofs()) proofs.add(toPBByteString(proof));
 
-        return TransactionOuterClass.ExchangeTransactionData.Order.newBuilder()
+        return OrderOuterClass.Order.newBuilder()
                 .setAmount(order.getAmount())
                 .setPrice(order.getPrice())
-                .setAssetPair(TransactionOuterClass.ExchangeTransactionData.Order.AssetPair.newBuilder()
-                        .setAmountAssetId(createPBAssetId(assetIdToBytes(order.getAssetPair().getAmountAsset())))
-                        .setPriceAssetId(createPBAssetId(assetIdToBytes(order.getAssetPair().getPriceAsset()))).build())
+                .setAssetPair(OrderOuterClass.AssetPair.newBuilder()
+                        .setAmountAssetId(assetIdToBytes(order.getAssetPair().getAmountAsset()))
+                        .setPriceAssetId(assetIdToBytes(order.getAssetPair().getPriceAsset())).build())
                 .setExpiration(order.getExpiration())
-                .setMatcherFee(TransactionOuterClass.Amount.newBuilder().setAmount(order.getMatcherFee()).build())
+                .setMatcherFee(AmountOuterClass.Amount.newBuilder().setAmount(order.getMatcherFee()).build())
                 .setMatcherPublicKey(ByteString.copyFrom(order.getMatcherPublicKey().getPublicKey()))
                 .setOrderSide(orderType)
                 .setSenderPublicKey(ByteString.copyFrom(order.getSenderPublicKey().getPublicKey()))
@@ -390,10 +386,6 @@ public class PBTransactions {
         } catch (Throwable e) {
             return RecipientOuterClass.Recipient.newBuilder().setAlias(recipient).build();
         }
-    }
-
-    public static TransactionOuterClass.AssetId createPBAssetId(final ByteString assetId) {
-        return assetId.isEmpty() ? TransactionOuterClass.AssetId.newBuilder().setWaves(Empty.newBuilder().build()).build() : TransactionOuterClass.AssetId.newBuilder().setIssuedAsset(assetId).build();
     }
 
     private static com.wavesplatform.wavesj.ByteString toSignature(final List<ByteString> proofs) {
