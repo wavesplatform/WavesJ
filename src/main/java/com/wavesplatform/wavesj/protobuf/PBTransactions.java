@@ -357,16 +357,17 @@ public class PBTransactions {
                 .build();
     }
 
-    public static String toRecipientString(final RecipientOuterClass.Recipient recipient, byte chainId) {
+    public static String toRecipientString(final RecipientOuterClass.Recipient recipient, final byte chainId) {
         switch (recipient.getRecipientCase()) {
             case ALIAS:
                 return recipient.getAlias();
             case ADDRESS:
                 final ByteBuffer withoutChecksum = ByteBuffer.allocate(2 + recipient.getAddress().size())
                         .put((byte) 1)
+                        .put(chainId)
                         .put(recipient.getAddress().toByteArray());
                 withoutChecksum.flip();
-                final byte[] checksum = Hash.blake2b(withoutChecksum.array(), 0, withoutChecksum.capacity());
+                final byte[] checksum = Hash.secureHash(withoutChecksum.array(), 0, withoutChecksum.capacity());
 
                 final ByteBuffer addrBytes = ByteBuffer.allocate(withoutChecksum.capacity() + 4)
                         .put(withoutChecksum)
