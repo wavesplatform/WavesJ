@@ -2,11 +2,8 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.Map;
-
-import static com.wavesplatform.wavesj.Asset.normalize;
 
 public class AssetDistribution {
     public final String lastItem;

@@ -2,6 +2,7 @@ package com.wavesplatform.wavesj.transactions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wavesplatform.wavesj.ApplicationStatus;
 import com.wavesplatform.wavesj.ByteString;
 import com.wavesplatform.wavesj.TransactionStCh;
 
@@ -12,12 +13,19 @@ public abstract class TransactionWithBytesHashId implements TransactionStCh {
     @JsonProperty(value = "height", access = WRITE_ONLY)
     private int height;
 
+    @JsonProperty(value = "applicationStatus", defaultValue = "succeed", access = WRITE_ONLY)
+    private ApplicationStatus applicationStatus;
+
     public ByteString getId() {
         return new ByteString(hash(getBodyBytes()));
     }
 
     public int getHeight() {
         return height;
+    }
+
+    public ApplicationStatus getApplicationStatus() {
+        return applicationStatus;
     }
 
     /**
