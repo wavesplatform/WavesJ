@@ -86,10 +86,10 @@ public class PBTransactions {
             }
         } else if (tx.hasSetAssetScript()) {
             final TransactionOuterClass.SetAssetScriptTransactionData sas = tx.getSetAssetScript();
-            return new SetAssetScriptTransaction(senderPublicKey, (byte) tx.getChainId(), toVanillaAssetId(sas.getAssetId()), Base58.encode(sas.getScript().toByteArray()), feeAmount, timestamp, proofs);
+            return new SetAssetScriptTransaction(senderPublicKey, (byte) tx.getChainId(), toVanillaAssetId(sas.getAssetId()), Base64.encode(sas.getScript().toByteArray()), feeAmount, timestamp, proofs);
         } else if (tx.hasSetScript()) {
             final TransactionOuterClass.SetScriptTransactionData setScript = tx.getSetScript();
-            return new SetScriptTransaction(senderPublicKey, Base58.encode(setScript.getScript().toByteArray()), (byte) tx.getChainId(), feeAmount, timestamp, proofs);
+            return new SetScriptTransaction(senderPublicKey, Base64.encode(setScript.getScript().toByteArray()), (byte) tx.getChainId(), feeAmount, timestamp, proofs);
         } else if (tx.hasTransfer()) {
             final TransactionOuterClass.TransferTransactionData transfer = tx.getTransfer();
             switch (tx.getVersion()) {
