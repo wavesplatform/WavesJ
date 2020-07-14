@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 
 import static com.wavesplatform.wavesj.ByteUtils.UTF8;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true, defaultImpl = DataEntry.DeleteEntry.class)
 @JsonTypeIdResolver(DataEntryTypeResolver.class)
 public abstract class DataEntry<T> {
     private final static byte INTEGER = 0;
@@ -30,7 +30,7 @@ public abstract class DataEntry<T> {
 
     private DataEntry(String key, String type, T value) {
         this.key = key;
-        this.type = type;
+        this.type = type == null ? "delete" : type;
         this.value = value;
     }
 
@@ -134,6 +134,13 @@ public abstract class DataEntry<T> {
         public void write(ByteBuffer buf) {
             super.write(buf);
             buf.put(STRING).putShort((short) bytes.length).put(bytes);
+        }
+    }
+
+    public static class DeleteEntry extends DataEntry<Void> {
+        @JsonCreator
+        public DeleteEntry(@JsonProperty("key") String key) {
+            super(key, null, null);
         }
     }
 

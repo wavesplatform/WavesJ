@@ -1,7 +1,6 @@
 package com.wavesplatform.wavesj.json.deser;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -13,17 +12,17 @@ import com.wavesplatform.wavesj.transactions.*;
 
 import java.io.IOException;
 
-public class TransactionDeserializer extends StdDeserializer<Transaction> {
+public class TransactionDeserializer<T extends Transaction> extends StdDeserializer<T> {
 
-    private WavesJsonMapper objectMapper;
+    protected WavesJsonMapper objectMapper;
 
-    public TransactionDeserializer(WavesJsonMapper objectMapper) {
-        super(Transaction.class);
+    public TransactionDeserializer(WavesJsonMapper objectMapper, Class<T> clazz) {
+        super(clazz);
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public Transaction deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         TreeNode treeNode = jsonParser.getCodec().readTree(jsonParser);
         int type = objectMapper.treeToValue(treeNode.get("type"), Integer.class);
         int version = objectMapper.treeToValue(treeNode.get("version"), Integer.class);
@@ -35,7 +34,16 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
         // todo omfg remove after 0.15.4 release
         ((ObjectNode) treeNode).put("chainId", chainId);
 
-        Class t = null;
+        TreeNode stateChangesNode = treeNode.path("stateChanges");
+        boolean debugAvailable = stateChangesNode != null && stateChangesNode.isObject();
+
+        Class<? extends T> t = getType(type, version, debugAvailable);
+
+        return objectMapper.treeToValue(treeNode, t);
+    }
+
+    protected Class<? extends T> getType(int type, int version, boolean debugAvailable) {
+        Class<? extends Transaction> t = null;
         switch (type) {
             case AliasTransaction.ALIAS:
                 switch (version) {
@@ -130,7 +138,11 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 }
                 break;
             case InvokeScriptTransaction.CONTRACT_INVOKE:
-                t = InvokeScriptTransaction.class;
+                if (debugAvailable) {
+                    t = InvokeScriptTransactionStCh.class;
+                } else {
+                    t = InvokeScriptTransaction.class;
+                }
                 break;
             case SetAssetScriptTransaction.SET_ASSET_SCRIPT:
                 t = SetAssetScriptTransaction.class;
@@ -139,6 +151,8 @@ public class TransactionDeserializer extends StdDeserializer<Transaction> {
                 t = UnknownTransaction.class;
         }
 
-        return (Transaction) objectMapper.treeToValue(treeNode, t);
+        @SuppressWarnings("unchecked")
+        Class<? extends T> tt = (Class<? extends T>) t;
+        return tt;
     }
 }

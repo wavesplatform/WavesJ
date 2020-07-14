@@ -1,15 +1,19 @@
-package com.wavesplatform.wavesj.json;
+package com.wavesplatform.wavesj.transactions;
 
+import com.wavesplatform.wavesj.Base64;
 import com.wavesplatform.wavesj.ByteString;
+import com.wavesplatform.wavesj.DataEntry;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.json.ser.TransactionSerTest;
-import com.wavesplatform.wavesj.transactions.InvokeScriptTransaction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.wavesplatform.wavesj.Asset.toWavelets;
 import static java.util.Collections.singletonList;
 
 
-public final class InvokeScriptTransactionTxTestData {
+public final class InvokeScriptTransactionTestData {
     private static final byte chainId = TransactionSerTest.chainId;
 
     public static final PublicKeyAccount SENDER_PUB =
@@ -150,5 +154,89 @@ public final class InvokeScriptTransactionTxTestData {
                 "\"type\":16," +
                 "\"version\":1," +
                 "\"height\":1234}";
+    }
+
+    public static InvokeScriptTransactionStCh txWithStateChanges() {
+        return new InvokeScriptTransactionStCh(
+                chainId,
+                new PublicKeyAccount("4f8jYJccCjarVgc8FHn5ms5YLkpi6PfHpxTnmjQZMkJk", chainId),
+                "3MqQ9ihYKGehfUnXYf5WmkYSZUD71ByeCQe",
+                new InvokeScriptTransaction.FunctionCall("withdraw")
+                        .addArg("CjX7LkS5G9Yq3XR2VPBkRY4Su8WbaR4KmjLqDh4Jz1VM")
+                        .addArg(new ByteString(Base64.decode("base64:gF+ENGvrNAadLgWxh/L1omQFi45C4JARpWd9QJYkk63Gszyq9nDfZqkMQ1xKyCNe/HNBlFyXKhy/tNtjNo5JUxTd0vvr8Dd6lEynFzsJDG3OSrWvSS3az59gWU0uyUXZtIiyibrIgW1KnTfLXfJtJ+BGEcrSn4/tjN6eSSzHR5KVuBVBugQKxgyettwcfo5N/EKnTtpFcTE5q9rzz/GLf84cRcUw5z5WhpUDmKGEy3ro6OoNYjiKb6r6L4tMauNJnVeMod2OqEMaYUSSaHEazx7ufGSse4M+quSza5Qxi+QcoTHPCRjsyO3p3qxsSiQjYFcmgSYMcf6zWSSVTwUjDQ=="))),
+                null,
+                500000,
+                null,
+                1561727253494L,
+                singletonList(new ByteString("4vUu8wkcvXvGX8S9RK2KQd6NzaQ8FqJgUK1zE9oMJxW3CEbT132si8FvcJ6UriYMKfSBkz8WPHnF6jLhNbYt1Ts2")),
+                new StateChanges(
+                        Arrays.<DataEntry<?>>asList(
+                                new DataEntry.StringEntry("CjX7LkS5G9Yq3XR2VPBkRY4Su8WbaR4KmjLqDh4Jz1VM",
+                                        "03WON_03124_44144YmNQFhw3ZaT3PoS3pz8YQmwfzWsr5QJXBZh1EbVrZ_06562004_09380000000_014"),
+                                new DataEntry.LongEntry("$RESERVED_AMOUNT",
+                                        0)),
+                        singletonList(new StateChanges.OutTransfer(
+                                "3N4yERKjhFqYXKV1D2RJLWCzmDqerCCvpNq",
+                                380000000L, null)),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new StateChanges.Error(0, "")
+                )
+        );
+    }
+
+    public static String txWithStateChangesJson() {
+        return "{\"chainId\":84,\n" +
+                "  \"senderPublicKey\": \"4f8jYJccCjarVgc8FHn5ms5YLkpi6PfHpxTnmjQZMkJk\",\n" +
+                "  \"fee\": 500000,\n" +
+                "  \"type\": 16,\n" +
+                "  \"version\": 1,\n" +
+                "  \"stateChanges\": {\n" +
+                "    \"data\": [\n" +
+                "      {\n" +
+                "        \"type\": \"string\",\n" +
+                "        \"value\": \"03WON_03124_44144YmNQFhw3ZaT3PoS3pz8YQmwfzWsr5QJXBZh1EbVrZ_06562004_09380000000_014\",\n" +
+                "        \"key\": \"CjX7LkS5G9Yq3XR2VPBkRY4Su8WbaR4KmjLqDh4Jz1VM\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"type\": \"integer\",\n" +
+                "        \"value\": 0,\n" +
+                "        \"key\": \"$RESERVED_AMOUNT\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"transfers\": [\n" +
+                "      {\n" +
+                "        \"address\": \"3N4yERKjhFqYXKV1D2RJLWCzmDqerCCvpNq\",\n" +
+                "        \"asset\": null,\n" +
+                "        \"amount\": 380000000\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  \"call\": {\n" +
+                "    \"function\": \"withdraw\",\n" +
+                "    \"args\": [\n" +
+                "      {\n" +
+                "        \"type\": \"string\",\n" +
+                "        \"value\": \"CjX7LkS5G9Yq3XR2VPBkRY4Su8WbaR4KmjLqDh4Jz1VM\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"type\": \"binary\",\n" +
+                "        \"value\": \"base64:gF+ENGvrNAadLgWxh/L1omQFi45C4JARpWd9QJYkk63Gszyq9nDfZqkMQ1xKyCNe/HNBlFyXKhy/tNtjNo5JUxTd0vvr8Dd6lEynFzsJDG3OSrWvSS3az59gWU0uyUXZtIiyibrIgW1KnTfLXfJtJ+BGEcrSn4/tjN6eSSzHR5KVuBVBugQKxgyettwcfo5N/EKnTtpFcTE5q9rzz/GLf84cRcUw5z5WhpUDmKGEy3ro6OoNYjiKb6r6L4tMauNJnVeMod2OqEMaYUSSaHEazx7ufGSse4M+quSza5Qxi+QcoTHPCRjsyO3p3qxsSiQjYFcmgSYMcf6zWSSVTwUjDQ==\"\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  \"dApp\": \"3MqQ9ihYKGehfUnXYf5WmkYSZUD71ByeCQe\",\n" +
+                "  \"sender\": \"3N4Aib5iubWiGMzdTh6wWiVDVbo32oeVUmH\",\n" +
+                "  \"feeAssetId\": null,\n" +
+                "  \"proofs\": [\n" +
+                "    \"4vUu8wkcvXvGX8S9RK2KQd6NzaQ8FqJgUK1zE9oMJxW3CEbT132si8FvcJ6UriYMKfSBkz8WPHnF6jLhNbYt1Ts2\"\n" +
+                "  ],\n" +
+                "  \"payment\": [],\n" +
+                "  \"id\": \"FPUbH4VEGeao5oj4Ebq2znGc9sKvNaVc6H2vjPorr9bM\",\n" +
+                "  \"timestamp\": 1561727253494,\n" +
+                "  \"height\": 562005\n" +
+                "}";
     }
 }
