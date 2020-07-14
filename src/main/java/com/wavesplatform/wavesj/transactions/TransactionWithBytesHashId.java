@@ -13,7 +13,7 @@ public abstract class TransactionWithBytesHashId implements TransactionStCh {
     @JsonProperty(value = "height", access = WRITE_ONLY)
     private int height;
 
-    @JsonProperty(value = "applicationStatus", defaultValue = "succeed", access = WRITE_ONLY)
+    @JsonProperty(value = "applicationStatus", defaultValue = "unknown", access = WRITE_ONLY)
     private ApplicationStatus applicationStatus;
 
     public ByteString getId() {

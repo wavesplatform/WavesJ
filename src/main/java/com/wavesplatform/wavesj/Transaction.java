@@ -21,13 +21,13 @@ public interface Transaction extends ApiJson, Signable {
      * Can be obtained ONLY during deserialization
      * @return transaction's height if available or 0
      */
-    public int getHeight();
+    int getHeight();
 
     /**
      * Can be obtained ONLY during deserialization
-     * @return transaction's status if available or SUCCEED
+     * @return transaction's status if available or UNKNOWN
      */
-    public ApplicationStatus getApplicationStatus();
+    ApplicationStatus getApplicationStatus();
 
     PublicKeyAccount getSenderPublicKey();
 

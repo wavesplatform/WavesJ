@@ -6,6 +6,7 @@ import com.wavesplatform.wavesj.DataEntry;
 import com.wavesplatform.wavesj.PublicKeyAccount;
 import com.wavesplatform.wavesj.json.ser.TransactionSerTest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.wavesplatform.wavesj.Asset.toWavelets;
@@ -176,7 +177,12 @@ public final class InvokeScriptTransactionTestData {
                                         0)),
                         singletonList(new StateChanges.OutTransfer(
                                 "3N4yERKjhFqYXKV1D2RJLWCzmDqerCCvpNq",
-                                380000000L, null))
+                                380000000L, null)),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new StateChanges.Error(0, "")
                 )
         );
     }

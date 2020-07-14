@@ -27,7 +27,9 @@ public class DataEntryTypeResolver extends TypeIdResolverBase {
     public JavaType typeFromId(DatabindContext context, String id) throws IOException {
         Class t = null;
 
-        if (id.equals("integer")) {
+        if (id == null || id.equals("delete")) {
+            t = DataEntry.DeleteEntry.class;
+        } else if (id.equals("integer")) {
             t = DataEntry.LongEntry.class;
         } else if (id.equals("boolean")) {
             t = DataEntry.BooleanEntry.class;
