@@ -1,3 +1,13 @@
+## 0.17.0
+- new InvokeScriptTransactionStCh with stateChanges attribute was added. It was design to provide an additional information about Invocation transaction and couldn't be used to post invokes into blockchain. That why constructor was marked as package-private
+- new AllTxIterator class to navigate over all account transactions. It has a generic semantic and can be used for other endpoints and transaction.
+- new methods to retrieve information about state changes were added into Node:
+  - Node#getStateChanges
+  - Node#getAddressStateChanges
+  - Node#getAllAddressStateChanges
+- applicationStatus supported to see if any transaction has failed in blockchain
+
+
 ## 0.16.0
 - Support Order version 3
 - Support blockchain rewards information
