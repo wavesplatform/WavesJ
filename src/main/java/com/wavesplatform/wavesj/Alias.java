@@ -54,6 +54,10 @@ public class Alias {
         return new Alias(str, networkByte);
     }
 
+    public String toRawString() {
+        return PREFIX + (char) chainId + ":" + name;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

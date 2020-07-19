@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.rmi.dgc.Lease;
 import java.util.*;
 
 import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
@@ -61,6 +62,10 @@ public class Node {
     private static final TypeReference<DataEntry> ADDRESS_DATA_BY_KEY = new TypeReference<DataEntry>() {
     };
     private static final TypeReference<List<TransactionStCh>> LIST_TX_ST = new TypeReference<List<TransactionStCh>>() {
+    };
+    private static final TypeReference<CalculatedFee> CALCULATED_FEE = new TypeReference<CalculatedFee>() {
+    };
+    private static final TypeReference<List<Block>> BLOCK_LIST = new TypeReference<List<Block>>() {
     };
 
     private final URI uri;
@@ -348,6 +353,30 @@ public class Node {
         return wavesJsonMapper.convertValue(send("/blockchain/rewards"), Rewards.class);
     }
 
+    /**
+     * Returns active leases of an address
+     *
+     * @param address
+     * @return list of active leases
+     * @throws IOException
+     */
+    public List<LeaseTransaction> getActiveLeases(String address) throws IOException {
+        return wavesJsonMapper.convertValue(send("/leasing/active/" + address), new TypeReference<List<Transaction>>() {});
+    }
+
+    /**
+     * Returns blocks at specified heights.
+     *
+     * @param from start block height
+     * @param to end block height
+     * @return block object
+     * @throws IOException if no block exists at the given height
+     */
+    public List<Block> getBlockSequence(int from, int to) throws IOException {
+        String path = String.format("/blocks/seq/%s/%s", from, to);
+        HttpResponse r = exec(request(path));
+        return parse(r, BLOCK_LIST);
+    }
 
     /**
      * Returns miner’s reward status at height
@@ -550,6 +579,17 @@ public class Node {
         return parse(exec(request), "script").asText();
     }
 
+    /**
+     * calculates the fee of a transaction
+     *
+     * @param transaction
+     * @return calculated Fee
+     * @throws IOException
+     */
+    public CalculatedFee calculateFee(Transaction transaction) throws IOException {
+        return parse(exec(request(transaction, "/transactions/calculateFee")), CALCULATED_FEE);
+    }
+
     // Matcher transactions
 
     public String getMatcherKey() throws IOException {
@@ -710,6 +750,12 @@ public class Node {
         } else {
             throw new IllegalArgumentException();
         }
+        HttpPost request = new HttpPost(uri.resolve(endpoint));
+        request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
+        return request;
+    }
+
+    private HttpUriRequest request(ApiJson obj, String endpoint) throws JsonProcessingException {
         HttpPost request = new HttpPost(uri.resolve(endpoint));
         request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
         return request;

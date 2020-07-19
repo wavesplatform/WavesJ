@@ -1,6 +1,7 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.wavesj.matcher.Order;
+import com.wavesplatform.wavesj.transactions.LeaseTransaction;
 import com.wavesplatform.wavesj.transactions.MassTransferTransaction;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV1;
 import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
@@ -359,5 +360,38 @@ public class NodeTest {
         assertEquals(expectedAccountSeed, Base58.encode(keccak));
         assertThat(Base58.decode(expectedAccountSeed), equalTo(keccak));
 
+    }
+
+    @Test
+    public void testAssetBalance() throws IOException, URISyntaxException {
+        String address = "3P6xXWEhmhAKEzoaG3oMgB8LAgn5vfvcZwi";
+        Node node = new Node("https://nodes.wavesplatform.com", 'W');
+        List<AssetBalance> assetBalances = node.getAssetsBalance(address);
+        assertNotNull(assetBalances);
+    }
+
+    @Test
+    public void getActiveLeases() throws URISyntaxException, IOException {
+        String address = "3PRA4aoFvvSTxf2yLycwnA91JBmWbXKf8JB";
+        Node node = new Node("https://nodes.wavesplatform.com", 'W');
+        List<LeaseTransaction> leaseTransactions = node.getActiveLeases(address);
+        assertTrue(leaseTransactions.stream().anyMatch(ltx -> ltx.getType() == LeaseTransaction.LEASE));
+    }
+
+    @Test
+    public void testCalculateFee() throws IOException, URISyntaxException {
+        Node node = new Node("https://testnode1.wavesnodes.com", (byte) 'T');
+        CalculatedFee expectedCalculatedFee = new CalculatedFee(null, 200000L);
+        List<Transfer> tx = Arrays.asList(new Transfer(bob.getAddress(), 100000));
+        MassTransferTransaction masstx = Transactions.makeMassTransferTx(alice ,bob.getAddress(), tx, 100000, "");
+        CalculatedFee calculatedFee = node.calculateFee(masstx);
+        assertEquals(expectedCalculatedFee, calculatedFee);
+    }
+
+    @Test
+    public void testGetBlockSequence() throws IOException, URISyntaxException {
+        Node node = new Node("https://nodes.wavesplatform.com", 'W');
+        List<Block> blockList = node.getBlockSequence(2,3);
+        assertTrue(blockList.stream().allMatch(block -> block.getHeight() == 2 || block.getHeight() == 3));
     }
 }

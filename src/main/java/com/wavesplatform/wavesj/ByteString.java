@@ -1,10 +1,8 @@
 package com.wavesplatform.wavesj;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class ByteString implements Serializable {
     private byte[] bytes;
@@ -14,31 +12,16 @@ public class ByteString implements Serializable {
         // to check valid base58 string
         if (base58String != null) {
             this.bytes = Base58.decode(base58String);
-            this.base58 = Suppliers.memoize(new Supplier<String>() {
-                @Override
-                public String get() {
-                    return base58String;
-                }
-            });
+            this.base58 = () -> base58String;
         } else {
-            this.base58 = Suppliers.memoize(new Supplier<String>() {
-                @Override
-                public String get() {
-                    return "";
-                }
-            });
+            this.base58 = () -> "";
             this.bytes = EMPTY.bytes;
         }
     }
 
     public ByteString(final byte[] bytes) {
         this.bytes = bytes;
-        this.base58 = Suppliers.memoize(new Supplier<String>() {
-            @Override
-            public String get() {
-                return (bytes == null) ? "" : Base58.encode(bytes);
-            }
-        });
+        this.base58 = () -> (bytes == null) ? "" : Base58.encode(bytes);
     }
 
     public static ByteString EMPTY = new ByteString(new byte[0]);
