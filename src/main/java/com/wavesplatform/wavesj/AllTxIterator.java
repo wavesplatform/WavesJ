@@ -8,14 +8,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class AllTxIterator<T extends Transaction> implements Iterator<T>, Iterable<T>  {
+public class AllTxIterator<T extends TransactionDebugInfo> implements Iterator<T>, Iterable<T>  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("com.wavesplatform.wavesj");
 
     private int dataSize;
     private int pageSize;
     private boolean hasNext;
-    private Transaction lastSuccessNext;
+    private TransactionDebugInfo lastSuccessNext;
     private String address;
     private Iterator<T> dataIt;
     private TransactionsLazyLoader<List<T>> txSupplier;
@@ -30,7 +30,7 @@ public class AllTxIterator<T extends Transaction> implements Iterator<T>, Iterab
 
     protected void fetchNext() {
         try {
-            String lastId = lastSuccessNext != null ? lastSuccessNext.getId().getBase58String() : null;
+            String lastId = lastSuccessNext != null ? lastSuccessNext.tx().id().toString() : null;
             LOGGER.debug("Dynamic load for remaining transactions: address={} page_size={} after_tx={}",
                     address, pageSize, lastId);
             List<T> txs = txSupplier.load(address, pageSize, lastId);

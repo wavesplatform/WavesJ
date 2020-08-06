@@ -1,198 +1,489 @@
 package com.wavesplatform.wavesj;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.wavesplatform.wavesj.AllTxIterator.TransactionsLazyLoader;
-import com.wavesplatform.wavesj.json.WavesJsonMapper;
-import com.wavesplatform.wavesj.matcher.CancelOrder;
-import com.wavesplatform.wavesj.matcher.DeleteOrder;
-import com.wavesplatform.wavesj.matcher.Order;
-import com.wavesplatform.wavesj.transactions.LeaseTransaction;
-import com.wavesplatform.wavesj.transactions.TransferTransactionV2;
+import com.wavesplatform.wavesj.exceptions.NodeException;
+import com.wavesplatform.wavesj.json.TypeRef;
+import com.wavesplatform.wavesj.json.WavesJMapper;
+import im.mak.waves.transactions.account.Address;
+import im.mak.waves.transactions.LeaseTransaction;
+import im.mak.waves.transactions.Transaction;
+import im.mak.waves.transactions.common.Alias;
+import im.mak.waves.transactions.common.Amount;
+import im.mak.waves.transactions.common.Id;
+import im.mak.waves.transactions.data.DataEntry;
+import im.mak.waves.transactions.serializers.json.JsonSerializer;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.rmi.dgc.Lease;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Pattern;
 
-import static com.wavesplatform.wavesj.transactions.InvokeScriptTransaction.*;
+import static im.mak.waves.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 
+//todo NodeGRPC
+@SuppressWarnings("unused")
 public class Node {
-    private static final String DEFAULT_NODE = "https://testnode4.wavesnodes.com";
 
-    private static final TypeReference<OrderBook> ORDER_BOOK = new TypeReference<OrderBook>() {
-    };
-    private static final TypeReference<List<Order>> ORDER_LIST = new TypeReference<List<Order>>() {
-    };
-    private static final TypeReference<List<BlockHeader>> BLOCK_HEADER_LIST = new TypeReference<List<BlockHeader>>() {
-    };
-    private static final TypeReference<Map<String, Long>> ASSET_DISTRIBUTION = new TypeReference<Map<String, Long>>() {
-    };
-    private static final TypeReference<AssetDistribution> ASSET_DISTRIBUTION_BY_HEIGHT = new TypeReference<AssetDistribution>() {
-    };
-    private static final TypeReference<List<AssetBalance>> ASSET_BALANCE_LIST = new TypeReference<List<AssetBalance>>() {
-    };
-    private static final TypeReference<OrderStatusInfo> ORDER_STATUS = new TypeReference<OrderStatusInfo>() {
-    };
-    private static final TypeReference<BalanceDetails> BALANCE_DETAILS = new TypeReference<BalanceDetails>() {
-    };
-    private static final TypeReference<Map<String, Long>> RESERVED = new TypeReference<Map<String, Long>>() {
-    };
-    private static final TypeReference<Map<String, Object>> TX_INFO = new TypeReference<Map<String, Object>>() {
-    };
-    private static final TypeReference<List<DataEntry>> ADDRESS_DATA = new TypeReference<List<DataEntry>>() {
-    };
-    private static final TypeReference<DataEntry> ADDRESS_DATA_BY_KEY = new TypeReference<DataEntry>() {
-    };
-    private static final TypeReference<List<TransactionStCh>> LIST_TX_ST = new TypeReference<List<TransactionStCh>>() {
-    };
-    private static final TypeReference<CalculatedFee> CALCULATED_FEE = new TypeReference<CalculatedFee>() {
-    };
-    private static final TypeReference<List<Block>> BLOCK_LIST = new TypeReference<List<Block>>() {
-    };
+    /* Not supported endpoints:
+    activationStatus
+    createAddress
+    deleteAddress
+    data get or post or form
+    addresses/publicKey
+    addresses/seed
+    addresses/sign
+    addresses/signText
+    addresses/validate
+    addresses/verify
+    addresses/verifyText
+    consensus/algo
+    consensus/basetarget, (blockId)
+    consensus/generatingbalance
+    debug/blacklist
+    debug/blocks/howMany
+    debug/configInfo
+    debug/info
+    debug/minerInfo
+    debug/portfolios
+    debug/print
+    debug/rollback
+    debug/rollback-to
+    debug/state
+    debug/stateWaves
+    node/status
+    node/stop
+    peers
+    peers/blacklisted
+    peers/clearblacklist
+    peers/connect
+    peers/connected
+    peers/suspended
+    transactions/sign, (address)
+    utils/hash/fast
+    utils/hash/secure
+    utils/script/compileCode
+    utils/script/decompile
+    utils/script/compileWithImports
+    utils/seed, (length)
+    utils/time
+    utils/transactionSerialize
+    wallet/seed
+    */
 
-    private final URI uri;
-    private final WavesJsonMapper wavesJsonMapper;
-    private final HttpClient client;
     private final byte chainId;
+    private final HttpClient client;
+    private final URI uri;
+    private final WavesJMapper mapper;
 
-    public Node() {
-        try {
-            this.uri = new URI(DEFAULT_NODE);
-            this.wavesJsonMapper = new WavesJsonMapper((byte) 'T');
-            this.client = createDefaultClient();
-            this.chainId = (byte) 'T';
-        } catch (URISyntaxException e) {
-            // should not happen
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Node(String uri, char chainId) throws URISyntaxException {
-        this.uri = new URI(uri);
-        this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
-        this.client = createDefaultClient();
-        this.chainId = (byte) chainId;
-    }
-
-    public Node(String uri, byte chainId) throws URISyntaxException {
-        this.uri = new URI(uri);
-        this.wavesJsonMapper = new WavesJsonMapper(chainId);
-        this.client = createDefaultClient();
-        this.chainId = chainId;
-    }
-
-    public Node(String uri, char chainId, HttpClient httpClient) throws URISyntaxException {
-        this.uri = new URI(uri);
-        this.wavesJsonMapper = new WavesJsonMapper((byte) chainId);
-        this.client = httpClient;
-        this.chainId = (byte) chainId;
-    }
-
-    public Node(String uri, byte chainId, HttpClient httpClient) throws URISyntaxException {
-        this.uri = new URI(uri);
-        this.wavesJsonMapper = new WavesJsonMapper(chainId);
-        this.client = httpClient;
-        this.chainId = chainId;
-    }
-
-    private HttpClient createDefaultClient() {
-        return HttpClients.custom().setDefaultRequestConfig(
-                RequestConfig.custom()
-                        .setSocketTimeout(5000)
-                        .setConnectTimeout(5000)
-                        .setConnectionRequestTimeout(5000)
-                        .setCookieSpec(CookieSpecs.STANDARD)
-                        .build())
+    public Node(URI uri) throws IOException, NodeException {
+        this.uri = uri;
+        this.client = HttpClients
+                .custom()
+                .setDefaultRequestConfig(
+                        RequestConfig.custom()
+                                .setSocketTimeout(5000)
+                                .setConnectTimeout(5000)
+                                .setConnectionRequestTimeout(5000)
+                                .setCookieSpec(CookieSpecs.STANDARD)
+                                .build())
                 .build();
+        this.mapper = new WavesJMapper(); //todo make static global? Inherit from waves-transactions? Or get from it?
+        this.chainId = getAddresses().get(0).bytes()[1];
     }
 
-    public URI getUri() {
-        return uri;
+    public Node(String url) throws URISyntaxException, IOException, NodeException {
+        this(new URI(url));
     }
 
-    public byte getChainId() {
+    public Node(Profile profile) throws IOException, NodeException {
+        this(profile.uri());
+    }
+
+    public byte chainId() {
         return chainId;
     }
 
-    public String getVersion() throws IOException {
-        return send("/node/version", "version").asText();
+    public HttpClient client() {
+        return client;
     }
 
-    public int getHeight() throws IOException {
-        return send("/blocks/height", "height").asInt();
+    public URI uri() {
+        return uri;
     }
 
-    public long getBalance(String address) throws IOException {
-        return send("/addresses/balance/" + address, "balance").asLong();
+    //todo javadoc
+
+    //===============
+    // ADDRESSES
+    //===============
+
+    public List<Address> getAddresses() throws IOException, NodeException {
+        return asType(get("/addresses"), TypeRef.ADDRESSES);
     }
 
-    public BalanceDetails getBalanceDetails(String address) throws IOException {
-        return wavesJsonMapper.convertValue(send("/addresses/balance/details/" + address), BALANCE_DETAILS);
+    public List<Address> getAddresses(int fromIndex, int toIndex) throws IOException, NodeException {
+        return asType(get("/addresses/seq/" + fromIndex + "/" + toIndex), TypeRef.ADDRESSES);
     }
 
-    public long getBalance(String address, int confirmations) throws IOException {
-        return send("/addresses/balance/" + address + "/" + confirmations, "balance").asLong();
+    public long getBalance(Address address) throws IOException, NodeException {
+        return asJson(get("/addresses/balance/" + address.toString()))
+                .get("balance").asLong();
     }
 
-    public long getBalance(String address, String assetId) throws IOException {
-        return Asset.isWaves(assetId)
-                ? getBalance(address)
-                : send("/assets/balance/" + address + "/" + assetId, "balance").asLong();
+    public long getBalance(Address address, int confirmations) throws IOException, NodeException {
+        return asJson(get("/addresses/balance/" + address.toString() + "/" + confirmations))
+                .get("balance").asLong();
     }
 
-
-    public Map<String, Long> getAssetDistribution(String assetId) throws IOException {
-        String path = String.format("/assets/%s/distribution", assetId);
-        HttpResponse r = exec(request(path));
-        return parse(r, ASSET_DISTRIBUTION);
+    public BalanceDetails getBalanceDetails(Address address) throws IOException, NodeException {
+        return asType(get("/addresses/balance/details/" + address.toString()), TypeRef.BALANCE_DETAILS);
     }
 
-    public AssetDistribution getAssetDistributionByHeight(String assetId, Integer height, Integer limit) throws IOException {
-        String path = String.format("/assets/%s/distribution/%d/limit/%d", assetId, height, limit);
-        HttpResponse r = exec(request(path));
-        return parse(r, ASSET_DISTRIBUTION_BY_HEIGHT);
+    public List<DataEntry> getData(Address address) throws IOException, NodeException {
+        return asType(get("/addresses/data/" + address.toString()), TypeRef.DATA_ENTRIES);
     }
 
-    public AssetDistribution getAssetDistributionByHeight(String assetId, Integer height, Integer limit, String after) throws IOException {
-        String path = String.format("/assets/%s/distribution/%d/limit/%d?after=%s", assetId, height, limit, after);
-        HttpResponse r = exec(request(path));
-        return parse(r, ASSET_DISTRIBUTION_BY_HEIGHT);
+    public List<DataEntry> getData(Address address, List<String> keys) throws IOException, NodeException {
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonKeys = jsonBody.putArray("keys");
+        keys.forEach(jsonKeys::add);
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return asType(post("/addresses/data/" + address.toString())
+                .addHeader("Content-Type", "application/json")
+                .setEntity(body), TypeRef.DATA_ENTRIES);
     }
 
-    public List<AssetBalance> getAssetsBalance(String address) throws IOException {
-        return wavesJsonMapper.convertValue(send("/assets/balance/" + address, "balances"), ASSET_BALANCE_LIST);
+    /*
+    example to javadoc: Pattern.compile("st.+")
+    */
+    public List<DataEntry> getData(Address address, Pattern regex) throws IOException, NodeException {
+        return asType(get("/addresses/data/" + address.toString())
+                .addParameter("matches", regex.toString()), TypeRef.DATA_ENTRIES);
     }
 
-    public List<DataEntry> getData(String address) throws IOException {
-        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s", address)), ADDRESS_DATA);
+    public DataEntry getData(Address address, String key) throws IOException, NodeException {
+        return asType(get("/addresses/data/" + address.toString() + "/" + key), TypeRef.DATA_ENTRY);
     }
 
-    public DataEntry getDataByKey(String address, String key) throws IOException {
-        return wavesJsonMapper.convertValue(send(String.format("/addresses/data/%s/%s", address, key)), ADDRESS_DATA_BY_KEY);
+    public long getEffectiveBalance(Address address) throws IOException, NodeException {
+        return asJson(get("/addresses/effectiveBalance/" + address.toString()))
+                .get("balance").asLong();
     }
 
-    public AssetDetails getAssetDetails(String assetId) throws IOException {
-        return wavesJsonMapper.convertValue(send("/assets/details/" + assetId), AssetDetails.class);
+    public long getEffectiveBalance(Address address, int confirmations) throws IOException, NodeException {
+        return asJson(get("/addresses/effectiveBalance/" + address.toString() + "/" + confirmations))
+                .get("balance").asLong();
     }
 
+    public ScriptInfo getScriptInfo(Address address) throws IOException, NodeException {
+        return asType(get("/addresses/scriptInfo/" + address.toString()), TypeRef.SCRIPT_INFO);
+    }
+
+    public ScriptMeta getScriptMeta(Address address) throws IOException, NodeException {
+        JsonNode json = asJson(get("/addresses/scriptInfo/" + address.toString() + "/meta"));
+        if (json.hasNonNull("meta"))
+            return mapper.convertValue(json.get("meta"), TypeRef.SCRIPT_META);
+        else
+            return new ScriptMeta(0, new HashMap<>());
+    }
+
+    //===============
+    // ALIAS
+    //===============
+
+    public List<Alias> getAliasesByAddress(Address address) throws IOException, NodeException {
+        return asType(get("/alias/by-address/" + address.toString()), TypeRef.ALIASES);
+    }
+
+    public Address getAddrByAlias(Alias alias) throws IOException, NodeException {
+        return Address.as(asJson(get("/alias/by-alias/" + alias.name())).get("address").asText());
+    }
+
+    //===============
+    // ASSETS
+    //===============
+
+    public AssetDistribution getAssetDistribution(Id assetId, int height) throws IOException, NodeException {
+        return getAssetDistribution(assetId, height, 10);
+    }
+
+    public AssetDistribution getAssetDistribution(Id assetId, int height, int limit) throws IOException, NodeException {
+        return getAssetDistribution(assetId, height, limit, null);
+    }
+
+    public AssetDistribution getAssetDistribution(Id assetId, int height, int limit, Address after) throws IOException, NodeException {
+        RequestBuilder request = get("/assets/" + assetId.toString() + "/distribution/" + height + "/limit/" + limit);
+        if (after != null)
+            request.addParameter("after", after.toString());
+        return asType(request, TypeRef.ASSET_DISTRIBUTION);
+    }
+
+    public List<AssetBalance> getAssetsBalance(Address address) throws IOException, NodeException {
+        return mapper.readerFor(TypeRef.ASSET_BALANCES)
+                .readValue(asJson(get("/assets/balance/" + address.toString())).get("balances"));
+    }
+
+    public long getAssetBalance(Address address, Id assetId) throws IOException, NodeException {
+        return asJson(get("/assets/balance/" + address.toString() + "/" + assetId.toString()))
+                .get("balance").asLong();
+    }
+
+    public AssetDetails getAssetDetails(Id assetId) throws IOException, NodeException {
+        return asType(get("/assets/details/" + assetId.toString()).addParameter("full", "true"),
+                TypeRef.ASSET_DETAILS);
+    }
+
+    //todo what if some asset doesn't exist? (error json with code and message) Either in java?
+    public List<AssetDetails> getAssetsDetails(List<Id> assetIds) throws IOException, NodeException {
+        RequestBuilder request = get("/assets/details").addParameter("full", "true");
+        assetIds.forEach(id -> request.addParameter("id", id.toString()));
+
+        return asType(request, TypeRef.ASSETS_DETAILS);
+    }
+
+    public List<AssetDetails> getNft(Address address) throws IOException, NodeException {
+        return this.getNft(address, 10);
+    }
+
+    public List<AssetDetails> getNft(Address address, int limit) throws IOException, NodeException {
+        return this.getNft(address, limit, null);
+    }
+
+    public List<AssetDetails> getNft(Address address, int limit, Id after) throws IOException, NodeException {
+        RequestBuilder request = get("/assets/nft/" + address.toString() + "/limit/" + limit);
+        if (after != null)
+            request.addParameter("after", after.toString());
+
+        return mapper.readValue(asInputStream(request), TypeRef.ASSETS_DETAILS);
+    }
+
+    //===============
+    // BLOCKCHAIN
+    //===============
+
+    /**
+     * Returns current blockchain rewards info
+     *
+     * @return @return Rewards
+     */
+    public BlockchainRewards getBlockchainRewards() throws IOException, NodeException {
+        return asType(get("/blockchain/rewards"), TypeRef.BLOCKCHAIN_REWARDS);
+    }
+
+    /**
+     * Returns miner’s reward status at height
+     *
+     * @return Rewards
+     */
+    public BlockchainRewards getBlockchainRewards(int height) throws IOException, NodeException {
+        return asType(get("/blockchain/rewards/" + height), TypeRef.BLOCKCHAIN_REWARDS);
+    }
+
+    //===============
+    // BLOCKS
+    //===============
+
+    public int getHeight() throws IOException, NodeException {
+        return asJson(get("/blocks/height")).get("height").asInt();
+    }
+
+    public int getBlockHeight(Id blockId) throws IOException, NodeException {
+        return asJson(get("/blocks/height/" + blockId.toString()))
+                .get("height").asInt();
+    }
+
+    public int getBlocksDelay(Id startBlock, int blocksNum) throws IOException, NodeException {
+        return asJson(get("/blocks/delay/" + startBlock.toString() + "/" + blocksNum))
+                .get("delay").asInt();
+    }
+
+    /**
+     * Returns block header at given height.
+     *
+     * @param height blockchain height
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public BlockHeaders getBlockHeaders(int height) throws IOException, NodeException {
+        return asType(get("/blocks/headers/at/" + height), TypeRef.BLOCK_HEADERS);
+    }
+
+    public BlockHeaders getBlockHeaders(Id blockId) throws IOException, NodeException {
+        return asType(get("/blocks/headers/" + blockId.toString()), TypeRef.BLOCK_HEADERS);
+    }
+
+    /**
+     * Returns seq of block headers
+     *
+     * @param fromHeight start block
+     * @param toHeight   end block
+     * @return sequences of block objects without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public List<BlockHeaders> getBlocksHeaders(int fromHeight, int toHeight) throws IOException, NodeException {
+        return asType(get("/blocks/headers/seq/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS_HEADERS);
+    }
+
+    /**
+     * Returns last block header
+     *
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public BlockHeaders getLastBlockHeaders() throws IOException, NodeException {
+        return asType(get("/blocks/headers/last"), TypeRef.BLOCK_HEADERS);
+    }
+
+    /**
+     * Returns block at given height.
+     *
+     * @param height blockchain height
+     * @return block object
+     * @throws IOException if no block exists at the given height
+     */
+    public Block getBlock(int height) throws IOException, NodeException {
+        return asType(get("/blocks/at/" + height), TypeRef.BLOCK);
+    }
+
+    /**
+     * Returns block by its id.
+     *
+     * @param blockId block id
+     * @return block object
+     * @throws IOException if no block with the given signature exists
+     */
+    public Block getBlock(Id blockId) throws IOException, NodeException {
+        return asType(get("/blocks/" + blockId.toString()), TypeRef.BLOCK);
+    }
+
+    public List<Block> getBlocks(int fromHeight, int toHeight) throws IOException, NodeException {
+        return asType(get("/blocks/seq/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS);
+    }
+
+    public Block getGenesisBlock() throws IOException, NodeException {
+        return asType(get("/blocks/first"), TypeRef.BLOCK);
+    }
+
+    public Block getLastBlock() throws IOException, NodeException {
+        return asType(get("/blocks/last"), TypeRef.BLOCK);
+    }
+
+    public List<Block> getBlocksGeneratedBy(Address generator, int fromHeight, int toHeight) throws IOException, NodeException {
+        return asType(get(
+                "/blocks/address/" + generator.toString() + "/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS);
+    }
+
+    //===============
+    // NODE
+    //===============
+
+    public String getVersion() throws IOException, NodeException {
+        return asJson(get("/node/version")).get("version").asText();
+    }
+
+    //===============
+    // DEBUG
+    //===============
+
+    public List<HistoryBalance> getBalanceHistory(Address address) throws IOException, NodeException {
+        return asType(get("/debug/balances/history/" + address.toString()), TypeRef.HISTORY_BALANCES);
+    }
+
+    public TransactionDebugInfo getStateChanges(Id txId) throws IOException, NodeException {
+        return asType(get("/debug/stateChanges/info/" + txId.toString()), TypeRef.TRANSACTION_DEBUG_INFO);
+    }
+
+    public List<TransactionDebugInfo> getAddressStateChanges(Address address, int limit, Id after) throws IOException, NodeException {
+        RequestBuilder request = get("/debug/stateChanges/address/" + address.toString() + "/limit/" + limit);
+        if (after != null)
+            request.addParameter("after", after.toString());
+
+        return asType(request, TypeRef.TRANSACTIONS_DEBUG_INFO);
+    }
+
+    public List<TransactionDebugInfo> getAddressStateChanges(Address address, int limit) throws IOException, NodeException {
+        return getAddressStateChanges(address, limit, null);
+    }
+
+    public List<TransactionDebugInfo> getAddressStateChanges(Address address) throws IOException, NodeException {
+        return getAddressStateChanges(address, 10);
+    }
+
+    public <T extends Transaction> Validation validateTransaction(T transaction) throws IOException, NodeException {
+        return asType(post("/debug/validate")
+                .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)), TypeRef.VALIDATION);
+    }
+
+    //todo do the same for all endpoints with pagination
+    /*
+     * Returns iterator with dynamic transactions loading to navigate over all account transactions including state changes
+     * information
+     *
+     * Be careful. Some nodes could turn OFF information about state changes.
+     * Also iterator can throw {@link AllTxIterator.WrappedIOException} in case of any network failures
+     *
+     * @param address account address
+     * @param pageSize page size to navigate over all transactions
+     * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
+     * @throws IOException in case of any network failures
+     */
+    /*public Iterable<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException, NodeException {
+        try {
+            return new AllTxIterator<TransactionStCh>(address, pageSize, new TransactionsLazyLoader<List<TransactionStCh>>() {
+                @Override
+                public List<TransactionStCh> load(String address, int limit, String after) throws IOException, NodeException {
+                    return NewNode.this.getAddressStateChanges(address, limit, after) ;
+                }
+            });
+        } catch (AllTxIterator.WrappedIOException ex) {
+            throw ex.unwrap();
+        }
+    }*/
+
+    //===============
+    // LEASING
+    //===============
+
+    public List<LeaseTransaction> getActiveLeases(Address address) throws IOException, NodeException {
+        return asType(get("/leasing/active/" + address.toString()), TypeRef.ACTIVE_LEASES);
+    }
+
+    //===============
+    // TRANSACTIONS
+    //===============
+
+    public <T extends Transaction> Amount calculateTransactionFee(T transaction) throws IOException, NodeException {
+        JsonNode json = asJson(post("/transactions/calculateFee").setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)));
+        return Amount.of(json.get("feeAmount").asLong(), JsonSerializer.assetIdFromJson(json.get("feeAssetId")));
+    }
+
+    /*
+    example to javadoc: IssueTransaction tx = broadcast(IssueTransaction.with("", 1, 0).get());
+     */
+    //todo throw BroadcastException(code, message, tx, trace, validate) extends NodeException
+    public <T extends Transaction> T broadcast(T transaction) throws IOException, NodeException {
+        //noinspection unchecked
+        return (T) asType(post("/transactions/broadcast")
+                .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)),
+                TypeRef.TRANSACTION);
+    }
 
     /**
      * Returns object by its ID.
@@ -201,16 +492,19 @@ public class Node {
      * @return object object
      * @throws IOException if no object with the given ID exists
      */
-    public Transaction getTransaction(String txId) throws IOException {
-        return wavesJsonMapper.convertValue(send("/transactions/info/" + txId), Transaction.class);
+    public TransactionInfo getTransactionInfo(Id txId) throws IOException, NodeException {
+        return asType(get("/transactions/info/" + txId.toString()), TypeRef.TRANSACTION_INFO);
     }
 
-    public Map<String, Object> getTransactionData(String txId) throws IOException {
-        return wavesJsonMapper.convertValue(send("/transactions/info/" + txId), TX_INFO);
-    }
-
-    public TransactionStCh getStateChanges(String txId) throws IOException {
-        return wavesJsonMapper.convertValue(send("/debug/stateChanges/info/" + txId), TransactionStCh.class);
+    /**
+     * Returns 10 last transactions by address.
+     *
+     * @param address address
+     * @return list of transactions
+     * @throws IOException if something going wrong
+     */
+    public List<TransactionInfo> getAddressTransactions(Address address) throws IOException, NodeException {
+        return getAddressTransactions(address, 10);
     }
 
     /**
@@ -221,7 +515,7 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<Transaction> getAddressTransactions(String address, int limit) throws IOException {
+    public List<TransactionInfo> getAddressTransactions(Address address, int limit) throws IOException, NodeException {
         return getAddressTransactions(address, limit, null);
     }
 
@@ -234,554 +528,82 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<Transaction> getAddressTransactions(String address, int limit, String after) throws IOException {
-        String requestUrl = String.format("/transactions/address/%s/limit/%d", address, limit);
-        if (after != null) {
-            requestUrl += String.format("?after=%s", after);
-        }
-        return wavesJsonMapper.<List<List<Transaction>>>convertValue(send(requestUrl), new TypeReference<List<List<Transaction>>>() {
-        }).get(0);
+    public List<TransactionInfo> getAddressTransactions(Address address, int limit, Id after) throws IOException, NodeException {
+        RequestBuilder request = get("/transactions/address/" + address.toString() + "/limit/" + limit);
+        if (after != null)
+            request.addParameter("after", after.toString());
+
+        //because there is a bug in the Node api: the array of transactions is nested in another array:
+        // [ [ {}, {}, ... ] ]
+        return mapper
+                .readerFor(TypeRef.TRANSACTIONS_INFO)
+                .readValue(asJson(request).get(0));
     }
 
-    public List<TransactionStCh> getAddressStateChanges(String address, int limit, String after) throws IOException {
-        if (address == null || address.isEmpty()) {
-            throw new IllegalArgumentException("address attribute couldn't be null or empty");
-        }
-
-        if (limit <= 0 || limit > 1000) {
-            limit = 1000;
-        }
-
-        String requestUrl = String.format("/debug/stateChanges/address/%s/limit/%d", address, limit);
-        if (after != null) {
-            requestUrl += "?after=" + after;
-        }
-
-        return wavesJsonMapper.convertValue(send(requestUrl), LIST_TX_ST);
+    public TransactionStatus getTransactionStatus(Id id) throws IOException, NodeException {
+        return asType(get("/transactions/status").addParameter("id", id.toString()),
+                TypeRef.TRANSACTIONS_STATUSES).get(0);
     }
 
-    /**
-     * Returns iterator with dynamic transactions loading to navigate over all account transactions including state changes
-     * information
-     *
-     * Be careful. Some nodes could turn OFF information about state changes.
-     * Also iterator can throw {@link AllTxIterator.WrappedIOException} in case of any network failures
-     *
-     * @param address account address
-     * @param pageSize page size to navigate over all transactions
-     * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
-     * @throws IOException in case of any network failures
-     */
-    public Iterable<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException {
-        try {
-            return new AllTxIterator<TransactionStCh>(address, pageSize, new TransactionsLazyLoader<List<TransactionStCh>>() {
-                @Override
-                public List<TransactionStCh> load(String address, int limit, String after) throws IOException {
-                    return Node.this.getAddressStateChanges(address, limit, after) ;
-                }
-            });
-        } catch (AllTxIterator.WrappedIOException ex) {
-            throw ex.unwrap();
-        }
+    public List<TransactionStatus> getTransactionsStatuses(List<Id> ids) throws IOException, NodeException {
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonIds = jsonBody.putArray("ids");
+        ids.forEach(id -> jsonIds.add(id.toString()));
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return asType(post("/transactions/status")
+                .addHeader("Content-Type", "application/json")
+                .setEntity(body), TypeRef.TRANSACTIONS_STATUSES);
     }
 
-    /**
-     * Returns block at given height.
-     *
-     * @param height blockchain height
-     * @return block object
-     * @throws IOException if no block exists at the given height
-     */
-    public Block getBlock(int height) throws IOException {
-        return wavesJsonMapper.convertValue(send("/blocks/at/" + height), Block.class);
+    public List<TransactionStatus> getTransactionsStatuses(Id... ids) throws IOException, NodeException {
+        return getTransactionsStatuses(new ArrayList<>(Arrays.asList(ids)));
     }
 
-    /**
-     * Returns block header at given height.
-     *
-     * @param height blockchain height
-     * @return block object without transactions
-     * @throws IOException if no block exists at the given height
-     */
-    public BlockHeader getBlockHeader(int height) throws IOException {
-        return wavesJsonMapper.convertValue(send("/blocks/headers/at/" + height), BlockHeader.class);
+    public Transaction getUnconfirmedTransaction(Id txId) throws IOException, NodeException {
+        return asType(get("/transactions/unconfirmed/info/" + txId.toString()), TypeRef.TRANSACTION);
     }
 
-
-    /**
-     * Returns last block header
-     *
-     * @return block object without transactions
-     * @throws IOException if no block exists at the given height
-     */
-    public BlockHeader getLastBlockHeader() throws IOException {
-        return wavesJsonMapper.convertValue(send("/blocks/headers/last"), BlockHeader.class);
+    public List<Transaction> getUnconfirmedTransactions() throws IOException, NodeException {
+        return asType(get("/transactions/unconfirmed"), TypeRef.TRANSACTIONS);
     }
 
-    /**
-     * Returns seq of block headers
-     *
-     * @param from start block
-     * @param to   end block
-     * @return sequences of block objects without transactions
-     * @throws IOException if no block exists at the given height
-     */
-    public List<BlockHeader> getBlockHeaderSeq(int from, int to) throws IOException {
-        String path = String.format("/blocks/headers/seq/%s/%s", from, to);
-        HttpResponse r = exec(request(path));
-        return parse(r, BLOCK_HEADER_LIST);
+    public int getUtxSize() throws IOException, NodeException {
+        return asJson(get("/transactions/unconfirmed/size")).get("size").asInt();
     }
 
-    /**
-     * Returns block by its signature.
-     *
-     * @param signature block signature
-     * @return block object
-     * @throws IOException if no block with the given signature exists
-     */
-    public Block getBlock(String signature) throws IOException {
-        return wavesJsonMapper.convertValue(send("/blocks/signature/" + signature), Block.class);
+    //===============
+    // HTTP REQUESTS
+    //===============
+
+    private RequestBuilder get(String path) {
+        return RequestBuilder.get(uri.resolve(path));
     }
 
-    /**
-     * Returns current blockchain rewards info
-     *
-     * @return @return Rewards
-     * @throws IOException
-     */
-    public Rewards getBlockchainRewards() throws IOException {
-        return wavesJsonMapper.convertValue(send("/blockchain/rewards"), Rewards.class);
+    private RequestBuilder post(String path) {
+        return RequestBuilder.post(uri.resolve(path));
     }
 
-    /**
-     * Returns active leases of an address
-     *
-     * @param address
-     * @return list of active leases
-     * @throws IOException
-     */
-    public List<LeaseTransaction> getActiveLeases(String address) throws IOException {
-        return wavesJsonMapper.convertValue(send("/leasing/active/" + address), new TypeReference<List<Transaction>>() {});
-    }
-
-    /**
-     * Returns blocks at specified heights.
-     *
-     * @param from start block height
-     * @param to end block height
-     * @return block object
-     * @throws IOException if no block exists at the given height
-     */
-    public List<Block> getBlockSequence(int from, int to) throws IOException {
-        String path = String.format("/blocks/seq/%s/%s", from, to);
-        HttpResponse r = exec(request(path));
-        return parse(r, BLOCK_LIST);
-    }
-
-    /**
-     * Returns miner’s reward status at height
-     *
-     * @return Rewards
-     */
-    public Rewards getBlockchainRewards(int height) throws IOException {
-        return wavesJsonMapper.convertValue(send(String.format("/blockchain/rewards/%d", height)), Rewards.class);
-    }
-
-    public boolean validateAddresses(String address) throws IOException {
-        return send("/addresses/validate/" + address, "valid").asBoolean();
-    }
-
-    public String getAddrByAlias(String alias) throws IOException {
-        return send("/alias/by-alias/" + alias, "address").textValue();
-    }
-
-    /**
-     * Sends a signed object and returns its ID.
-     *
-     * @param tx signed object (as created by static methods in Transaction class)
-     * @return Transaction ID
-     * @throws IOException
-     */
-    public String send(Transaction tx) throws IOException {
-        return parse(exec(request(tx)), "id").asText();
-    }
-
-    private JsonNode send(String path, String... key) throws IOException {
-        return parse(exec(request(path)), key);
-    }
-
-    public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, ByteString attachment) throws IOException {
-        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, attachment);
-        return send(tx);
-    }
-
-    public String transfer(PrivateKeyAccount from, String recipient, long amount, long fee, String message) throws IOException {
-        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, null, fee, null, message);
-        return send(tx);
-    }
-
-    public String transfer(PrivateKeyAccount from, String recipient,
-                           long amount, String assetId, long fee, String feeAssetId, String message) throws IOException {
-        TransferTransactionV2 tx = Transactions.makeTransferTx(from, recipient, amount, assetId, fee, feeAssetId, message);
-        return send(tx);
-    }
-
-    public String lease(PrivateKeyAccount from, String recipient, long amount, long fee) throws IOException {
-        LeaseTransaction tx = Transactions.makeLeaseTx(from, recipient, amount, fee);
-        return send(tx);
-    }
-
-    public String cancelLease(PrivateKeyAccount account, byte chainId, String txId, long fee) throws IOException {
-        return send(Transactions.makeLeaseCancelTx(account, chainId, txId, fee));
-    }
-
-    public String issueAsset(PrivateKeyAccount account, byte chainId, String name, String description, long quantity,
-                             byte decimals, boolean reissuable, String script, long fee) throws IOException {
-        return send(Transactions.makeIssueTx(account, chainId, name, description, quantity, decimals, reissuable, script, fee));
-    }
-
-    public String reissueAsset(PrivateKeyAccount account, byte chainId, String assetId, long quantity, boolean reissuable, long fee) throws IOException {
-        return send(Transactions.makeReissueTx(account, chainId, assetId, quantity, reissuable, fee));
-    }
-
-    public String burnAsset(PrivateKeyAccount account, byte chainId, String assetId, long amount, long fee) throws IOException {
-        return send(Transactions.makeBurnTx(account, chainId, assetId, amount, fee));
-    }
-
-    public String sponsorAsset(PrivateKeyAccount account, String assetId, long minAssetFee, long fee) throws IOException {
-        return send(Transactions.makeSponsorTx(account, assetId, minAssetFee, fee));
-    }
-
-    public String alias(PrivateKeyAccount account, byte chainId, String alias, long fee) throws IOException {
-        return send(Transactions.makeAliasTx(account, alias, chainId, fee));
-    }
-
-    public String massTransfer(PrivateKeyAccount from, String assetId, Collection<Transfer> transfers, long fee, String message) throws IOException {
-        return send(Transactions.makeMassTransferTx(from, assetId, transfers, fee, message));
-    }
-
-    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId, long timestamp) throws IOException {
-        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId, timestamp));
-    }
-
-    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, List<Payment> payments, long fee, String feeAssetId) throws IOException {
-        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, payments, fee, feeAssetId));
-    }
-
-    public String invokeScript(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId, long timestamp) throws IOException {
-        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId, timestamp));
-    }
-
-    /**
-     * send invoke script tx with call function without arguments
-     *
-     * @param from         account private key
-     * @param chainId      chain id
-     * @param dApp         dapp address
-     * @param functionName function name to call
-     * @param fee          transaction fee
-     * @param feeAssetId   transaction fee assetId
-     * @return invoke script transaction id
-     * @throws IOException
-     */
-    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, String functionName, long fee, String feeAssetId) throws IOException {
-        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, functionName, fee, feeAssetId));
-    }
-
-    /**
-     * send invoke script tx withour payments
-     *
-     * @param from       account private key
-     * @param chainId    chain id
-     * @param dApp       dapp address
-     * @param call       function call
-     * @param fee        transaction fee
-     * @param feeAssetId transaction fee assetId
-     * @param timestamp  tx timestamp
-     * @return invoke script transaction id
-     * @throws IOException
-     */
-    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId, long timestamp) throws IOException {
-        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId, timestamp));
-    }
-
-    /**
-     * send invoke script tx withour payments
-     *
-     * @param from       account private key
-     * @param chainId    chain id
-     * @param dApp       dapp address
-     * @param call       function call
-     * @param fee        transaction fee
-     * @param feeAssetId transaction fee assetId
-     * @return invoke script transaction id
-     * @throws IOException
-     */
-    public String invokeScriptTx(PrivateKeyAccount from, byte chainId, String dApp, FunctionCall call, long fee, String feeAssetId) throws IOException {
-        return send(Transactions.makeInvokeScriptTx(from, chainId, dApp, call, fee, feeAssetId));
-    }
-
-    public String data(PrivateKeyAccount from, Collection<DataEntry<?>> data, long fee) throws IOException {
-        return send(Transactions.makeDataTx(from, data, fee));
-    }
-
-    public String exchange(PrivateKeyAccount from, Order buyOrder, Order sellOrder, long amount,
-                           long price, long buyMatcherFee, long sellMatcherFee, long fee) throws IOException {
-        return send(Transactions.makeExchangeTx(from, buyOrder, sellOrder, amount, price, buyMatcherFee, sellMatcherFee, fee));
-    }
-
-
-    /**
-     * Sets a validating script for an account.
-     *
-     * @param from    the account
-     * @param script  script text
-     * @param chainId chain ID
-     * @param fee     transaction fee
-     * @return object ID
-     * @throws IOException if an error occurs
-     * @see Account#MAINNET
-     * @see Account#TESTNET
-     */
-    public String setScript(PrivateKeyAccount from, String script, byte chainId, long fee) throws IOException {
-        return send(Transactions.makeScriptTx(from, script, chainId, fee));
-    }
-
-    /**
-     * Uptates smart account script if allowed by script
-     *
-     * @param from    the account
-     * @param script  script text
-     * @param chainId chain ID
-     * @param fee     transaction fee
-     * @return transaction ID
-     * @throws IOException if an error occurs
-     * @see Account#MAINNET
-     * @see Account#TESTNET
-     */
-    public String setAssetScript(PrivateKeyAccount from, byte chainId, String assetId, String script, long fee) throws IOException {
-        return send(Transactions.makeSetAssetScriptTransaction(from, chainId, assetId, script, fee));
-    }
-
-    /**
-     * Compiles a script.
-     *
-     * @param script the script to compile
-     * @return compiled script, base64 encoded
-     * @throws IOException if the script is not well formed or some other error occurs
-     */
-    public String compileScript(String script) throws IOException {
-        if (script == null || script.isEmpty()) {
-            return null;
-        }
-        HttpPost request = new HttpPost(uri.resolve("/utils/script/compile"));
-        request.setEntity(new StringEntity(script));
-        return parse(exec(request), "script").asText();
-    }
-
-    /**
-     * calculates the fee of a transaction
-     *
-     * @param transaction
-     * @return calculated Fee
-     * @throws IOException
-     */
-    public CalculatedFee calculateFee(Transaction transaction) throws IOException {
-        return parse(exec(request(transaction, "/transactions/calculateFee")), CALCULATED_FEE);
-    }
-
-    // Matcher transactions
-
-    public String getMatcherKey() throws IOException {
-        return parse(exec(request("/matcher"))).asText();
-    }
-
-    @Deprecated
-    public Order createOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                             long price, long amount, long expiration, long matcherFee) throws IOException {
-        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
-        JsonNode tree = parse(exec(matcherRequest(tx, false)));
-        // fix order status
-        ObjectNode message = (ObjectNode) tree.get("message");
-        message.put("status", tree.get("status").asText());
-        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
-    }
-
-    public Order placeOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                             long price, long amount, long expiration, long matcherFee, boolean isMarket) throws IOException {
-        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee);
-        JsonNode tree = parse(exec(matcherRequest(tx, isMarket)));        // fix order status
-        ObjectNode message = (ObjectNode) tree.get("message");
-        message.put("status", tree.get("status").asText());
-        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
-    }
-
-    public Order placeOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                            long price, long amount, long expiration, long matcherFee, String matcherFeeAssetId, boolean isMarket) throws IOException {
-        Order tx = Transactions.makeOrder(account, matcherKey, orderType, assetPair, price, amount, expiration, matcherFee, matcherFeeAssetId);
-        JsonNode tree = parse(exec(matcherRequest(tx, isMarket)));        // fix order status
-        ObjectNode message = (ObjectNode) tree.get("message");
-        message.put("status", tree.get("status").asText());
-        return wavesJsonMapper.treeToValue(tree.get("message"), Order.class);
-    }
-
-    public Order placeLimitOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                                 long price, long amount, long expiration, long matcherFee, String matcherFeeAssetId) throws IOException {
-        return placeOrder(account, matcherKey, assetPair, orderType, price, amount, expiration, matcherFee, matcherFeeAssetId, false);
-    }
-
-    public Order placeLimitOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                             long price, long amount, long expiration, long matcherFee) throws IOException {
-        return placeOrder(account, matcherKey, assetPair, orderType, price, amount, expiration, matcherFee, false);
-    }
-
-    public Order marketOrder(PrivateKeyAccount account, String matcherKey, AssetPair assetPair, Order.Type orderType,
-                             long price, long amount, long expiration, long matcherFee) throws IOException {
-        return placeOrder(account, matcherKey, assetPair, orderType, price, amount, expiration, matcherFee, true);
-    }
-
-    public String cancelOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancel(account, assetPair, orderId);
-        return parse(exec(matcherRequest(tx)), "status").asText();
-    }
-
-    public String cancelOrdersbyPair(PrivateKeyAccount account, AssetPair assetPair) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancel(account, assetPair);
-        return parse(exec(matcherRequest(tx)), "status").asText();
-    }
-
-    public String cancelAllOrders(PrivateKeyAccount account) throws IOException {
-        ApiJson tx = Transactions.makeOrderCancel(account);
-        return parse(exec(request(tx)), "status").asText();
-    }
-
-    @Deprecated
-    public String deleteOrder(PrivateKeyAccount account, AssetPair assetPair, String orderId) throws IOException {
-        ApiJson tx = Transactions.makeDeleteOrder(account, assetPair, orderId);
-        return parse(exec(request(tx)), "status").asText();
-    }
-
-    public OrderBook getOrderBook(AssetPair assetPair) throws IOException {
-        String path = "/matcher/orderbook/" + assetPair.getAmountAsset() + '/' + assetPair.getPriceAsset();
-        return parse(exec(request(path)), ORDER_BOOK);
-    }
-
-    public OrderStatusInfo getOrderStatus(String orderId, AssetPair assetPair) throws IOException {
-        String path = "/matcher/orderbook/" + assetPair.getAmountAsset() + '/' + assetPair.getPriceAsset() + '/' + orderId;
-        return parse(exec(request(path)), ORDER_STATUS);
-    }
-
-    public List<Order> getOrders(PrivateKeyAccount account) throws IOException {
-        return getOrders(account, "/matcher/orderbook/" + Base58.encode(account.getPublicKey()));
-    }
-
-    public List<Order> getOrders(PrivateKeyAccount account, AssetPair market) throws IOException {
-        return getOrders(account, String.format("/matcher/orderbook/%s/%s/publicKey/%s",
-                market.getAmountAsset(), market.getPriceAsset(), Base58.encode(account.getPublicKey())));
-    }
-
-    public String getOrderHistorySignature(PrivateKeyAccount account, long timestamp) {
-        ByteBuffer buf = ByteBuffer.allocate(40);
-        buf.put(account.getPublicKey()).putLong(timestamp);
-        return account.sign(buf.array());
-    }
-
-    private List<Order> getOrders(PrivateKeyAccount account, String path) throws IOException {
-        long timestamp = System.currentTimeMillis();
-        String signature = getOrderHistorySignature(account, timestamp);
-        HttpResponse r = exec(request(path, "Timestamp", String.valueOf(timestamp), "Signature", signature));
-        return parse(r, ORDER_LIST);
-    }
-
-
-    public Map<String, Long> getTradableBalance(AssetPair pair, String address) throws IOException {
-        String path = String.format("/matcher/orderbook/%s/%s/tradableBalance/%s", pair.getAmountAsset(), pair.getPriceAsset(), address);
-        HttpResponse r = exec(request(path));
-        return parse(r, RESERVED);
-    }
-
-    public Map<String, Long> getReservedBalance(PrivateKeyAccount account) throws IOException {
-        long timestamp = System.currentTimeMillis();
-        ByteBuffer buf = ByteBuffer.allocate(40);
-        buf.put(account.getPublicKey()).putLong(timestamp);
-        String signature = account.sign(buf.array());
-        HttpResponse r = exec(request(String.format("/matcher/balance/reserved/%s", Base58.encode(account.getPublicKey())), "Timestamp", String.valueOf(timestamp), "Signature", signature));
-        return parse(r, RESERVED);
-    }
-
-    private <T> HttpUriRequest request(String path, String... headers) {
-        HttpUriRequest req = new HttpGet(uri.resolve(path));
-        for (int i = 0; i < headers.length; i += 2) {
-            req.addHeader(headers[i], headers[i + 1]);
-        }
-        return req;
-    }
-
-    private HttpUriRequest request(ApiJson obj, Boolean ...arg) throws JsonProcessingException {
-        String endpoint;
-        if (obj instanceof Transaction) {
-            endpoint = "/transactions/broadcast";
-        } else {
-            throw new IllegalArgumentException();
-        }
-        HttpPost request = new HttpPost(uri.resolve(endpoint));
-        request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
-        return request;
-    }
-
-    private HttpUriRequest matcherRequest(ApiJson obj) throws JsonProcessingException {
-        return matcherRequest(obj, false);
-    }
-
-    private HttpUriRequest matcherRequest(ApiJson obj, boolean isMarket) throws JsonProcessingException {
-        String endpoint = "/matcher/orderbook";
-        if (obj instanceof Order) {
-            if (isMarket)
-                endpoint += "/market";
-        } else if (obj instanceof DeleteOrder) {
-            DeleteOrder d = (DeleteOrder) obj;
-            endpoint += d.getAssetPair().getAmountAsset() + '/' + d.getAssetPair().getPriceAsset() + "/delete";
-        } else if (obj instanceof CancelOrder) {
-            CancelOrder co = (CancelOrder) obj;
-            if (co.getAssetPair() == null) {
-                endpoint += "/cancel";
-            } else
-                endpoint += "/" + co.getAssetPair().getAmountAsset() + '/' + co.getAssetPair().getPriceAsset() + "/cancel";
-        } else {
-            throw new IllegalArgumentException();
-        }
-        HttpPost request = new HttpPost(uri.resolve(endpoint));
-        request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
-        return request;
-    }
-
-    private HttpUriRequest request(ApiJson obj, String endpoint) throws JsonProcessingException {
-        HttpPost request = new HttpPost(uri.resolve(endpoint));
-        request.setEntity(new StringEntity(wavesJsonMapper.writeValueAsString(obj), ContentType.APPLICATION_JSON));
-        return request;
-    }
-
-    private HttpResponse exec(HttpUriRequest request) throws IOException {
+    //todo error codes enum
+    private HttpResponse exec(HttpUriRequest request) throws IOException, NodeException {
         HttpResponse r = client.execute(request);
-        if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            try {
-                throw new IOException(EntityUtils.toString(r.getEntity()));
-            } catch (JsonParseException e) {
-                throw new RuntimeException("Server error " + r.getStatusLine().getStatusCode());
-            }
-        }
+        if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+            throw mapper.readValue(r.getEntity().getContent(), NodeException.class);
+        //todo ...future...
         return r;
     }
 
-    private <T> T parse(HttpResponse r, TypeReference<T> ref) throws IOException {
-        return wavesJsonMapper.readValue(r.getEntity().getContent(), ref);
+    private InputStream asInputStream(RequestBuilder request) throws IOException, NodeException {
+        return exec(request.build()).getEntity().getContent();
     }
 
-    private JsonNode parse(HttpResponse r, String... keys) throws IOException {
-        JsonNode tree = wavesJsonMapper.readTree(r.getEntity().getContent());
-        for (String key : keys) {
-            tree = tree.get(key);
-        }
-        return tree;
+    private <T> T asType(RequestBuilder request, TypeReference<T> reference) throws IOException, NodeException {
+        return mapper.readValue(asInputStream(request), reference);
     }
+
+    private JsonNode asJson(RequestBuilder request) throws IOException, NodeException {
+        return JSON_MAPPER.readTree(asInputStream(request));
+    }
+
 }
+

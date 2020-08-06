@@ -2,38 +2,31 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wavesplatform.wavesj.transactions.IssueTransaction;
-import com.wavesplatform.wavesj.transactions.IssueTransactionV2;
+import im.mak.waves.transactions.Transaction;
+import im.mak.waves.transactions.common.Id;
 
-import java.io.Serializable;
+import java.util.Objects;
 
-public class AssetBalance implements Serializable {
-    private final String assetId;
-    private final Long balance;
-    private final Boolean reissuable;
-    private final Long minSponsoredAssetFee;
-    private final Long sponsorBalance;
-    private final Long quantity;
-    private final IssueTransaction issueTransaction;
+@SuppressWarnings("unused")
+public class AssetBalance {
+
+    public final Id assetId;
+    public final long balance;
+    public final boolean reissuable;
+    public final long minSponsoredAssetFee;
+    public final long sponsorBalance;
+    public final long quantity;
+    public final Transaction issueTransaction;
 
     @JsonCreator
-    public AssetBalance(@JsonProperty("assetId") String assetId, @JsonProperty("balance") Long balance,
-                        @JsonProperty("reissuable") Boolean reissuable, @JsonProperty("minSponsoredAssetFee") Long minSponsoredAssetFee,
-                        @JsonProperty("sponsorBalance") Long sponsorBalance, @JsonProperty("quantity") Long quantity,
-                        @JsonProperty("issueTransaction") IssueTransactionV2 issueTransaction) {
-        this.assetId = assetId;
-        this.reissuable = reissuable;
-        this.quantity = quantity;
-        this.minSponsoredAssetFee = minSponsoredAssetFee;
-        this.balance = balance;
-        this.sponsorBalance = sponsorBalance;
-        this.issueTransaction = issueTransaction;
-    }
-
-
-    public AssetBalance(final String assetId, final Long balance, final Boolean reissuable, final Long minSponsoredAssetFee,
-                        final Long sponsorBalance, final Long quantity, final IssueTransactionV2 issueTransaction, Object unused) {
-        this.assetId = assetId;
+    public AssetBalance(@JsonProperty("assetId") Id assetId,
+                        @JsonProperty("balance") long balance,
+                        @JsonProperty("reissuable") boolean reissuable,
+                        @JsonProperty("minSponsoredAssetFee") long minSponsoredAssetFee,
+                        @JsonProperty("sponsorBalance") long sponsorBalance,
+                        @JsonProperty("quantity") long quantity,
+                        @JsonProperty("issueTransaction") Transaction issueTransaction) {
+        this.assetId = Common.notNull(assetId, "AssetId");
         this.balance = balance;
         this.reissuable = reissuable;
         this.minSponsoredAssetFee = minSponsoredAssetFee;
@@ -42,80 +35,63 @@ public class AssetBalance implements Serializable {
         this.issueTransaction = issueTransaction;
     }
 
-    public String getAssetId() {
+    public Id assetId() {
         return assetId;
     }
 
-    public Long getBalance() {
+    public long balance() {
         return balance;
     }
 
-    public Boolean getReissuable() {
+    public boolean isReissuable() {
         return reissuable;
     }
 
-    public Long getMinSponsoredAssetFee() {
+    public long minSponsoredAssetFee() {
         return minSponsoredAssetFee;
     }
 
-    public Long getSponsorBalance() {
+    public long sponsorBalance() {
         return sponsorBalance;
     }
 
-    public Long getQuantity() {
+    public long quantity() {
         return quantity;
     }
 
-    public IssueTransaction getIssueTransaction() {
+    public Transaction issueTransaction() {
         return issueTransaction;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssetBalance that = (AssetBalance) o;
+        return balance == that.balance &&
+                reissuable == that.reissuable &&
+                minSponsoredAssetFee == that.minSponsoredAssetFee &&
+                sponsorBalance == that.sponsorBalance &&
+                quantity == that.quantity &&
+                assetId.equals(that.assetId) &&
+                issueTransaction.equals(that.issueTransaction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(assetId, balance, reissuable, minSponsoredAssetFee, sponsorBalance, quantity, issueTransaction);
     }
 
     @Override
     public String toString() {
         return "AssetBalance{" +
-                "assetId='" + assetId + '\'' +
+                "assetId=" + assetId.toString() +
                 ", balance=" + balance +
                 ", reissuable=" + reissuable +
                 ", minSponsoredAssetFee=" + minSponsoredAssetFee +
                 ", sponsorBalance=" + sponsorBalance +
                 ", quantity=" + quantity +
-                ", issueTransactionV2=" + issueTransaction +
+                ", issueTransaction=" + issueTransaction +
                 '}';
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof AssetBalance))
-            return false;
-
-        final AssetBalance that = (AssetBalance) o;
-
-        if (getAssetId() != null ? !getAssetId().equals(that.getAssetId()) : that.getAssetId() != null)
-            return false;
-        if (getBalance() != null ? !getBalance().equals(that.getBalance()) : that.getBalance() != null)
-            return false;
-        if (getReissuable() != null ? !getReissuable().equals(that.getReissuable()) : that.getReissuable() != null)
-            return false;
-        if (getMinSponsoredAssetFee() != null ? !getMinSponsoredAssetFee().equals(that.getMinSponsoredAssetFee()) : that.getMinSponsoredAssetFee() != null)
-            return false;
-        if (getSponsorBalance() != null ? !getSponsorBalance().equals(that.getSponsorBalance()) : that.getSponsorBalance() != null)
-            return false;
-        if (getQuantity() != null ? !getQuantity().equals(that.getQuantity()) : that.getQuantity() != null)
-            return false;
-        return getIssueTransaction() != null ? getIssueTransaction().equals(that.getIssueTransaction()) : that.getIssueTransaction() == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getAssetId() != null ? getAssetId().hashCode() : 0;
-        result = 31 * result + (getBalance() != null ? getBalance().hashCode() : 0);
-        result = 31 * result + (getReissuable() != null ? getReissuable().hashCode() : 0);
-        result = 31 * result + (getMinSponsoredAssetFee() != null ? getMinSponsoredAssetFee().hashCode() : 0);
-        result = 31 * result + (getSponsorBalance() != null ? getSponsorBalance().hashCode() : 0);
-        result = 31 * result + (getQuantity() != null ? getQuantity().hashCode() : 0);
-        result = 31 * result + (getIssueTransaction() != null ? getIssueTransaction().hashCode() : 0);
-        return result;
     }
 }

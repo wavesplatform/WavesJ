@@ -2,51 +2,78 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import im.mak.waves.transactions.account.Address;
 
-import static com.wavesplatform.wavesj.Asset.normalize;
+import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class BalanceDetails {
-    private final String address;
-    private final Long regular;
-    private final Long available;
-    private final Long generating;
-    private final Long effective;
 
+    private final Address address;
+    private final long available;
+    private final long regular;
+    private final long generating;
+    private final long effective;
 
     @JsonCreator
-    public BalanceDetails(
-            @JsonProperty("address") String address,
-            @JsonProperty("regular") Long regular,
-            @JsonProperty("available") Long available,
-            @JsonProperty("generating") Long generating,
-            @JsonProperty("effective") Long effective
-    ) {
-        this.address = address;
-        this.regular = regular;
+    public BalanceDetails(@JsonProperty("address") Address address,
+                          @JsonProperty("available") long available,
+                          @JsonProperty("regular") long regular,
+                          @JsonProperty("generating") long generating,
+                          @JsonProperty("effective") long effective) {
+        this.address = Common.notNull(address, "Address");
         this.available = available;
+        this.regular = regular;
         this.generating = generating;
         this.effective = effective;
     }
 
-
-    public Long getRegular() {
-        return regular;
-    }
-
-    public String getAddress() {
+    public Address address() {
         return address;
     }
 
-
-    public Long getGenerating() {
-        return generating;
-    }
-
-    public Long getAvailable() {
+    public long available() {
         return available;
     }
 
-    public Long getEffective() {
+    public long regular() {
+        return regular;
+    }
+
+    public long generating() {
+        return generating;
+    }
+
+    public long effective() {
         return effective;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BalanceDetails that = (BalanceDetails) o;
+        return this.available == that.available &&
+                this.regular == that.regular &&
+                this.generating == that.generating &&
+                this.effective == that.effective &&
+                this.address.equals(that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address, available, regular, generating, effective);
+    }
+
+    @Override
+    public String toString() {
+        return "BalanceDetails{" +
+                "address=" + address.toString() +
+                ", available=" + available +
+                ", regular=" + regular +
+                ", generating=" + generating +
+                ", effective=" + effective +
+                '}';
+    }
+
 }
