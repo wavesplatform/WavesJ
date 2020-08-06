@@ -2,113 +2,100 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import im.mak.waves.transactions.account.Address;
+import im.mak.waves.transactions.account.PublicKey;
+import im.mak.waves.transactions.common.Id;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * This class represents a block.
  */
-public class Block {
-    private final int version;
-    private final long timestamp;
-    private final String signature;
-    private final int size;
+@SuppressWarnings("unused")
+public class Block extends BlockHeaders {
+
     private final long fee;
-    private final int height;
-    private final Collection<Transaction> transactions;
+    private final List<TransactionInfo> transactions;
 
     @JsonCreator
-    private Block(
+    public Block(
             @JsonProperty("version") int version,
             @JsonProperty("timestamp") long timestamp,
+            @JsonProperty("reference") Id reference,
+            @JsonProperty("transactionsRoot") String transactionsRoot,
+            @JsonProperty("id") Id id,
+            @JsonProperty("features") List<Integer> features,
+            @JsonProperty("desiredReward") long desiredReward,
+            @JsonProperty("generator") Address generator,
+            @JsonProperty("generatorPublicKey") PublicKey generatorPublicKey,
             @JsonProperty("signature") String signature,
             @JsonProperty("blocksize") int size,
-            @JsonProperty("fee") long fee,
+            @JsonProperty("transactionsCount") int transactionsCount,
             @JsonProperty("height") int height,
-            @JsonProperty("transactions") Collection<Transaction> transactions) {
-        this.version = version;
-        this.timestamp = timestamp;
-        this.signature = signature;
-        this.size = size;
+            @JsonProperty("totalFee") long totalFee,
+            @JsonProperty("reward") long reward,
+            @JsonProperty("VRF") Id vrf,
+            @JsonProperty("fee") long fee,
+            @JsonProperty("transactions") List<TransactionInfo> transactions) {
+        super(version, timestamp, reference, transactionsRoot, id, features, desiredReward, generator,
+                generatorPublicKey, signature, size, transactionsCount, height, totalFee, reward, vrf);
         this.fee = fee;
-        this.height = height;
-        this.transactions = transactions != null ? Collections.unmodifiableCollection(transactions) : null;
+        this.transactions = Common.notNull(transactions, "Transactions");
+
+        //transactions in block don't have height
+        for (int i = 0; i < this.transactions.size(); i++) {
+            TransactionInfo info = this.transactions.get(i);
+            if (info.height() == 0)
+                this.transactions.set(i, new TransactionInfo(info.tx(), info.applicationStatus(), this.height()));
+        }
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public long getFee() {
+    public long fee() {
         return fee;
     }
 
-    public int getHeight() {
-        return height;
-    }
-
-    public Collection<Transaction> getTransactions() {
+    public List<TransactionInfo> transactions() {
         return transactions;
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof Block))
-            return false;
-
-        final Block block = (Block) o;
-
-        if (getVersion() != block.getVersion())
-            return false;
-        if (getTimestamp() != block.getTimestamp())
-            return false;
-        if (getSize() != block.getSize())
-            return false;
-        if (getFee() != block.getFee())
-            return false;
-        if (getHeight() != block.getHeight())
-            return false;
-        if (getSignature() != null ? !getSignature().equals(block.getSignature()) : block.getSignature() != null)
-            return false;
-        return getTransactions() != null ? getTransactions().equals(block.getTransactions()) : block.getTransactions() == null;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Block block = (Block) o;
+        return fee == block.fee &&
+                Objects.equals(transactions, block.transactions);
     }
 
     @Override
     public int hashCode() {
-        int result = getVersion();
-        result = 31 * result + (int) (getTimestamp() ^ (getTimestamp() >>> 32));
-        result = 31 * result + (getSignature() != null ? getSignature().hashCode() : 0);
-        result = 31 * result + getSize();
-        result = 31 * result + (int) (getFee() ^ (getFee() >>> 32));
-        result = 31 * result + getHeight();
-        result = 31 * result + (getTransactions() != null ? getTransactions().hashCode() : 0);
-        return result;
+        return Objects.hash(super.hashCode(), fee, transactions);
     }
 
     @Override
     public String toString() {
         return "Block{" +
-                "version=" + version +
-                ", timestamp=" + timestamp +
-                ", signature='" + signature + '\'' +
-                ", size=" + size +
+                "version=" + version() +
+                ", timestamp=" + timestamp() +
+                ", reference=" + reference() +
+                ", baseTarget=" + baseTarget() +
+                ", generationSignature='" + generationSignature() + '\'' +
+                ", transactionsRoot='" + transactionsRoot() + '\'' +
+                ", id=" + id() +
+                ", features=" + features() +
+                ", desiredReward=" + desiredReward() +
+                ", generator=" + generator() +
+                ", generatorPublicKey=" + generatorPublicKey() +
+                ", signature='" + signature() + '\'' +
+                ", size=" + size() +
+                ", transactionsCount=" + transactionsCount() +
+                ", height=" + height() +
+                ", totalFee=" + totalFee() +
+                ", reward=" + reward() +
+                ", vrf=" + vrf() +
                 ", fee=" + fee +
-                ", height=" + height +
                 ", transactions=" + transactions +
                 '}';
     }

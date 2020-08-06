@@ -2,158 +2,151 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import im.mak.waves.transactions.account.Address;
+import im.mak.waves.transactions.account.PublicKey;
+import im.mak.waves.transactions.common.Id;
 
-import java.io.Serializable;
+import java.util.Objects;
 
-public class AssetDetails implements Serializable {
-    private final String assetId;
-    private final Long issueHeight;
-    private final Long issueTimestamp;
-    private final String issuer;
+@SuppressWarnings("unused")
+public class AssetDetails {
+
+    private final Id assetId;
+    private final int issueHeight;
+    private final long issueTimestamp;
+    private final Address issuer;
+    private final PublicKey issuerPublicKey;
     private final String name;
     private final String description;
-    private final Integer decimals;
-    private final Boolean reissuable;
-    private final Long quantity;
-    private final Boolean scripted;
-    private final Long minSponsoredAssetFee;
+    private final int decimals;
+    private final boolean reissuable;
+    private final long quantity;
+    private final boolean scripted;
+    private final long minSponsoredAssetFee;
+    private final Id originTransactionId;
+    private final ScriptDetails scriptDetails;
 
     @JsonCreator
-    public AssetDetails(@JsonProperty("assetId") String assetId, @JsonProperty("issueHeight") Long issueHeight,
-                        @JsonProperty("issueTimestamp") final Long issueTimestamp, @JsonProperty("issuer") String issuer,
-                        @JsonProperty("name") String name, @JsonProperty("descirption") String description,
-                        @JsonProperty("decimals") Integer decimals, @JsonProperty("reissuable") Boolean reissuable,
-                        @JsonProperty("quantity") Long quantity, @JsonProperty("scripted") Boolean scripted,
-                        @JsonProperty("minSponsoredAssetFee") Long minSponsoredAssetFee) {
-        this.assetId = assetId;
+    public AssetDetails(@JsonProperty("assetId") Id assetId,
+                        @JsonProperty("issueHeight") int issueHeight,
+                        @JsonProperty("issueTimestamp") long issueTimestamp,
+                        @JsonProperty("issuer") Address issuer,
+                        @JsonProperty("issuerPublicKey") PublicKey issuerPublicKey,
+                        @JsonProperty("name") String name,
+                        @JsonProperty("description") String description,
+                        @JsonProperty("decimals") int decimals,
+                        @JsonProperty("reissuable") boolean reissuable,
+                        @JsonProperty("quantity") long quantity,
+                        @JsonProperty("scripted") boolean scripted,
+                        @JsonProperty("minSponsoredAssetFee") long minSponsoredAssetFee,
+                        @JsonProperty("originTransactionId") Id originTransactionId,
+                        @JsonProperty("scriptDetails") ScriptDetails scriptDetails) {
+        this.assetId = Common.notNull(assetId, "AssetId");
         this.issueHeight = issueHeight;
         this.issueTimestamp = issueTimestamp;
-        this.issuer = issuer;
-        this.name = name;
-        this.description = description;
+        this.issuer = Common.notNull(issuer, "Issuer");
+        this.issuerPublicKey = Common.notNull(issuerPublicKey, "IssuerPublicKey");
+        this.name = Common.notNull(name, "Name");
+        this.description = Common.notNull(description, "Description");
         this.decimals = decimals;
         this.reissuable = reissuable;
         this.quantity = quantity;
         this.scripted = scripted;
         this.minSponsoredAssetFee = minSponsoredAssetFee;
+        this.originTransactionId = Common.notNull(originTransactionId, "OriginTransactionId");
+        this.scriptDetails = scriptDetails == null ? new ScriptDetails("", 0) : scriptDetails;
     }
 
-    public AssetDetails(String assetId, Long issueHeight, String issuer, String name,
-                        String description, Integer decimals, Boolean reissuable, Long quantity,
-                        Boolean scripted, Long minSponsoredAssetFee, Object unused, final Long issueTimestamp) {
-        this.assetId = assetId;
-        this.issueHeight = issueHeight;
-        this.issuer = issuer;
-        this.name = name;
-        this.description = description;
-        this.decimals = decimals;
-        this.reissuable = reissuable;
-        this.quantity = quantity;
-        this.scripted = scripted;
-        this.minSponsoredAssetFee = minSponsoredAssetFee;
-        this.issueTimestamp = issueTimestamp;
-    }
-
-    public String getAssetId() {
+    public Id assetId() {
         return assetId;
     }
 
-    public Long getIssueHeight() {
+    public int issueHeight() {
         return issueHeight;
     }
 
-    public Long getIssueTimestamp() {
+    public long issueTimestamp() {
         return issueTimestamp;
     }
 
-    public String getIssuer() {
+    public Address issuer() {
         return issuer;
     }
 
-    public String getName() {
+    public PublicKey issuerPublicKey() {
+        return issuerPublicKey;
+    }
+
+    public String name() {
         return name;
     }
 
-    public String getDescription() {
+    public String description() {
         return description;
     }
 
-    public Integer getDecimals() {
+    public int decimals() {
         return decimals;
     }
 
-    public Boolean getReissuable() {
+    public boolean isReissuable() {
         return reissuable;
     }
 
-    public Long getQuantity() {
+    public long quantity() {
         return quantity;
     }
 
-    public Boolean getScripted() {
+    public boolean isScripted() {
         return scripted;
     }
 
-    public Long getMinSponsoredAssetFee() {
+    public long minSponsoredAssetFee() {
         return minSponsoredAssetFee;
     }
 
+    public Id originTransactionId() {
+        return originTransactionId;
+    }
+
+    public ScriptDetails scriptDetails() {
+        return scriptDetails;
+    }
+
     @Override
-    public boolean equals(final Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof AssetDetails))
-            return false;
-
-        final AssetDetails that = (AssetDetails) o;
-
-        if (getAssetId() != null ? !getAssetId().equals(that.getAssetId()) : that.getAssetId() != null)
-            return false;
-        if (getIssueHeight() != null ? !getIssueHeight().equals(that.getIssueHeight()) : that.getIssueHeight() != null)
-            return false;
-        if (getIssueTimestamp() != null ? !getIssueTimestamp().equals(that.getIssueTimestamp()) : that.getIssueTimestamp() != null)
-            return false;
-        if (getIssuer() != null ? !getIssuer().equals(that.getIssuer()) : that.getIssuer() != null)
-            return false;
-        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null)
-            return false;
-        if (getDescription() != null ? !getDescription().equals(that.getDescription()) : that.getDescription() != null)
-            return false;
-        if (getDecimals() != null ? !getDecimals().equals(that.getDecimals()) : that.getDecimals() != null)
-            return false;
-        if (getReissuable() != null ? !getReissuable().equals(that.getReissuable()) : that.getReissuable() != null)
-            return false;
-        if (getQuantity() != null ? !getQuantity().equals(that.getQuantity()) : that.getQuantity() != null)
-            return false;
-        if (getScripted() != null ? !getScripted().equals(that.getScripted()) : that.getScripted() != null)
-            return false;
-        return getMinSponsoredAssetFee() != null ? getMinSponsoredAssetFee().equals(that.getMinSponsoredAssetFee()) : that.getMinSponsoredAssetFee() == null;
-
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssetDetails that = (AssetDetails) o;
+        return issueHeight == that.issueHeight &&
+                issueTimestamp == that.issueTimestamp &&
+                decimals == that.decimals &&
+                reissuable == that.reissuable &&
+                quantity == that.quantity &&
+                scripted == that.scripted &&
+                minSponsoredAssetFee == that.minSponsoredAssetFee &&
+                Objects.equals(assetId, that.assetId) &&
+                Objects.equals(issuer, that.issuer) &&
+                Objects.equals(issuerPublicKey, that.issuerPublicKey) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(originTransactionId, that.originTransactionId) &&
+                Objects.equals(scriptDetails, that.scriptDetails);
     }
 
     @Override
     public int hashCode() {
-        int result = getAssetId() != null ? getAssetId().hashCode() : 0;
-        result = 31 * result + (getIssueHeight() != null ? getIssueHeight().hashCode() : 0);
-        result = 31 * result + (getIssueTimestamp() != null ? getIssueTimestamp().hashCode() : 0);
-        result = 31 * result + (getIssuer() != null ? getIssuer().hashCode() : 0);
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
-        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
-        result = 31 * result + (getDecimals() != null ? getDecimals().hashCode() : 0);
-        result = 31 * result + (getReissuable() != null ? getReissuable().hashCode() : 0);
-        result = 31 * result + (getQuantity() != null ? getQuantity().hashCode() : 0);
-        result = 31 * result + (getScripted() != null ? getScripted().hashCode() : 0);
-        result = 31 * result + (getMinSponsoredAssetFee() != null ? getMinSponsoredAssetFee().hashCode() : 0);
-        return result;
+        return Objects.hash(assetId, issueHeight, issueTimestamp, issuer, issuerPublicKey, name, description, decimals, reissuable, quantity, scripted, minSponsoredAssetFee, originTransactionId, scriptDetails);
     }
 
     @Override
     public String toString() {
         return "AssetDetails{" +
-                "assetId='" + assetId + '\'' +
+                "assetId=" + assetId +
                 ", issueHeight=" + issueHeight +
                 ", issueTimestamp=" + issueTimestamp +
-                ", issuer='" + issuer + '\'' +
+                ", issuer=" + issuer +
+                ", issuerPublicKey=" + issuerPublicKey +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", decimals=" + decimals +
@@ -161,6 +154,9 @@ public class AssetDetails implements Serializable {
                 ", quantity=" + quantity +
                 ", scripted=" + scripted +
                 ", minSponsoredAssetFee=" + minSponsoredAssetFee +
+                ", originTransactionId=" + originTransactionId +
+                ", scriptDetails=" + scriptDetails +
                 '}';
     }
+
 }

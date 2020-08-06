@@ -2,39 +2,61 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import im.mak.waves.transactions.account.Address;
 
 import java.util.Map;
+import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class AssetDistribution {
-    public final String lastItem;
-    public final Boolean hasNext;
-    public final Map<String, Long> items;
+
+    private final Map<Address, Long> items;
+    private final Address lastItem;
+    private final boolean hasNext;
 
     @JsonCreator
-    public AssetDistribution(
-            @JsonProperty("lastItem") String lastItem,
-            @JsonProperty("hasItems") Boolean hasNext,
-            @JsonProperty("items") Map<String, Long> items) {
-        this.lastItem = lastItem;
+    public AssetDistribution(@JsonProperty("items") Map<Address, Long> items,
+                             @JsonProperty("lastItem") Address lastItem,
+                             @JsonProperty("hasNext") boolean hasNext) {
+        this.items = Common.notNull(items, "Items");
+        this.lastItem = Common.notNull(lastItem, "LastItem");
         this.hasNext = hasNext;
-        this.items = items;
     }
 
-    private AssetDistribution(String lastItem, Boolean hasNext, Map<String, Long> items, Object unused) {
-        this.lastItem = lastItem;
-        this.hasNext = hasNext;
-        this.items = items;
-    }
-
-    public Map<String, Long> getItems() {
+    public Map<Address, Long> items() {
         return items;
     }
 
-    public String getLastItem() {
+    public Address lastItem() {
         return lastItem;
     }
 
-    public Boolean isHasNext() {
+    public boolean hasNext() {
         return hasNext;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssetDistribution that = (AssetDistribution) o;
+        return hasNext == that.hasNext &&
+                items.equals(that.items) &&
+                lastItem.equals(that.lastItem);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(items, lastItem, hasNext);
+    }
+
+    @Override
+    public String toString() {
+        return "Distribution{" +
+                "items=" + items +
+                ", lastItem=" + lastItem.toString() +
+                ", hasNext=" + hasNext +
+                '}';
+    }
+
 }

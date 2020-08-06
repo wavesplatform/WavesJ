@@ -6,8 +6,12 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>0.17.0</version>
+    <version>${revision}</version>
     <packaging>jar</packaging>
+
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+    </properties>
 
     <name>WavesJ</name>
     <description>Java library to interact with the Waves blockchain</description>
@@ -140,6 +144,12 @@
     </build>
 
     <dependencies>
+        <!-- waves -->
+        <dependency>
+            <groupId>im.mak</groupId>
+            <artifactId>waves-transactions</artifactId>
+            <version>1.0.0-rc1</version>
+        </dependency>
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>protobuf-schemas</artifactId>
@@ -150,57 +160,27 @@
             <artifactId>protobuf-java</artifactId>
             <version>3.12.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.whispersystems</groupId>
-            <artifactId>curve25519-java</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.58</version>
-        </dependency>
+
+        <!-- http client -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.8</version>
-        </dependency>
+
+        <!-- logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-            <scope>test</scope>
-        </dependency>
+
+        <!-- testing -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.20.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <version>1.20.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
-            <version>1.20.0</version>
         </dependency>
     </dependencies>
 </project>
