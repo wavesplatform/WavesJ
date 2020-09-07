@@ -468,7 +468,7 @@ public class Node {
 
     public TransactionStatus getTransactionStatus(Id txId) throws IOException, NodeException {
         return asType(get("/transactions/status").addParameter("id", txId.toString()),
-                TypeRef.TRANSACTIONS_STATUSES).get(0);
+                TypeRef.TRANSACTIONS_STATUS).get(0);
     }
 
     public List<TransactionStatus> getTransactionsStatus(List<Id> txIds) throws IOException, NodeException {
@@ -479,7 +479,7 @@ public class Node {
 
         return asType(post("/transactions/status")
                 .addHeader("Content-Type", "application/json")
-                .setEntity(body), TypeRef.TRANSACTIONS_STATUSES);
+                .setEntity(body), TypeRef.TRANSACTIONS_STATUS);
     }
 
     public List<TransactionStatus> getTransactionsStatus(Id... txIds) throws IOException, NodeException {
