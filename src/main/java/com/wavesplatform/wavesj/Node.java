@@ -165,7 +165,7 @@ public class Node {
         return asType(get("/alias/by-address/" + address.toString()), TypeRef.ALIASES);
     }
 
-    public Address getAddrByAlias(Alias alias) throws IOException, NodeException {
+    public Address getAddressByAlias(Alias alias) throws IOException, NodeException {
         return Address.as(asJson(get("/alias/by-alias/" + alias.name())).get("address").asText());
     }
 
@@ -363,7 +363,7 @@ public class Node {
         return asType(get("/debug/stateChanges/info/" + txId.toString()), TypeRef.TRANSACTION_DEBUG_INFO);
     }
 
-    public List<TransactionDebugInfo> getAddressStateChanges(Address address, int limit, Id afterTxId) throws IOException, NodeException {
+    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
         RequestBuilder request = get("/debug/stateChanges/address/" + address.toString() + "/limit/" + limit);
         if (afterTxId != null)
             request.addParameter("after", afterTxId.toString());
@@ -371,12 +371,12 @@ public class Node {
         return asType(request, TypeRef.TRANSACTIONS_DEBUG_INFO);
     }
 
-    public List<TransactionDebugInfo> getAddressStateChanges(Address address, int limit) throws IOException, NodeException {
-        return getAddressStateChanges(address, limit, null);
+    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit) throws IOException, NodeException {
+        return getStateChangesByAddress(address, limit, null);
     }
 
-    public List<TransactionDebugInfo> getAddressStateChanges(Address address) throws IOException, NodeException {
-        return getAddressStateChanges(address, 10);
+    public List<TransactionDebugInfo> getStateChangesByAddress(Address address) throws IOException, NodeException {
+        return getStateChangesByAddress(address, 10);
     }
 
     public <T extends Transaction> Validation validateTransaction(T transaction) throws IOException, NodeException {
@@ -429,8 +429,8 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<TransactionInfo> getAddressTransactions(Address address) throws IOException, NodeException {
-        return getAddressTransactions(address, 10);
+    public List<TransactionInfo> getTransactionsByAddress(Address address) throws IOException, NodeException {
+        return getTransactionsByAddress(address, 10);
     }
 
     /**
@@ -441,8 +441,8 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<TransactionInfo> getAddressTransactions(Address address, int limit) throws IOException, NodeException {
-        return getAddressTransactions(address, limit, null);
+    public List<TransactionInfo> getTransactionsByAddress(Address address, int limit) throws IOException, NodeException {
+        return getTransactionsByAddress(address, limit, null);
     }
 
     /**
@@ -454,7 +454,7 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<TransactionInfo> getAddressTransactions(Address address, int limit, Id afterTxId) throws IOException, NodeException {
+    public List<TransactionInfo> getTransactionsByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
         RequestBuilder request = get("/transactions/address/" + address.toString() + "/limit/" + limit);
         if (afterTxId != null)
             request.addParameter("after", afterTxId.toString());
@@ -471,7 +471,7 @@ public class Node {
                 TypeRef.TRANSACTIONS_STATUSES).get(0);
     }
 
-    public List<TransactionStatus> getTransactionsStatuses(List<Id> txIds) throws IOException, NodeException {
+    public List<TransactionStatus> getTransactionsStatus(List<Id> txIds) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonIds = jsonBody.putArray("ids");
         txIds.forEach(id -> jsonIds.add(id.toString()));
@@ -482,8 +482,8 @@ public class Node {
                 .setEntity(body), TypeRef.TRANSACTIONS_STATUSES);
     }
 
-    public List<TransactionStatus> getTransactionsStatuses(Id... txIds) throws IOException, NodeException {
-        return getTransactionsStatuses(new ArrayList<>(Arrays.asList(txIds)));
+    public List<TransactionStatus> getTransactionsStatus(Id... txIds) throws IOException, NodeException {
+        return getTransactionsStatus(new ArrayList<>(Arrays.asList(txIds)));
     }
 
     public Transaction getUnconfirmedTransaction(Id txId) throws IOException, NodeException {
