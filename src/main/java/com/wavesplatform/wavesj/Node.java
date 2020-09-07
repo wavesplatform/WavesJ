@@ -432,7 +432,7 @@ public class Node {
     }
 
     //todo do the same for all endpoints with pagination
-    /*
+    /**
      * Returns iterator with dynamic transactions loading to navigate over all account transactions including state changes
      * information
      *
@@ -444,7 +444,7 @@ public class Node {
      * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
      * @throws IOException in case of any network failures
      */
-    /*public Iterable<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException, NodeException {
+    public Iterable<TransactionStCh> getAddressStateChangesIterator(String address, int pageSize) throws IOException, NodeException {
         try {
             return new AllTxIterator<TransactionStCh>(address, pageSize, new TransactionsLazyLoader<List<TransactionStCh>>() {
                 @Override
@@ -455,7 +455,7 @@ public class Node {
         } catch (AllTxIterator.WrappedIOException ex) {
             throw ex.unwrap();
         }
-    }*/
+    }
 
     //===============
     // LEASING
