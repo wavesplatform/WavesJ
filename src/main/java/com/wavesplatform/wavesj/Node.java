@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.json.TypeRef;
 import com.wavesplatform.wavesj.json.WavesJMapper;
+import im.mak.waves.transactions.WavesConfig;
 import im.mak.waves.transactions.account.Address;
 import im.mak.waves.transactions.LeaseTransaction;
 import im.mak.waves.transactions.Transaction;
@@ -56,7 +57,7 @@ public class Node {
                 .build();
         this.mapper = new WavesJMapper();
         this.chainId = getAddresses().get(0).chainId();
-        WavesJConfig.chainId(this.chainId);
+        WavesConfig.chainId(this.chainId);
     }
 
     public Node(String url) throws URISyntaxException, IOException, NodeException {
