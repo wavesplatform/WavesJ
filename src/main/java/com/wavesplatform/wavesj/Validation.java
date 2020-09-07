@@ -14,7 +14,6 @@ public class Validation {
     @JsonCreator
     public Validation(@JsonProperty("valid") boolean valid,
                       @JsonProperty("validationTime") long validationTime,
-//todo NODE-2197 @JsonProperty("trace") List<String> trace,
                       @JsonProperty("error") String error) {
         this.valid = valid;
         this.validationTime = validationTime;

@@ -3,6 +3,7 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import im.mak.waves.transactions.account.Address;
+import im.mak.waves.transactions.common.Base64String;
 
 import java.util.Map;
 import java.util.Objects;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 public class ScriptInfo {
 
     private final Address address;
-    private final String script;
+    private final Base64String script;
     private final int complexity;
     private final int verifierComplexity;
     private final Map<String, Integer> callableComplexities;
@@ -20,13 +21,13 @@ public class ScriptInfo {
 
     @JsonCreator
     public ScriptInfo(@JsonProperty("address") Address address,
-                      @JsonProperty("script") String script,
+                      @JsonProperty("script") Base64String script,
                       @JsonProperty("complexity") int complexity,
                       @JsonProperty("verifierComplexity") int verifierComplexity,
                       @JsonProperty("callableComplexities") Map<String, Integer> callableComplexities,
                       @JsonProperty("extraFee") long extraFee) {
         this.address = Common.notNull(address, "Address");
-        this.script = script == null ? "" : script;
+        this.script = script == null ? Base64String.empty() : script;
         this.complexity = complexity;
         this.verifierComplexity = verifierComplexity;
         this.callableComplexities = Common.notNull(callableComplexities, "CallableComplexities");
@@ -37,7 +38,7 @@ public class ScriptInfo {
         return address;
     }
 
-    public String script() {
+    public Base64String script() {
         return script;
     }
 

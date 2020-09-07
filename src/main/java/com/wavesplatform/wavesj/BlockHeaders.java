@@ -3,8 +3,7 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import im.mak.waves.transactions.account.Address;
-import im.mak.waves.transactions.account.PublicKey;
-import im.mak.waves.transactions.common.Id;
+import im.mak.waves.transactions.common.Base58String;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,63 +17,60 @@ import java.util.Objects;
 public class BlockHeaders {
     private final int version;
     private final long timestamp;
-    private final Id reference;
+    private final Base58String reference;
     private long baseTarget;
-    private String generationSignature;
-    private final String transactionsRoot; //todo common type
-    private final Id id;
+    private Base58String generationSignature;
+    private final Base58String transactionsRoot;
+    private final Base58String id;
     private final List<Integer> features;
     private final long desiredReward;
     private final Address generator;
-    private final PublicKey generatorPublicKey;
-    private final String signature; //todo common type
+    private final Base58String signature;
     private final int size;
     private final int transactionsCount;
     private final int height;
     private final long totalFee;
     private final long reward;
-    private final Id vrf; //todo common binary type instead of Id
+    private final Base58String vrf;
 
     @JsonCreator
-    public BlockHeaders( //todo what about old versions?
+    public BlockHeaders( //todo test on old versions of block
             @JsonProperty("version") int version,
             @JsonProperty("timestamp") long timestamp,
-            @JsonProperty("reference") Id reference,
-            @JsonProperty("transactionsRoot") String transactionsRoot,
-            @JsonProperty("id") Id id,
+            @JsonProperty("reference") Base58String reference,
+            @JsonProperty("transactionsRoot") Base58String transactionsRoot,
+            @JsonProperty("id") Base58String id,
             @JsonProperty("features") List<Integer> features,
             @JsonProperty("desiredReward") long desiredReward,
             @JsonProperty("generator") Address generator,
-            @JsonProperty("generatorPublicKey") PublicKey generatorPublicKey,
-            @JsonProperty("signature") String signature,
+            @JsonProperty("signature") Base58String signature,
             @JsonProperty("blocksize") int size,
-            @JsonProperty("transactionsCount") int transactionsCount,
+            @JsonProperty("transactionCount") int transactionsCount,
             @JsonProperty("height") int height,
             @JsonProperty("totalFee") long totalFee,
             @JsonProperty("reward") long reward,
-            @JsonProperty("VRF") Id vrf) {
+            @JsonProperty("VRF") Base58String vrf) {
         this.height = height;
         this.version = version;
         this.timestamp = timestamp;
         this.reference = Common.notNull(reference, "Reference");
-        this.transactionsRoot = height == 1 ? "" : Common.notNull(transactionsRoot, "TransactionsRoot");
-        this.id = height == 1 ? Id.as("11111111111111111111111111111111") : Common.notNull(id, "Id");
-        this.features = height == 1 ? new ArrayList<>() : Common.notNull(features, "Features");
-        this.desiredReward = desiredReward;
         this.generator = Common.notNull(generator, "Generator");
-        this.generatorPublicKey = Common.notNull(generatorPublicKey, "GeneratorPublicKey");
         this.signature = Common.notNull(signature, "Signature");
+        this.id = id == null ? this.signature : id;
+        this.vrf = vrf == null ? Base58String.empty() : vrf;
+        this.transactionsRoot = transactionsRoot == null ? Base58String.empty() : transactionsRoot;
         this.size = size;
         this.transactionsCount = transactionsCount;
         this.totalFee = totalFee;
         this.reward = reward;
-        this.vrf = vrf == null ? Id.as("11111111111111111111111111111111") : vrf;
+        this.desiredReward = desiredReward;
+        this.features = features == null ? new ArrayList<>() : features;
     }
 
     @JsonProperty("nxt-consensus")
     private void nxtConsensus(Map<String, Object> nxtConsensus) {
         this.baseTarget = (int) nxtConsensus.get("base-target");
-        this.generationSignature = (String) nxtConsensus.get("generation-signature");
+        this.generationSignature = new Base58String((String) nxtConsensus.get("generation-signature"));
     }
 
     public int version() {
@@ -85,7 +81,7 @@ public class BlockHeaders {
         return timestamp;
     }
 
-    public Id reference() {
+    public Base58String reference() {
         return reference;
     }
 
@@ -93,15 +89,15 @@ public class BlockHeaders {
         return baseTarget;
     }
 
-    public String generationSignature() {
+    public Base58String generationSignature() {
         return generationSignature;
     }
 
-    public String transactionsRoot() {
+    public Base58String transactionsRoot() {
         return transactionsRoot;
     }
 
-    public Id id() {
+    public Base58String id() {
         return id;
     }
 
@@ -117,11 +113,7 @@ public class BlockHeaders {
         return generator;
     }
 
-    public PublicKey generatorPublicKey() {
-        return generatorPublicKey;
-    }
-
-    public String signature() {
+    public Base58String signature() {
         return signature;
     }
 
@@ -145,7 +137,7 @@ public class BlockHeaders {
         return reward;
     }
 
-    public Id vrf() {
+    public Base58String vrf() {
         return vrf;
     }
 
@@ -169,14 +161,13 @@ public class BlockHeaders {
                 Objects.equals(id, that.id) &&
                 Objects.equals(features, that.features) &&
                 Objects.equals(generator, that.generator) &&
-                Objects.equals(generatorPublicKey, that.generatorPublicKey) &&
                 Objects.equals(signature, that.signature) &&
                 Objects.equals(vrf, that.vrf);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, timestamp, reference, baseTarget, generationSignature, transactionsRoot, id, features, desiredReward, generator, generatorPublicKey, signature, size, transactionsCount, height, totalFee, reward, vrf);
+        return Objects.hash(version, timestamp, reference, baseTarget, generationSignature, transactionsRoot, id, features, desiredReward, generator, signature, size, transactionsCount, height, totalFee, reward, vrf);
     }
 
     @Override
@@ -192,7 +183,6 @@ public class BlockHeaders {
                 ", features=" + features +
                 ", desiredReward=" + desiredReward +
                 ", generator=" + generator +
-                ", generatorPublicKey=" + generatorPublicKey +
                 ", signature='" + signature + '\'' +
                 ", size=" + size +
                 ", transactionsCount=" + transactionsCount +
