@@ -3,14 +3,14 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import im.mak.waves.transactions.Transaction;
-import im.mak.waves.transactions.common.Id;
+import im.mak.waves.transactions.common.AssetId;
 
 import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class AssetBalance {
 
-    public final Id assetId;
+    public final AssetId assetId;
     public final long balance;
     public final boolean reissuable;
     public final long minSponsoredAssetFee;
@@ -19,7 +19,7 @@ public class AssetBalance {
     public final Transaction issueTransaction;
 
     @JsonCreator
-    public AssetBalance(@JsonProperty("assetId") Id assetId,
+    public AssetBalance(@JsonProperty("assetId") AssetId assetId,
                         @JsonProperty("balance") long balance,
                         @JsonProperty("reissuable") boolean reissuable,
                         @JsonProperty("minSponsoredAssetFee") long minSponsoredAssetFee,
@@ -35,7 +35,7 @@ public class AssetBalance {
         this.issueTransaction = issueTransaction;
     }
 
-    public Id assetId() {
+    public AssetId assetId() {
         return assetId;
     }
 

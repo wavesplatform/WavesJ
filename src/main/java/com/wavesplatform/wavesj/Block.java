@@ -3,8 +3,7 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import im.mak.waves.transactions.account.Address;
-import im.mak.waves.transactions.account.PublicKey;
-import im.mak.waves.transactions.common.Id;
+import im.mak.waves.transactions.common.Base58String;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,28 +21,27 @@ public class Block extends BlockHeaders {
     public Block(
             @JsonProperty("version") int version,
             @JsonProperty("timestamp") long timestamp,
-            @JsonProperty("reference") Id reference,
-            @JsonProperty("transactionsRoot") String transactionsRoot,
-            @JsonProperty("id") Id id,
+            @JsonProperty("reference") Base58String reference,
+            @JsonProperty("transactionsRoot") Base58String transactionsRoot,
+            @JsonProperty("id") Base58String id,
             @JsonProperty("features") List<Integer> features,
             @JsonProperty("desiredReward") long desiredReward,
             @JsonProperty("generator") Address generator,
-            @JsonProperty("generatorPublicKey") PublicKey generatorPublicKey,
-            @JsonProperty("signature") String signature,
+            @JsonProperty("signature") Base58String signature,
             @JsonProperty("blocksize") int size,
-            @JsonProperty("transactionsCount") int transactionsCount,
+            @JsonProperty("transactionCount") int transactionsCount,
             @JsonProperty("height") int height,
             @JsonProperty("totalFee") long totalFee,
             @JsonProperty("reward") long reward,
-            @JsonProperty("VRF") Id vrf,
+            @JsonProperty("VRF") Base58String vrf,
             @JsonProperty("fee") long fee,
             @JsonProperty("transactions") List<TransactionInfo> transactions) {
         super(version, timestamp, reference, transactionsRoot, id, features, desiredReward, generator,
-                generatorPublicKey, signature, size, transactionsCount, height, totalFee, reward, vrf);
+                signature, size, transactionsCount, height, totalFee, reward, vrf);
         this.fee = fee;
         this.transactions = Common.notNull(transactions, "Transactions");
 
-        //transactions in block don't have height
+        //transactions in block don't have height field in json
         for (int i = 0; i < this.transactions.size(); i++) {
             TransactionInfo info = this.transactions.get(i);
             if (info.height() == 0)
@@ -87,7 +85,6 @@ public class Block extends BlockHeaders {
                 ", features=" + features() +
                 ", desiredReward=" + desiredReward() +
                 ", generator=" + generator() +
-                ", generatorPublicKey=" + generatorPublicKey() +
                 ", signature='" + signature() + '\'' +
                 ", size=" + size() +
                 ", transactionsCount=" + transactionsCount() +

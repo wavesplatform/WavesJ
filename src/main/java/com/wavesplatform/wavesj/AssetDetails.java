@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import im.mak.waves.transactions.account.Address;
 import im.mak.waves.transactions.account.PublicKey;
+import im.mak.waves.transactions.common.AssetId;
 import im.mak.waves.transactions.common.Id;
 
 import java.util.Objects;
@@ -11,7 +12,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class AssetDetails {
 
-    private final Id assetId;
+    private final AssetId assetId;
     private final int issueHeight;
     private final long issueTimestamp;
     private final Address issuer;
@@ -27,7 +28,7 @@ public class AssetDetails {
     private final ScriptDetails scriptDetails;
 
     @JsonCreator
-    public AssetDetails(@JsonProperty("assetId") Id assetId,
+    public AssetDetails(@JsonProperty("assetId") AssetId assetId,
                         @JsonProperty("issueHeight") int issueHeight,
                         @JsonProperty("issueTimestamp") long issueTimestamp,
                         @JsonProperty("issuer") Address issuer,
@@ -57,7 +58,7 @@ public class AssetDetails {
         this.scriptDetails = scriptDetails == null ? new ScriptDetails("", 0) : scriptDetails;
     }
 
-    public Id assetId() {
+    public AssetId assetId() {
         return assetId;
     }
 

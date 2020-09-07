@@ -2,7 +2,7 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import im.mak.waves.transactions.account.Address;
+import im.mak.waves.transactions.common.Base64String;
 
 import java.util.Map;
 import java.util.Objects;
@@ -11,33 +11,26 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ScriptInfo {
 
-    private final Address address;
-    private final String script;
+    private final Base64String script;
     private final int complexity;
     private final int verifierComplexity;
     private final Map<String, Integer> callableComplexities;
     private final long extraFee;
 
     @JsonCreator
-    public ScriptInfo(@JsonProperty("address") Address address,
-                      @JsonProperty("script") String script,
+    public ScriptInfo(@JsonProperty("script") Base64String script,
                       @JsonProperty("complexity") int complexity,
                       @JsonProperty("verifierComplexity") int verifierComplexity,
                       @JsonProperty("callableComplexities") Map<String, Integer> callableComplexities,
                       @JsonProperty("extraFee") long extraFee) {
-        this.address = Common.notNull(address, "Address");
-        this.script = script == null ? "" : script;
+        this.script = script == null ? Base64String.empty() : script;
         this.complexity = complexity;
         this.verifierComplexity = verifierComplexity;
         this.callableComplexities = Common.notNull(callableComplexities, "CallableComplexities");
         this.extraFee = extraFee;
     }
 
-    public Address address() {
-        return address;
-    }
-
-    public String script() {
+    public Base64String script() {
         return script;
     }
 
@@ -65,14 +58,13 @@ public class ScriptInfo {
         return complexity == that.complexity &&
                 verifierComplexity == that.verifierComplexity &&
                 extraFee == that.extraFee &&
-                address.equals(that.address) &&
                 script.equals(that.script) &&
                 callableComplexities.equals(that.callableComplexities);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(address, script, complexity, verifierComplexity, callableComplexities, extraFee);
+        return Objects.hash(script, complexity, verifierComplexity, callableComplexities, extraFee);
     }
 
     @Override
@@ -81,8 +73,7 @@ public class ScriptInfo {
                 .map(key -> key + "=" + callableComplexities.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
         return "ScriptInfo{" +
-                "address=" + address.toString() +
-                ", script='" + script + '\'' +
+                "script='" + script + '\'' +
                 ", complexity=" + complexity +
                 ", verifierComplexity=" + verifierComplexity +
                 ", callableComplexities=" + callables +

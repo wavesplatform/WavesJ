@@ -1,3 +1,9 @@
+## 1.0.0
+- significantly redesigned interface
+- based on [Waves Crypto](https://github.com/wavesplatform/waves-crypto-java) and [Waves transactions](https://github.com/wavesplatform/waves-transactions-java) libraries
+- supported most of Waves Node API
+- feature #15 of Waves Node 1.2 Malibu release is now supported
+
 ## 0.17.0
 - new InvokeScriptTransactionStCh with stateChanges attribute was added. It was design to provide an additional information about Invocation transaction and couldn't be used to post invokes into blockchain. That why constructor was marked as package-private
 - new AllTxIterator class to navigate over all account transactions. It has a generic semantic and can be used for other endpoints and transaction.

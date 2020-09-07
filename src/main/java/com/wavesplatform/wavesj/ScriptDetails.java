@@ -2,23 +2,24 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import im.mak.waves.transactions.common.Base64String;
 
 import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class ScriptDetails {
 
-    private final String script;
+    private final Base64String script;
     private final int complexity;
 
     @JsonCreator
     public ScriptDetails(@JsonProperty("script") String script,
                          @JsonProperty("scriptComplexity") int complexity) {
-        this.script = Common.notNull(script, "Script");
+        this.script = new Base64String(Common.notNull(script, "Script"));
         this.complexity = complexity;
     }
 
-    public String script() {
+    public Base64String script() {
         return script;
     }
 

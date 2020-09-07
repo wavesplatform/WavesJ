@@ -7,12 +7,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.json.TypeRef;
 import com.wavesplatform.wavesj.json.WavesJMapper;
+import im.mak.waves.transactions.WavesConfig;
 import im.mak.waves.transactions.account.Address;
 import im.mak.waves.transactions.LeaseTransaction;
 import im.mak.waves.transactions.Transaction;
-import im.mak.waves.transactions.common.Alias;
-import im.mak.waves.transactions.common.Amount;
-import im.mak.waves.transactions.common.Id;
+import im.mak.waves.transactions.common.*;
 import im.mak.waves.transactions.data.DataEntry;
 import im.mak.waves.transactions.serializers.json.JsonSerializer;
 import org.apache.http.HttpResponse;
@@ -36,55 +35,8 @@ import java.util.regex.Pattern;
 
 import static im.mak.waves.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 
-//todo NodeGRPC
 @SuppressWarnings("unused")
 public class Node {
-
-    /* Not supported endpoints:
-    activationStatus
-    createAddress
-    deleteAddress
-    data get or post or form
-    addresses/publicKey
-    addresses/seed
-    addresses/sign
-    addresses/signText
-    addresses/validate
-    addresses/verify
-    addresses/verifyText
-    consensus/algo
-    consensus/basetarget, (blockId)
-    consensus/generatingbalance
-    debug/blacklist
-    debug/blocks/howMany
-    debug/configInfo
-    debug/info
-    debug/minerInfo
-    debug/portfolios
-    debug/print
-    debug/rollback
-    debug/rollback-to
-    debug/state
-    debug/stateWaves
-    node/status
-    node/stop
-    peers
-    peers/blacklisted
-    peers/clearblacklist
-    peers/connect
-    peers/connected
-    peers/suspended
-    transactions/sign, (address)
-    utils/hash/fast
-    utils/hash/secure
-    utils/script/compileCode
-    utils/script/decompile
-    utils/script/compileWithImports
-    utils/seed, (length)
-    utils/time
-    utils/transactionSerialize
-    wallet/seed
-    */
 
     private final byte chainId;
     private final HttpClient client;
@@ -103,8 +55,9 @@ public class Node {
                                 .setCookieSpec(CookieSpecs.STANDARD)
                                 .build())
                 .build();
-        this.mapper = new WavesJMapper(); //todo make static global? Inherit from waves-transactions? Or get from it?
-        this.chainId = getAddresses().get(0).bytes()[1];
+        this.mapper = new WavesJMapper();
+        this.chainId = getAddresses().get(0).chainId();
+        WavesConfig.chainId(this.chainId);
     }
 
     public Node(String url) throws URISyntaxException, IOException, NodeException {
@@ -127,8 +80,6 @@ public class Node {
         return uri;
     }
 
-    //todo javadoc
-
     //===============
     // ADDRESSES
     //===============
@@ -150,6 +101,8 @@ public class Node {
         return asJson(get("/addresses/balance/" + address.toString() + "/" + confirmations))
                 .get("balance").asLong();
     }
+
+    //todo getBalances(height, Address...) for several addresses at height
 
     public BalanceDetails getBalanceDetails(Address address) throws IOException, NodeException {
         return asType(get("/addresses/balance/details/" + address.toString()), TypeRef.BALANCE_DETAILS);
@@ -212,7 +165,7 @@ public class Node {
         return asType(get("/alias/by-address/" + address.toString()), TypeRef.ALIASES);
     }
 
-    public Address getAddrByAlias(Alias alias) throws IOException, NodeException {
+    public Address getAddressByAlias(Alias alias) throws IOException, NodeException {
         return Address.as(asJson(get("/alias/by-alias/" + alias.name())).get("address").asText());
     }
 
@@ -220,15 +173,15 @@ public class Node {
     // ASSETS
     //===============
 
-    public AssetDistribution getAssetDistribution(Id assetId, int height) throws IOException, NodeException {
+    public AssetDistribution getAssetDistribution(AssetId assetId, int height) throws IOException, NodeException {
         return getAssetDistribution(assetId, height, 10);
     }
 
-    public AssetDistribution getAssetDistribution(Id assetId, int height, int limit) throws IOException, NodeException {
+    public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit) throws IOException, NodeException {
         return getAssetDistribution(assetId, height, limit, null);
     }
 
-    public AssetDistribution getAssetDistribution(Id assetId, int height, int limit, Address after) throws IOException, NodeException {
+    public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit, Address after) throws IOException, NodeException {
         RequestBuilder request = get("/assets/" + assetId.toString() + "/distribution/" + height + "/limit/" + limit);
         if (after != null)
             request.addParameter("after", after.toString());
@@ -240,18 +193,18 @@ public class Node {
                 .readValue(asJson(get("/assets/balance/" + address.toString())).get("balances"));
     }
 
-    public long getAssetBalance(Address address, Id assetId) throws IOException, NodeException {
+    public long getAssetBalance(Address address, AssetId assetId) throws IOException, NodeException {
         return asJson(get("/assets/balance/" + address.toString() + "/" + assetId.toString()))
                 .get("balance").asLong();
     }
 
-    public AssetDetails getAssetDetails(Id assetId) throws IOException, NodeException {
+    public AssetDetails getAssetDetails(AssetId assetId) throws IOException, NodeException {
         return asType(get("/assets/details/" + assetId.toString()).addParameter("full", "true"),
                 TypeRef.ASSET_DETAILS);
     }
 
     //todo what if some asset doesn't exist? (error json with code and message) Either in java?
-    public List<AssetDetails> getAssetsDetails(List<Id> assetIds) throws IOException, NodeException {
+    public List<AssetDetails> getAssetsDetails(List<AssetId> assetIds) throws IOException, NodeException {
         RequestBuilder request = get("/assets/details").addParameter("full", "true");
         assetIds.forEach(id -> request.addParameter("id", id.toString()));
 
@@ -266,7 +219,7 @@ public class Node {
         return this.getNft(address, limit, null);
     }
 
-    public List<AssetDetails> getNft(Address address, int limit, Id after) throws IOException, NodeException {
+    public List<AssetDetails> getNft(Address address, int limit, AssetId after) throws IOException, NodeException {
         RequestBuilder request = get("/assets/nft/" + address.toString() + "/limit/" + limit);
         if (after != null)
             request.addParameter("after", after.toString());
@@ -304,13 +257,13 @@ public class Node {
         return asJson(get("/blocks/height")).get("height").asInt();
     }
 
-    public int getBlockHeight(Id blockId) throws IOException, NodeException {
+    public int getBlockHeight(Base58String blockId) throws IOException, NodeException {
         return asJson(get("/blocks/height/" + blockId.toString()))
                 .get("height").asInt();
     }
 
-    public int getBlocksDelay(Id startBlock, int blocksNum) throws IOException, NodeException {
-        return asJson(get("/blocks/delay/" + startBlock.toString() + "/" + blocksNum))
+    public int getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
+        return asJson(get("/blocks/delay/" + startBlockId.toString() + "/" + blocksNum))
                 .get("delay").asInt();
     }
 
@@ -325,7 +278,7 @@ public class Node {
         return asType(get("/blocks/headers/at/" + height), TypeRef.BLOCK_HEADERS);
     }
 
-    public BlockHeaders getBlockHeaders(Id blockId) throws IOException, NodeException {
+    public BlockHeaders getBlockHeaders(Base58String blockId) throws IOException, NodeException {
         return asType(get("/blocks/headers/" + blockId.toString()), TypeRef.BLOCK_HEADERS);
     }
 
@@ -369,7 +322,7 @@ public class Node {
      * @return block object
      * @throws IOException if no block with the given signature exists
      */
-    public Block getBlock(Id blockId) throws IOException, NodeException {
+    public Block getBlock(Base58String blockId) throws IOException, NodeException {
         return asType(get("/blocks/" + blockId.toString()), TypeRef.BLOCK);
     }
 
@@ -410,52 +363,26 @@ public class Node {
         return asType(get("/debug/stateChanges/info/" + txId.toString()), TypeRef.TRANSACTION_DEBUG_INFO);
     }
 
-    public List<TransactionDebugInfo> getAddressStateChanges(Address address, int limit, Id after) throws IOException, NodeException {
+    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
         RequestBuilder request = get("/debug/stateChanges/address/" + address.toString() + "/limit/" + limit);
-        if (after != null)
-            request.addParameter("after", after.toString());
+        if (afterTxId != null)
+            request.addParameter("after", afterTxId.toString());
 
         return asType(request, TypeRef.TRANSACTIONS_DEBUG_INFO);
     }
 
-    public List<TransactionDebugInfo> getAddressStateChanges(Address address, int limit) throws IOException, NodeException {
-        return getAddressStateChanges(address, limit, null);
+    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit) throws IOException, NodeException {
+        return getStateChangesByAddress(address, limit, null);
     }
 
-    public List<TransactionDebugInfo> getAddressStateChanges(Address address) throws IOException, NodeException {
-        return getAddressStateChanges(address, 10);
+    public List<TransactionDebugInfo> getStateChangesByAddress(Address address) throws IOException, NodeException {
+        return getStateChangesByAddress(address, 10);
     }
 
     public <T extends Transaction> Validation validateTransaction(T transaction) throws IOException, NodeException {
         return asType(post("/debug/validate")
                 .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)), TypeRef.VALIDATION);
     }
-
-    //todo do the same for all endpoints with pagination
-    /*
-     * Returns iterator with dynamic transactions loading to navigate over all account transactions including state changes
-     * information
-     *
-     * Be careful. Some nodes could turn OFF information about state changes.
-     * Also iterator can throw {@link AllTxIterator.WrappedIOException} in case of any network failures
-     *
-     * @param address account address
-     * @param pageSize page size to navigate over all transactions
-     * @return iterator which can throw {@link AllTxIterator.WrappedIOException}
-     * @throws IOException in case of any network failures
-     */
-    /*public Iterable<TransactionStCh> getAllAddressStateChanges(String address, int pageSize) throws IOException, NodeException {
-        try {
-            return new AllTxIterator<TransactionStCh>(address, pageSize, new TransactionsLazyLoader<List<TransactionStCh>>() {
-                @Override
-                public List<TransactionStCh> load(String address, int limit, String after) throws IOException, NodeException {
-                    return NewNode.this.getAddressStateChanges(address, limit, after) ;
-                }
-            });
-        } catch (AllTxIterator.WrappedIOException ex) {
-            throw ex.unwrap();
-        }
-    }*/
 
     //===============
     // LEASING
@@ -477,11 +404,10 @@ public class Node {
     /*
     example to javadoc: IssueTransaction tx = broadcast(IssueTransaction.with("", 1, 0).get());
      */
-    //todo throw BroadcastException(code, message, tx, trace, validate) extends NodeException
     public <T extends Transaction> T broadcast(T transaction) throws IOException, NodeException {
         //noinspection unchecked
         return (T) asType(post("/transactions/broadcast")
-                .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)),
+                        .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)),
                 TypeRef.TRANSACTION);
     }
 
@@ -503,8 +429,8 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<TransactionInfo> getAddressTransactions(Address address) throws IOException, NodeException {
-        return getAddressTransactions(address, 10);
+    public List<TransactionInfo> getTransactionsByAddress(Address address) throws IOException, NodeException {
+        return getTransactionsByAddress(address, 10);
     }
 
     /**
@@ -515,23 +441,23 @@ public class Node {
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<TransactionInfo> getAddressTransactions(Address address, int limit) throws IOException, NodeException {
-        return getAddressTransactions(address, limit, null);
+    public List<TransactionInfo> getTransactionsByAddress(Address address, int limit) throws IOException, NodeException {
+        return getTransactionsByAddress(address, limit, null);
     }
 
     /**
      * Returns transactions by address with limit after passed transaction id.
      *
-     * @param address address
-     * @param limit   transactions limit
-     * @param after   separate transaction id
+     * @param address   address
+     * @param limit     transactions limit
+     * @param afterTxId separate transaction id
      * @return list of transactions
      * @throws IOException if something going wrong
      */
-    public List<TransactionInfo> getAddressTransactions(Address address, int limit, Id after) throws IOException, NodeException {
+    public List<TransactionInfo> getTransactionsByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
         RequestBuilder request = get("/transactions/address/" + address.toString() + "/limit/" + limit);
-        if (after != null)
-            request.addParameter("after", after.toString());
+        if (afterTxId != null)
+            request.addParameter("after", afterTxId.toString());
 
         //because there is a bug in the Node api: the array of transactions is nested in another array:
         // [ [ {}, {}, ... ] ]
@@ -540,24 +466,24 @@ public class Node {
                 .readValue(asJson(request).get(0));
     }
 
-    public TransactionStatus getTransactionStatus(Id id) throws IOException, NodeException {
-        return asType(get("/transactions/status").addParameter("id", id.toString()),
-                TypeRef.TRANSACTIONS_STATUSES).get(0);
+    public TransactionStatus getTransactionStatus(Id txId) throws IOException, NodeException {
+        return asType(get("/transactions/status").addParameter("id", txId.toString()),
+                TypeRef.TRANSACTIONS_STATUS).get(0);
     }
 
-    public List<TransactionStatus> getTransactionsStatuses(List<Id> ids) throws IOException, NodeException {
+    public List<TransactionStatus> getTransactionsStatus(List<Id> txIds) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonIds = jsonBody.putArray("ids");
-        ids.forEach(id -> jsonIds.add(id.toString()));
+        txIds.forEach(id -> jsonIds.add(id.toString()));
         StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
 
         return asType(post("/transactions/status")
                 .addHeader("Content-Type", "application/json")
-                .setEntity(body), TypeRef.TRANSACTIONS_STATUSES);
+                .setEntity(body), TypeRef.TRANSACTIONS_STATUS);
     }
 
-    public List<TransactionStatus> getTransactionsStatuses(Id... ids) throws IOException, NodeException {
-        return getTransactionsStatuses(new ArrayList<>(Arrays.asList(ids)));
+    public List<TransactionStatus> getTransactionsStatus(Id... txIds) throws IOException, NodeException {
+        return getTransactionsStatus(new ArrayList<>(Arrays.asList(txIds)));
     }
 
     public Transaction getUnconfirmedTransaction(Id txId) throws IOException, NodeException {
@@ -573,6 +499,17 @@ public class Node {
     }
 
     //===============
+    // UTILS
+    //===============
+
+    public ScriptInfo compileScript(String source) throws IOException, NodeException {
+        return asType(post("/utils/script/compileCode")
+                        .addHeader("Content-Type", "text/plain")
+                        .setEntity(new StringEntity(source, StandardCharsets.UTF_8)),
+                TypeRef.SCRIPT_INFO);
+    }
+
+    //===============
     // HTTP REQUESTS
     //===============
 
@@ -584,12 +521,10 @@ public class Node {
         return RequestBuilder.post(uri.resolve(path));
     }
 
-    //todo error codes enum
     private HttpResponse exec(HttpUriRequest request) throws IOException, NodeException {
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
             throw mapper.readValue(r.getEntity().getContent(), NodeException.class);
-        //todo ...future...
         return r;
     }
 
