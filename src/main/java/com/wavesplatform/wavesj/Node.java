@@ -407,7 +407,7 @@ public class Node {
     public <T extends Transaction> T broadcast(T transaction) throws IOException, NodeException {
         //noinspection unchecked
         return (T) asType(post("/transactions/broadcast")
-                .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)),
+                        .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)),
                 TypeRef.TRANSACTION);
     }
 
@@ -448,9 +448,9 @@ public class Node {
     /**
      * Returns transactions by address with limit after passed transaction id.
      *
-     * @param address address
-     * @param limit   transactions limit
-     * @param afterTxId   separate transaction id
+     * @param address   address
+     * @param limit     transactions limit
+     * @param afterTxId separate transaction id
      * @return list of transactions
      * @throws IOException if something going wrong
      */
@@ -496,6 +496,17 @@ public class Node {
 
     public int getUtxSize() throws IOException, NodeException {
         return asJson(get("/transactions/unconfirmed/size")).get("size").asInt();
+    }
+
+    //===============
+    // UTILS
+    //===============
+
+    public ScriptInfo compileScript(String source) throws IOException, NodeException {
+        return asType(post("/utils/script/compileCode")
+                        .addHeader("Content-Type", "text/plain")
+                        .setEntity(new StringEntity(source, StandardCharsets.UTF_8)),
+                TypeRef.SCRIPT_INFO);
     }
 
     //===============
