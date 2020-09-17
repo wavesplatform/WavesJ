@@ -26,6 +26,8 @@ public class TypeRef {
 
     public static final TypeReference<List<AssetDetails>> ASSETS_DETAILS = new TypeReference<List<AssetDetails>>() {};
 
+    public static final TypeReference<List<Balance>> BALANCES = new TypeReference<List<Balance>>() {};
+
     public static final TypeReference<BalanceDetails> BALANCE_DETAILS = new TypeReference<BalanceDetails>() {};
 
     public static final TypeReference<Block> BLOCK = new TypeReference<Block>() {};
