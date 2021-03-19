@@ -5,10 +5,10 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.wavesplatform.transactions.Transaction;
 import com.wavesplatform.wavesj.ApplicationStatus;
-import com.wavesplatform.wavesj.TransactionDebugInfo;
 import com.wavesplatform.wavesj.StateChanges;
-import im.mak.waves.transactions.Transaction;
+import com.wavesplatform.wavesj.TransactionDebugInfo;
 
 import java.io.IOException;
 

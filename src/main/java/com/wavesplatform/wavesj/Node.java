@@ -4,16 +4,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.wavesplatform.transactions.LeaseTransaction;
+import com.wavesplatform.transactions.Transaction;
+import com.wavesplatform.transactions.WavesConfig;
+import com.wavesplatform.transactions.account.Address;
+import com.wavesplatform.transactions.common.*;
+import com.wavesplatform.transactions.data.DataEntry;
+import com.wavesplatform.transactions.serializers.json.JsonSerializer;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.json.TypeRef;
 import com.wavesplatform.wavesj.json.WavesJMapper;
-import im.mak.waves.transactions.WavesConfig;
-import im.mak.waves.transactions.account.Address;
-import im.mak.waves.transactions.LeaseTransaction;
-import im.mak.waves.transactions.Transaction;
-import im.mak.waves.transactions.common.*;
-import im.mak.waves.transactions.data.DataEntry;
-import im.mak.waves.transactions.serializers.json.JsonSerializer;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -30,10 +30,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
-import static im.mak.waves.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
+import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 
 @SuppressWarnings("unused")
 public class Node {

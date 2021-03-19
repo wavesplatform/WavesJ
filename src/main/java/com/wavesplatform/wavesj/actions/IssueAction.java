@@ -2,8 +2,8 @@ package com.wavesplatform.wavesj.actions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import im.mak.waves.transactions.common.AssetId;
-import im.mak.waves.transactions.common.Base64String;
+import com.wavesplatform.transactions.common.AssetId;
+import com.wavesplatform.transactions.common.Base64String;
 
 import java.util.Objects;
 

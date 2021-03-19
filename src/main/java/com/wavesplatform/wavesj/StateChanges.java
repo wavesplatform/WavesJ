@@ -2,11 +2,12 @@ package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wavesplatform.wavesj.actions.*;
+import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.wavesj.actions.Error;
-import im.mak.waves.transactions.data.DataEntry;
+import com.wavesplatform.wavesj.actions.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class StateChanges {
