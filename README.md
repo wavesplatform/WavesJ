@@ -1,3 +1,5 @@
+[![Maven Central](https://img.shields.io/maven-central/v/com.wavesplatform/wavesj.svg?label=Maven%20Central)](https://search.maven.org/artifact/com.wavesplatform/wavesj)
+
 # WavesJ
 A Java library for interacting with the Waves blockchain.
 
@@ -11,18 +13,18 @@ Use the codes below to add WavesJ as a dependency for your project.
 <dependency>
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
 ##### Gradle:
 ```
-compile group: 'com.wavesplatform', name: 'wavesj', version: '1.0.0'
+compile group: 'com.wavesplatform', name: 'wavesj', version: '1.0.3'
 ```
 
 ##### SBT:
 ```
-libraryDependencies += "com.wavesplatform" % "wavesj" % "1.0.0"
+libraryDependencies += "com.wavesplatform" % "wavesj" % "1.0.3"
 ```
 
 [This library's page at Maven Central](https://mvnrepository.com/artifact/com.wavesplatform/wavesj)
