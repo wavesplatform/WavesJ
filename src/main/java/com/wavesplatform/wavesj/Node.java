@@ -105,7 +105,18 @@ public class Node {
                 .get("balance").asLong();
     }
 
-    //todo getBalances(height, Address...) for several addresses at height
+    public List<Balance> getBalances(List<Address> addresses) throws IOException, NodeException {
+        RequestBuilder request = get("/addresses/balance");
+        addresses.forEach(address -> request.addParameter("address", address.toString()));
+        return asType(request, TypeRef.BALANCES);
+    }
+
+    public List<Balance> getBalances(List<Address> addresses, int height) throws IOException, NodeException {
+        RequestBuilder request = get("/addresses/balance");
+        addresses.forEach(address -> request.addParameter("address", address.toString()));
+        request.addParameter("height", String.valueOf(height));
+        return asType(request, TypeRef.BALANCES);
+    }
 
     public BalanceDetails getBalanceDetails(Address address) throws IOException, NodeException {
         return asType(get("/addresses/balance/details/" + address.toString()), TypeRef.BALANCE_DETAILS);
