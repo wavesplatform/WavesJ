@@ -6,11 +6,10 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>${revision}</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <properties>
-        <revision>1.0.2</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
