@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -182,12 +182,7 @@
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
-            <version>1.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.wavesplatform</groupId>
-            <artifactId>protobuf-schemas</artifactId>
-            <version>1.2.10</version>
+            <version>1.0.5</version>
         </dependency>
 
         <!-- http client -->

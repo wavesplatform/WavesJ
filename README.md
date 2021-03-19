@@ -13,18 +13,18 @@ Use the codes below to add WavesJ as a dependency for your project.
 <dependency>
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
 ##### Gradle:
 ```
-compile group: 'com.wavesplatform', name: 'wavesj', version: '1.0.3'
+compile group: 'com.wavesplatform', name: 'wavesj', version: '1.0.4'
 ```
 
 ##### SBT:
 ```
-libraryDependencies += "com.wavesplatform" % "wavesj" % "1.0.3"
+libraryDependencies += "com.wavesplatform" % "wavesj" % "1.0.4"
 ```
 
 [This library's page at Maven Central](https://mvnrepository.com/artifact/com.wavesplatform/wavesj)
