@@ -1,6 +1,6 @@
 package com.wavesplatform.wavesj;
 
-import im.mak.waves.transactions.Transaction;
+import com.wavesplatform.transactions.Transaction;
 
 import java.util.Objects;
 
