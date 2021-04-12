@@ -10,13 +10,13 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class AssetBalance {
 
-    public final AssetId assetId;
-    public final long balance;
-    public final boolean reissuable;
-    public final long minSponsoredAssetFee;
-    public final long sponsorBalance;
-    public final long quantity;
-    public final Transaction issueTransaction;
+    private final AssetId assetId;
+    private final long balance;
+    private final boolean reissuable;
+    private final long minSponsoredAssetFee;
+    private final long sponsorBalance;
+    private final long quantity;
+    private final Transaction issueTransaction;
 
     @JsonCreator
     public AssetBalance(@JsonProperty("assetId") AssetId assetId,
