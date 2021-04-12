@@ -106,16 +106,28 @@ public class Node {
     }
 
     public List<Balance> getBalances(List<Address> addresses) throws IOException, NodeException {
-        RequestBuilder request = get("/addresses/balance");
-        addresses.forEach(address -> request.addParameter("address", address.toString()));
-        return asType(request, TypeRef.BALANCES);
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonAddresses = jsonBody.putArray("addresses");
+        addresses.forEach(address -> jsonAddresses.add(address.toString()));
+
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return asType(post("/addresses/balance")
+                .addHeader("Content-Type", "application/json")
+                .setEntity(body), TypeRef.BALANCES);
     }
 
     public List<Balance> getBalances(List<Address> addresses, int height) throws IOException, NodeException {
-        RequestBuilder request = get("/addresses/balance");
-        addresses.forEach(address -> request.addParameter("address", address.toString()));
-        request.addParameter("height", String.valueOf(height));
-        return asType(request, TypeRef.BALANCES);
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonAddresses = jsonBody.putArray("addresses");
+        addresses.forEach(address -> jsonAddresses.add(address.toString()));
+
+        jsonBody.put("height", height);
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return asType(post("/addresses/balance")
+                .addHeader("Content-Type", "application/json")
+                .setEntity(body), TypeRef.BALANCES);
     }
 
     public BalanceDetails getBalanceDetails(Address address) throws IOException, NodeException {
@@ -527,30 +539,30 @@ public class Node {
     // HTTP REQUESTS
     //===============
 
-    private RequestBuilder get(String path) {
+    protected RequestBuilder get(String path) {
         return RequestBuilder.get(uri.resolve(path));
     }
 
-    private RequestBuilder post(String path) {
+    protected RequestBuilder post(String path) {
         return RequestBuilder.post(uri.resolve(path));
     }
 
-    private HttpResponse exec(HttpUriRequest request) throws IOException, NodeException {
+    protected HttpResponse exec(HttpUriRequest request) throws IOException, NodeException {
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
             throw mapper.readValue(r.getEntity().getContent(), NodeException.class);
         return r;
     }
 
-    private InputStream asInputStream(RequestBuilder request) throws IOException, NodeException {
+    protected InputStream asInputStream(RequestBuilder request) throws IOException, NodeException {
         return exec(request.build()).getEntity().getContent();
     }
 
-    private <T> T asType(RequestBuilder request, TypeReference<T> reference) throws IOException, NodeException {
+    protected <T> T asType(RequestBuilder request, TypeReference<T> reference) throws IOException, NodeException {
         return mapper.readValue(asInputStream(request), reference);
     }
 
-    private JsonNode asJson(RequestBuilder request) throws IOException, NodeException {
+    protected JsonNode asJson(RequestBuilder request) throws IOException, NodeException {
         return JSON_MAPPER.readTree(asInputStream(request));
     }
 
