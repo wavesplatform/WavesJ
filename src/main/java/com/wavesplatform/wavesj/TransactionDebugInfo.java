@@ -1,10 +1,12 @@
 package com.wavesplatform.wavesj;
 
 import com.wavesplatform.transactions.Transaction;
+import com.wavesplatform.wavesj.info.TransactionInfo;
 
 import java.util.Objects;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class TransactionDebugInfo extends TransactionInfo {
 
     private final StateChanges stateChanges;
@@ -16,7 +18,7 @@ public class TransactionDebugInfo extends TransactionInfo {
         super(tx, applicationStatus, height);
 
         this.stateChanges = stateChanges == null
-                ? new StateChanges(null, null, null, null, null, null, null)
+                ? new StateChanges(null, null, null, null, null, null, null, null, null, null)
                 : stateChanges;
     }
 

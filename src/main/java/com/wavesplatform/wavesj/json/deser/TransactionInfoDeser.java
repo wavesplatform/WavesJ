@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wavesplatform.transactions.Transaction;
 import com.wavesplatform.wavesj.ApplicationStatus;
-import com.wavesplatform.wavesj.TransactionInfo;
+import com.wavesplatform.wavesj.info.TransactionInfo;
 
 import java.io.IOException;
 

@@ -1,7 +1,9 @@
-package com.wavesplatform.wavesj;
+package com.wavesplatform.wavesj.info;
 
 import com.wavesplatform.transactions.GenesisTransaction;
 import com.wavesplatform.transactions.Transaction;
+import com.wavesplatform.wavesj.ApplicationStatus;
+import com.wavesplatform.wavesj.Common;
 
 import java.util.Objects;
 

@@ -7,12 +7,12 @@ import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.Alias;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.wavesj.*;
+import com.wavesplatform.wavesj.actions.LeaseInfo;
+import com.wavesplatform.wavesj.info.TransactionInfo;
 
 import java.util.List;
 
 public class TypeRef {
-
-    public static final TypeReference<List<LeaseTransaction>> ACTIVE_LEASES = new TypeReference<List<LeaseTransaction>>() {};
 
     public static final TypeReference<List<Address>> ADDRESSES = new TypeReference<List<Address>>() {};
 
@@ -45,6 +45,10 @@ public class TypeRef {
     public static final TypeReference<DataEntry> DATA_ENTRY = new TypeReference<DataEntry>() {};
 
     public static final TypeReference<List<HistoryBalance>> HISTORY_BALANCES = new TypeReference<List<HistoryBalance>>() {};
+
+    public static final TypeReference<LeaseInfo> LEASE_INFO = new TypeReference<LeaseInfo>() {};
+
+    public static final TypeReference<List<LeaseInfo>> LEASES_INFO = new TypeReference<List<LeaseInfo>>() {};
 
     public static final TypeReference<ScriptInfo> SCRIPT_INFO = new TypeReference<ScriptInfo>() {};
 

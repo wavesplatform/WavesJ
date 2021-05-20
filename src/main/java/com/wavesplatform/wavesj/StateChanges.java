@@ -18,6 +18,9 @@ public class StateChanges {
     private final List<ReissueAction> reissues;
     private final List<BurnAction> burns;
     private final List<SponsorFeeAction> sponsorFees;
+    private final List<LeaseInfo> leases;
+    private final List<LeaseCancelInfo> leaseCancels;
+    private final List<InvokeAction> invokes;
     private final Error error;
 
     @JsonCreator
@@ -27,6 +30,9 @@ public class StateChanges {
                  @JsonProperty("reissues") List<ReissueAction> reissues,
                  @JsonProperty("burns") List<BurnAction> burns,
                  @JsonProperty("sponsorFees") List<SponsorFeeAction> sponsorFees,
+                 @JsonProperty("leases") List<LeaseInfo> leases,
+                 @JsonProperty("leaseCancels") List<LeaseCancelInfo> leaseCancels,
+                 @JsonProperty("invokes") List<InvokeAction> invokes,
                  @JsonProperty("error") Error error) {
         this.data = data != null ? data : new ArrayList<>();
         this.transfers = transfers != null ? transfers : new ArrayList<>();
@@ -34,6 +40,9 @@ public class StateChanges {
         this.reissues = reissues != null ? reissues : new ArrayList<>();
         this.burns = burns != null ? burns : new ArrayList<>();
         this.sponsorFees = sponsorFees != null ? sponsorFees : new ArrayList<>();
+        this.leases = leases != null ? leases : new ArrayList<>();
+        this.leaseCancels = leaseCancels != null ? leaseCancels : new ArrayList<>();
+        this.invokes = invokes != null ? invokes : new ArrayList<>();
         this.error = error != null ? error : new Error(0, "");
     }
 
@@ -84,6 +93,30 @@ public class StateChanges {
      */
     public List<SponsorFeeAction> sponsorFees() {
         return sponsorFees;
+    }
+
+    /**
+     * Returns collection of leasing after applying transaction.
+     * @return collection of leasing or empty list
+     */
+    public List<LeaseInfo> leases() {
+        return leases;
+    }
+
+    /**
+     * Returns collection of leasing cancellations after applying transaction.
+     * @return collection of leasing cancellations or empty list
+     */
+    public List<LeaseCancelInfo> leaseCancels() {
+        return leaseCancels;
+    }
+
+    /**
+     * Returns collection of script invocations during applying transaction.
+     * @return collection of script invocations or empty list
+     */
+    public List<InvokeAction> invokes() {
+        return invokes;
     }
 
     /**
