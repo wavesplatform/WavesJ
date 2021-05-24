@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public abstract class BaseTestWithNodeInDocker {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final GenericContainer<?> NODE_CONTAINER;
     private static final String NODE_API_URL;
 
