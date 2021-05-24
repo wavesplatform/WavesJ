@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.Base58String;
+import com.wavesplatform.wavesj.info.TransactionInfo;
 
 import java.util.List;
 import java.util.Objects;
@@ -75,25 +76,9 @@ public class Block extends BlockHeaders {
     @Override
     public String toString() {
         return "Block{" +
-                "version=" + version() +
-                ", timestamp=" + timestamp() +
-                ", reference=" + reference() +
-                ", baseTarget=" + baseTarget() +
-                ", generationSignature='" + generationSignature() + '\'' +
-                ", transactionsRoot='" + transactionsRoot() + '\'' +
-                ", id=" + id() +
-                ", features=" + features() +
-                ", desiredReward=" + desiredReward() +
-                ", generator=" + generator() +
-                ", signature='" + signature() + '\'' +
-                ", size=" + size() +
-                ", transactionsCount=" + transactionsCount() +
-                ", height=" + height() +
-                ", totalFee=" + totalFee() +
-                ", reward=" + reward() +
-                ", vrf=" + vrf() +
-                ", fee=" + fee +
+                "fee=" + fee +
                 ", transactions=" + transactions +
-                '}';
+                "} " + super.toString();
     }
+
 }

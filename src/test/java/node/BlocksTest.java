@@ -4,7 +4,7 @@ import base.BaseTestWithNodeInDocker;
 import com.wavesplatform.transactions.LeaseTransaction;
 import com.wavesplatform.transactions.account.PrivateKey;
 import com.wavesplatform.transactions.common.Base58String;
-import com.wavesplatform.wavesj.actions.LeaseInfo;
+import com.wavesplatform.wavesj.LeaseInfo;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import org.junit.jupiter.api.Test;
@@ -44,18 +44,6 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
         node.getBlocksGeneratedBy(faucet.address(), 2, 101);
         node.getBlocksHeaders(2, 101);
         node.getLastBlockHeaders();
-
-        //leasing
-        LeaseInfo leasing = null;
-        LeaseTransaction leaseTx = null;
-        TransactionInfo txInBlock = node.getBlock(leasing.height())
-                .transactions().stream()
-                .filter(t -> t.tx().id().equals(leaseTx.id()))
-                .findFirst().orElseThrow(AssertionError::new);
-        TransactionInfo txInBlocksSeq = node.getBlocks(leasing.height(), leasing.height())
-                .get(0).transactions().stream()
-                .filter(t -> t.tx().id().equals(leaseTx.id()))
-                .findFirst().orElseThrow(AssertionError::new);
     }
 
 }

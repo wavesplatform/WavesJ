@@ -254,7 +254,7 @@ public class Node {
         if (after != null)
             request.addParameter("after", after.toString());
 
-        return mapper.readValue(asInputStream(request), TypeRef.ASSETS_DETAILS);
+        return asType(request, TypeRef.ASSETS_DETAILS);
     }
 
     //===============

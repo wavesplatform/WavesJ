@@ -19,7 +19,7 @@ public class StateChanges {
     private final List<BurnAction> burns;
     private final List<SponsorFeeAction> sponsorFees;
     private final List<LeaseInfo> leases;
-    private final List<LeaseCancelInfo> leaseCancels;
+    private final List<LeaseInfo> leaseCancels;
     private final List<InvokeAction> invokes;
     private final Error error;
 
@@ -31,7 +31,7 @@ public class StateChanges {
                  @JsonProperty("burns") List<BurnAction> burns,
                  @JsonProperty("sponsorFees") List<SponsorFeeAction> sponsorFees,
                  @JsonProperty("leases") List<LeaseInfo> leases,
-                 @JsonProperty("leaseCancels") List<LeaseCancelInfo> leaseCancels,
+                 @JsonProperty("leaseCancels") List<LeaseInfo> leaseCancels,
                  @JsonProperty("invokes") List<InvokeAction> invokes,
                  @JsonProperty("error") Error error) {
         this.data = data != null ? data : new ArrayList<>();
@@ -107,7 +107,7 @@ public class StateChanges {
      * Returns collection of leasing cancellations after applying transaction.
      * @return collection of leasing cancellations or empty list
      */
-    public List<LeaseCancelInfo> leaseCancels() {
+    public List<LeaseInfo> leaseCancels() {
         return leaseCancels;
     }
 

@@ -1,13 +1,12 @@
 package com.wavesplatform.wavesj.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.wavesplatform.transactions.LeaseTransaction;
 import com.wavesplatform.transactions.Transaction;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.Alias;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.wavesj.*;
-import com.wavesplatform.wavesj.actions.LeaseInfo;
+import com.wavesplatform.wavesj.LeaseInfo;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 
 import java.util.List;

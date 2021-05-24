@@ -7,14 +7,14 @@ import com.wavesplatform.transactions.LeaseTransaction;
 import com.wavesplatform.transactions.SetScriptTransaction;
 import com.wavesplatform.transactions.account.PrivateKey;
 import com.wavesplatform.transactions.common.Base64String;
-import com.wavesplatform.transactions.common.Id;
 import com.wavesplatform.transactions.invocation.Function;
 import com.wavesplatform.transactions.invocation.IntegerArg;
 import com.wavesplatform.transactions.invocation.StringArg;
+import com.wavesplatform.wavesj.ApplicationStatus;
 import com.wavesplatform.wavesj.LeaseStatus;
-import com.wavesplatform.wavesj.StateChanges;
-import com.wavesplatform.wavesj.actions.LeaseCancelInfo;
-import com.wavesplatform.wavesj.actions.LeaseInfo;
+import com.wavesplatform.wavesj.LeaseInfo;
+import com.wavesplatform.wavesj.info.LeaseCancelTransactionInfo;
+import com.wavesplatform.wavesj.info.LeaseTransactionInfo;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import org.junit.jupiter.api.Test;
@@ -25,10 +25,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LeasingTest extends BaseTestWithNodeInDocker {
-
-    //TODO getLeaseInfo(id)
-    //TODO getLeaseInfo(ids)
-    //TODO getActiveLeases()
 
     @Test
     void leaseInfo() throws IOException, NodeException {
@@ -55,7 +51,6 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
                         .builder(bob.address(), Function.as("lease",
                                 IntegerArg.as(invokeLeaseAmount)))
                         .getSignedWith(alice)).id());
-        printTxInfo("INVOKE LEASE", invokeTx.tx().id());
         LeaseInfo stateChangesLease = node.getStateChanges(invokeTx.tx().id()).stateChanges().leases().get(0);
 
         // get info
@@ -69,11 +64,14 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
 
         assertThat(leasing).isEqualTo(new LeaseInfo(
                 leaseTx.tx().id(), leaseTx.tx().id(), alice.address(), bob.address(),
-                leaseAmount, leaseTx.height(), LeaseStatus.ACTIVE));
+                leaseAmount, leaseTx.height(), LeaseStatus.ACTIVE, 0, null));
+
+        assertThat(leasing.cancelHeight()).isNotPresent();
+        assertThat(leasing.cancelTransactionId()).isNotPresent();
 
         assertThat(invokeLeasing).isEqualTo(new LeaseInfo(
                 stateChangesLease.id(), invokeTx.tx().id(), bob.address(), alice.address(),
-                invokeLeaseAmount, invokeTx.height(), LeaseStatus.ACTIVE));
+                invokeLeaseAmount, invokeTx.height(), LeaseStatus.ACTIVE, 0, null));
         assertThat(invokeLeasing).isEqualTo(stateChangesLease);
 
         assertThat(leasingList).containsExactlyInAnyOrder(leasing, invokeLeasing);
@@ -89,7 +87,6 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
                         .builder(bob.address(), Function.as("cancel",
                                 StringArg.as(invokeLeasing.id().toString())))
                         .getSignedWith(alice)).id());
-        printTxInfo("INVOKE CANCEL", invokeCancelTx.tx().id());
         LeaseInfo stateChangesCancel = node.getStateChanges(invokeCancelTx.tx().id()).stateChanges().leaseCancels().get(0);
 
         // get info
@@ -101,49 +98,72 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
 
         // assert canceled leasing
 
-        assertThat(leasingCancel).isEqualTo(new LeaseCancelInfo(
+        assertThat(leasingCancel).isEqualTo(new LeaseInfo(
                 leaseTx.tx().id(), leaseTx.tx().id(), alice.address(), bob.address(),
                 leaseAmount, leaseTx.height(), LeaseStatus.CANCELED,
                 leaseCancelTx.height(), leaseCancelTx.tx().id()));
 
-        assertThat(invokeLeasingCancel).isEqualTo(new LeaseCancelInfo(
+        assertThat(leasingCancel.cancelHeight()).isPresent();
+        assertThat(leasingCancel.cancelTransactionId()).isPresent();
+
+        assertThat(invokeLeasingCancel).isEqualTo(new LeaseInfo(
                 stateChangesLease.id(), invokeTx.tx().id(), bob.address(), alice.address(),
                 invokeLeaseAmount, invokeTx.height(), LeaseStatus.CANCELED,
                 stateChangesCancel.height(), invokeCancelTx.tx().id()));
-        assertThat(invokeLeasingCancel).isEqualTo(stateChangesCancel);
+        // TODO bug, should be fixed in Node. Uncomment at Node 1.3.5 release
+        //assertThat(invokeLeasingCancel).isEqualTo(stateChangesCancel);
 
-        assertThat(leasingList).containsExactlyInAnyOrder(leasingCancel, invokeLeasingCancel);
-        assertThat(activeLeases).isEmpty();
+        //assertThat(leasingList).containsExactlyInAnyOrder(leasingCancel, invokeLeasingCancel);
+        assertThat(activeLeasesCancel).isEmpty();
     }
 
+    //TODO move to BlocksTest
     @Test
-    void canceledLeaseInfo() throws IOException, NodeException {
+    void block() throws IOException, NodeException {
         PrivateKey alice = createAccountWithBalance(1000000);
         PrivateKey bob = createAccountWithBalance(1000000);
 
-        Base64String dAppScript = node.compileScript(
-                "{-# STDLIB_VERSION 5 #-}\n{-# CONTENT_TYPE DAPP #-}\n{-# SCRIPT_TYPE ACCOUNT #-}\n" +
-                        "@Callable(inv)\nfunc lease(amount: Int) = [Lease(inv.caller, amount)]").script();
-        node.waitForTransaction(node.broadcast(
-                SetScriptTransaction.builder(dAppScript).getSignedWith(bob)).id());
+        // 1. lease
 
         LeaseTransaction leaseTx = LeaseTransaction.builder(bob.address(), 10000).getSignedWith(alice);
-        node.waitForTransaction(node.broadcast(leaseTx).id()).tx().id();
+        TransactionInfo leaseTxInfo = node.waitForTransaction(node.broadcast(leaseTx).id());
 
-        LeaseInfo leasing = node.getLeaseInfo(leaseTx.id());
-
-        TransactionInfo txInBlock = node.getBlock(leasing.height())
+        TransactionInfo leaseTxInBlock = node.getBlock(leaseTxInfo.height())
                 .transactions().stream()
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
-        TransactionInfo txInBlocksSeq = node.getBlocks(leasing.height(), leasing.height())
+        TransactionInfo leaseTxInBlocksSeq = node.getBlocks(leaseTxInfo.height(), leaseTxInfo.height())
                 .get(0).transactions().stream()
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
+
+        assertThat(leaseTxInfo).isEqualTo(leaseTxInBlock);
+        assertThat(leaseTxInfo).isEqualTo(leaseTxInBlocksSeq);
+        assertThat(leaseTxInBlock).isEqualTo(
+                new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
+        assertThat(leaseTxInBlocksSeq).isEqualTo(
+                new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
+
+        // 2. cancel
+
+        LeaseCancelTransaction cancelTx = LeaseCancelTransaction.builder(leaseTx.id()).getSignedWith(alice);
+        TransactionInfo cancelTxInfo = node.waitForTransaction(node.broadcast(cancelTx).id());
+
+        TransactionInfo cancelTxInBlock = node.getBlock(cancelTxInfo.height())
+                .transactions().stream()
+                .filter(t -> t.tx().id().equals(cancelTx.id()))
+                .findFirst().orElseThrow(AssertionError::new);
+        TransactionInfo cancelTxInBlocksSeq = node.getBlocks(cancelTxInfo.height(), cancelTxInfo.height())
+                .get(0).transactions().stream()
+                .filter(t -> t.tx().id().equals(cancelTx.id()))
+                .findFirst().orElseThrow(AssertionError::new);
+
+        assertThat(cancelTxInfo).isEqualTo(cancelTxInBlock);
+        assertThat(cancelTxInfo).isEqualTo(cancelTxInBlocksSeq);
+        assertThat(cancelTxInBlock).isEqualTo(
+                new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
+        assertThat(cancelTxInBlocksSeq).isEqualTo(
+                new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
     }
-
-    //TODO lease from invoke + inner
-
-    //TODO check everywhere: in blocks, addresses, assets, transactions
 
 }

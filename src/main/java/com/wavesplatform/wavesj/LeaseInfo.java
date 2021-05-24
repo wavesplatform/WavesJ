@@ -1,13 +1,14 @@
-package com.wavesplatform.wavesj.actions;
+package com.wavesplatform.wavesj;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.Id;
 import com.wavesplatform.transactions.common.Recipient;
-import com.wavesplatform.wavesj.LeaseStatus;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 public class LeaseInfo {
 
@@ -18,6 +19,8 @@ public class LeaseInfo {
     private final long amount;
     private final int height;
     private final LeaseStatus status;
+    private final int cancelHeight;
+    private final Id cancelTransactionId;
 
     @JsonCreator
     public LeaseInfo(
@@ -27,7 +30,9 @@ public class LeaseInfo {
             @JsonProperty("recipient") Recipient recipient,
             @JsonProperty("amount") long amount,
             @JsonProperty("height") int height,
-            @JsonProperty("status") LeaseStatus status) {
+            @JsonProperty("status") LeaseStatus status,
+            @JsonProperty("cancelHeight") int cancelHeight,
+            @JsonProperty("cancelTransactionId") Id cancelTransactionId) {
         this.id = id;
         this.originTransactionId = originTransactionId;
         this.sender = sender;
@@ -35,6 +40,8 @@ public class LeaseInfo {
         this.amount = amount;
         this.height = height;
         this.status = status;
+        this.cancelHeight = cancelHeight;
+        this.cancelTransactionId = cancelTransactionId;
     }
 
     public Id id() {
@@ -65,6 +72,14 @@ public class LeaseInfo {
         return status;
     }
 
+    public OptionalInt cancelHeight() {
+        return cancelHeight > 0 ? OptionalInt.of(cancelHeight) : OptionalInt.empty();
+    }
+
+    public Optional<Id> cancelTransactionId() {
+        return Optional.ofNullable(cancelTransactionId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,12 +91,14 @@ public class LeaseInfo {
                 && amount == that.amount
                 && Objects.equals(sender, that.sender)
                 && Objects.equals(recipient, that.recipient)
-                && Objects.equals(originTransactionId, that.originTransactionId);
+                && Objects.equals(originTransactionId, that.originTransactionId)
+                && cancelHeight == that.cancelHeight
+                && Objects.equals(cancelTransactionId, that.cancelTransactionId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, originTransactionId, sender, recipient, amount, height, status);
+        return Objects.hash(id, originTransactionId, sender, recipient, amount, height, status, cancelHeight, cancelTransactionId);
     }
 
     @Override
@@ -94,6 +111,8 @@ public class LeaseInfo {
                 ", amount=" + amount +
                 ", height=" + height +
                 ", status=" + status +
+                ", cancelHeight=" + cancelHeight +
+                ", cancelTransactionId=" + cancelTransactionId +
                 '}';
     }
 
