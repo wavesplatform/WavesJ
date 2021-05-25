@@ -57,10 +57,6 @@ public class TypeRef {
 
     public static final TypeReference<List<TransactionInfo>> TRANSACTIONS_INFO = new TypeReference<List<TransactionInfo>>() {};
 
-    public static final TypeReference<TransactionDebugInfo> TRANSACTION_DEBUG_INFO = new TypeReference<TransactionDebugInfo>() {};
-
-    public static final TypeReference<List<TransactionDebugInfo>> TRANSACTIONS_DEBUG_INFO = new TypeReference<List<TransactionDebugInfo>>() {};
-
     public static final TypeReference<Transaction> TRANSACTION = new TypeReference<Transaction>() {};
 
     public static final TypeReference<List<Transaction>> TRANSACTIONS = new TypeReference<List<Transaction>>() {};

@@ -15,7 +15,7 @@ public class ScriptTransfer {
     private final AssetId assetId;
 
     @JsonCreator
-    ScriptTransfer(@JsonProperty("address") Recipient recipient,
+    public ScriptTransfer(@JsonProperty("address") Recipient recipient,
                    @JsonProperty("amount") long amount,
                    @JsonProperty("asset") AssetId assetId) {
         this.recipient = Common.notNull(recipient, "Recipient");

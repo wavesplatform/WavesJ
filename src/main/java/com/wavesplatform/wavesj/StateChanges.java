@@ -8,6 +8,7 @@ import com.wavesplatform.wavesj.actions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 public class StateChanges {
@@ -125,6 +126,44 @@ public class StateChanges {
      */
     public Error error() {
         return error;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StateChanges that = (StateChanges) o;
+        return Objects.equals(data, that.data)
+                && Objects.equals(transfers, that.transfers)
+                && Objects.equals(issues, that.issues)
+                && Objects.equals(reissues, that.reissues)
+                && Objects.equals(burns, that.burns)
+                && Objects.equals(sponsorFees, that.sponsorFees)
+                && Objects.equals(leases, that.leases)
+                && Objects.equals(leaseCancels, that.leaseCancels)
+                && Objects.equals(invokes, that.invokes)
+                && Objects.equals(error, that.error);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data, transfers, issues, reissues, burns, sponsorFees, leases, leaseCancels, invokes, error);
+    }
+
+    @Override
+    public String toString() {
+        return "StateChanges{" +
+                "data=" + data +
+                ", transfers=" + transfers +
+                ", issues=" + issues +
+                ", reissues=" + reissues +
+                ", burns=" + burns +
+                ", sponsorFees=" + sponsorFees +
+                ", leases=" + leases +
+                ", leaseCancels=" + leaseCancels +
+                ", invokes=" + invokes +
+                ", error=" + error +
+                '}';
     }
 
 }

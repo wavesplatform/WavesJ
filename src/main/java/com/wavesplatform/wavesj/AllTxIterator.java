@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class AllTxIterator<T extends TransactionDebugInfo> implements Iterator<T>, Iterable<T>  {
-
+public class AllTxIterator /*<T extends TransactionDebugInfo> implements Iterator<T>, Iterable<T>*/  {
+/* TODO
     private static final Logger LOGGER = LoggerFactory.getLogger("com.wavesplatform.wavesj");
 
     private int dataSize;
@@ -89,5 +89,5 @@ public class AllTxIterator<T extends TransactionDebugInfo> implements Iterator<T
         public IOException unwrap() {
             return ioEx;
         }
-    }
+    }*/
 }

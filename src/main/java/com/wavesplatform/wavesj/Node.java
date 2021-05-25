@@ -10,7 +10,6 @@ import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.*;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.transactions.serializers.json.JsonSerializer;
-import com.wavesplatform.wavesj.actions.LeaseInfo;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.json.TypeRef;
@@ -31,8 +30,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -394,30 +391,6 @@ public class Node {
         return asType(get("/debug/balances/history/" + address.toString()), TypeRef.HISTORY_BALANCES);
     }
 
-    @Deprecated
-    public TransactionDebugInfo getStateChanges(Id txId) throws IOException, NodeException {
-        return asType(get("/debug/stateChanges/info/" + txId.toString()), TypeRef.TRANSACTION_DEBUG_INFO);
-    }
-
-    @Deprecated
-    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
-        RequestBuilder request = get("/debug/stateChanges/address/" + address.toString() + "/limit/" + limit);
-        if (afterTxId != null)
-            request.addParameter("after", afterTxId.toString());
-
-        return asType(request, TypeRef.TRANSACTIONS_DEBUG_INFO);
-    }
-
-    @Deprecated
-    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit) throws IOException, NodeException {
-        return getStateChangesByAddress(address, limit, null);
-    }
-
-    @Deprecated
-    public List<TransactionDebugInfo> getStateChangesByAddress(Address address) throws IOException, NodeException {
-        return getStateChangesByAddress(address, 10);
-    }
-
     public <T extends Transaction> Validation validateTransaction(T transaction) throws IOException, NodeException {
         return asType(post("/debug/validate")
                 .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)), TypeRef.VALIDATION);
@@ -479,6 +452,18 @@ public class Node {
      */
     public TransactionInfo getTransactionInfo(Id txId) throws IOException, NodeException {
         return asType(get("/transactions/info/" + txId.toString()), TypeRef.TRANSACTION_INFO);
+    }
+
+    /**
+     * Returns object by its ID.
+     *
+     * @param txId object ID
+     * @return object object
+     * @throws IOException if no object with the given ID exists
+     */
+    public <T extends TransactionInfo> T getTransactionInfo(Id txId, Class<T> transactionInfoClass) throws IOException, NodeException {
+        return transactionInfoClass.cast(
+                asType(get("/transactions/info/" + txId.toString()), TypeRef.TRANSACTION_INFO));
     }
 
     /**
@@ -615,7 +600,7 @@ public class Node {
     }
 
     public <T extends TransactionInfo> T waitForTransaction(Id id, Class<T> infoClass) throws IOException {
-        return (T) this.waitForTransaction(id);
+        return infoClass.cast(waitForTransaction(id));
     }
 
     public int waitForHeight(int target, int waitingInSeconds) throws IOException, NodeException {

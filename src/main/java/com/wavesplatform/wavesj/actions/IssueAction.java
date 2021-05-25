@@ -18,7 +18,7 @@ public class IssueAction {
     private final int nonce;
 
     @JsonCreator
-    IssueAction(@JsonProperty("assetId") AssetId assetId,
+    public IssueAction(@JsonProperty("assetId") AssetId assetId,
                 @JsonProperty("name") String name,
                 @JsonProperty("description") String description,
                 @JsonProperty("quantity") long quantity,

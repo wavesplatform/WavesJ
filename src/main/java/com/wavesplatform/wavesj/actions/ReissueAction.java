@@ -12,7 +12,7 @@ public class ReissueAction {
     private final boolean reissuable;
 
     @JsonCreator
-    ReissueAction(@JsonProperty("assetId") AssetId assetId,
+    public ReissueAction(@JsonProperty("assetId") AssetId assetId,
                   @JsonProperty("quantity") long quantity,
                   @JsonProperty("isReissuable") boolean reissuable) {
         this.assetId = assetId;

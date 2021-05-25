@@ -7,7 +7,7 @@ import com.wavesplatform.wavesj.Common;
 
 import java.util.Objects;
 
-public class TransactionInfo {
+public /* TODO abstract, TransactionWithStatus */ class TransactionInfo {
 
     private final int height;
     private final ApplicationStatus applicationStatus;
@@ -31,6 +31,10 @@ public class TransactionInfo {
 
     public Transaction tx() {
         return tx;
+    }
+
+    public <T extends Transaction> T tx(Class<T> transactionClass) {
+        return transactionClass.cast(tx);
     }
 
     @Override

@@ -11,7 +11,7 @@ public class SponsorFeeAction {
     private final long minSponsoredAssetFee;
 
     @JsonCreator
-    SponsorFeeAction(@JsonProperty("assetId") AssetId assetId,
+    public SponsorFeeAction(@JsonProperty("assetId") AssetId assetId,
                      @JsonProperty("minSponsoredAssetFee") long minSponsoredAssetFee) {
         this.assetId = assetId;
         this.minSponsoredAssetFee = minSponsoredAssetFee;

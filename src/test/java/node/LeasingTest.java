@@ -10,11 +10,9 @@ import com.wavesplatform.transactions.common.Base64String;
 import com.wavesplatform.transactions.invocation.Function;
 import com.wavesplatform.transactions.invocation.IntegerArg;
 import com.wavesplatform.transactions.invocation.StringArg;
-import com.wavesplatform.wavesj.ApplicationStatus;
 import com.wavesplatform.wavesj.LeaseStatus;
 import com.wavesplatform.wavesj.LeaseInfo;
-import com.wavesplatform.wavesj.info.LeaseCancelTransactionInfo;
-import com.wavesplatform.wavesj.info.LeaseTransactionInfo;
+import com.wavesplatform.wavesj.info.InvokeScriptTransactionInfo;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import org.junit.jupiter.api.Test;
@@ -51,7 +49,8 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
                         .builder(bob.address(), Function.as("lease",
                                 IntegerArg.as(invokeLeaseAmount)))
                         .getSignedWith(alice)).id());
-        LeaseInfo stateChangesLease = node.getStateChanges(invokeTx.tx().id()).stateChanges().leases().get(0);
+        LeaseInfo stateChangesLease = node.getTransactionInfo(invokeTx.tx().id(), InvokeScriptTransactionInfo.class)
+                .stateChanges().leases().get(0);
 
         // get info
 
@@ -87,7 +86,8 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
                         .builder(bob.address(), Function.as("cancel",
                                 StringArg.as(invokeLeasing.id().toString())))
                         .getSignedWith(alice)).id());
-        LeaseInfo stateChangesCancel = node.getStateChanges(invokeCancelTx.tx().id()).stateChanges().leaseCancels().get(0);
+        LeaseInfo stateChangesCancel = node.getTransactionInfo(invokeCancelTx.tx().id(), InvokeScriptTransactionInfo.class)
+                .stateChanges().leaseCancels().get(0);
 
         // get info
 
@@ -115,55 +115,6 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
 
         //assertThat(leasingList).containsExactlyInAnyOrder(leasingCancel, invokeLeasingCancel);
         assertThat(activeLeasesCancel).isEmpty();
-    }
-
-    //TODO move to BlocksTest
-    @Test
-    void block() throws IOException, NodeException {
-        PrivateKey alice = createAccountWithBalance(1000000);
-        PrivateKey bob = createAccountWithBalance(1000000);
-
-        // 1. lease
-
-        LeaseTransaction leaseTx = LeaseTransaction.builder(bob.address(), 10000).getSignedWith(alice);
-        TransactionInfo leaseTxInfo = node.waitForTransaction(node.broadcast(leaseTx).id());
-
-        TransactionInfo leaseTxInBlock = node.getBlock(leaseTxInfo.height())
-                .transactions().stream()
-                .filter(t -> t.tx().id().equals(leaseTx.id()))
-                .findFirst().orElseThrow(AssertionError::new);
-        TransactionInfo leaseTxInBlocksSeq = node.getBlocks(leaseTxInfo.height(), leaseTxInfo.height())
-                .get(0).transactions().stream()
-                .filter(t -> t.tx().id().equals(leaseTx.id()))
-                .findFirst().orElseThrow(AssertionError::new);
-
-        assertThat(leaseTxInfo).isEqualTo(leaseTxInBlock);
-        assertThat(leaseTxInfo).isEqualTo(leaseTxInBlocksSeq);
-        assertThat(leaseTxInBlock).isEqualTo(
-                new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
-        assertThat(leaseTxInBlocksSeq).isEqualTo(
-                new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
-
-        // 2. cancel
-
-        LeaseCancelTransaction cancelTx = LeaseCancelTransaction.builder(leaseTx.id()).getSignedWith(alice);
-        TransactionInfo cancelTxInfo = node.waitForTransaction(node.broadcast(cancelTx).id());
-
-        TransactionInfo cancelTxInBlock = node.getBlock(cancelTxInfo.height())
-                .transactions().stream()
-                .filter(t -> t.tx().id().equals(cancelTx.id()))
-                .findFirst().orElseThrow(AssertionError::new);
-        TransactionInfo cancelTxInBlocksSeq = node.getBlocks(cancelTxInfo.height(), cancelTxInfo.height())
-                .get(0).transactions().stream()
-                .filter(t -> t.tx().id().equals(cancelTx.id()))
-                .findFirst().orElseThrow(AssertionError::new);
-
-        assertThat(cancelTxInfo).isEqualTo(cancelTxInBlock);
-        assertThat(cancelTxInfo).isEqualTo(cancelTxInBlocksSeq);
-        assertThat(cancelTxInBlock).isEqualTo(
-                new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
-        assertThat(cancelTxInBlocksSeq).isEqualTo(
-                new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
     }
 
 }
