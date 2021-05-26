@@ -31,6 +31,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Cache docker images
+        uses: satackey/action-docker-layer-caching@v0.0.11
+
       - name: Run tests
         run: mvn -B test -Dmaven.test.failure.ignore=true
 

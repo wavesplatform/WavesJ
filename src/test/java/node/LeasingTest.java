@@ -86,12 +86,12 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
                         .builder(bob.address(), Function.as("cancel",
                                 StringArg.as(invokeLeasing.id().toString())))
                         .getSignedWith(alice)).id());
+        node.waitBlocks(2);
+
         LeaseInfo stateChangesCancel = node.getTransactionInfo(invokeCancelTx.tx().id(), InvokeScriptTransactionInfo.class)
                 .stateChanges().leaseCancels().get(0);
 
         // get info
-
-        node.waitBlocks(2);
 
         LeaseInfo leasingCancel = node.getLeaseInfo(leaseTx.tx().id());
         LeaseInfo invokeLeasingCancel = node.getLeaseInfo(stateChangesCancel.id());
