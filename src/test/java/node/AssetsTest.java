@@ -52,7 +52,8 @@ public class AssetsTest extends BaseTestWithNodeInDocker {
         ).assetId();
         node.waitForTransaction(assetId);
 
-        node.getAssetDistribution(assetId, node.getHeight());
+        node.waitBlocks(1);
+        node.getAssetDistribution(assetId, node.getHeight() - 1);
     }
 
     @Test

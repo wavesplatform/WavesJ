@@ -68,11 +68,9 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
 
-        assertThat(leaseTxInfo).isEqualTo(leaseTxInBlock);
-        assertThat(leaseTxInfo).isEqualTo(leaseTxInBlocksSeq);
+        assertThat(leaseTxInBlock).isEqualTo(leaseTxInBlocksSeq);
+        assertThat(leaseTxInBlock).isInstanceOf(TransactionInfo.class);
         assertThat(leaseTxInBlock).isEqualTo(
-                new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
-        assertThat(leaseTxInBlocksSeq).isEqualTo(
                 new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
 
         // 2. cancel
@@ -89,11 +87,9 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
                 .filter(t -> t.tx().id().equals(cancelTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
 
-        assertThat(cancelTxInfo).isEqualTo(cancelTxInBlock);
-        assertThat(cancelTxInfo).isEqualTo(cancelTxInBlocksSeq);
+        assertThat(cancelTxInBlock).isEqualTo(cancelTxInBlocksSeq);
+        assertThat(cancelTxInfo).isInstanceOf(TransactionInfo.class);
         assertThat(cancelTxInBlock).isEqualTo(
-                new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
-        assertThat(cancelTxInBlocksSeq).isEqualTo(
                 new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
     }
 

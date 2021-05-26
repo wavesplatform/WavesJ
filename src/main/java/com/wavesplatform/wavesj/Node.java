@@ -290,7 +290,7 @@ public class Node {
     }
 
     public int getBlockHeight(long timestamp) throws IOException, NodeException {
-        return asJson(get("/blocks/height/" + timestamp))
+        return asJson(get("/blocks/heightByTimestamp/" + timestamp))
                 .get("height").asInt();
     }
 

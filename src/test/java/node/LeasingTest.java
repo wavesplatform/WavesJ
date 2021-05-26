@@ -92,8 +92,8 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
         // get info
 
         LeaseInfo leasingCancel = node.getLeaseInfo(leaseTx.tx().id());
-        LeaseInfo invokeLeasingCancel = node.getLeaseInfo(stateChangesLease.id());
-        List<LeaseInfo> leasingListCancel = node.getLeasesInfo(leaseTx.tx().id(), stateChangesLease.id());
+        LeaseInfo invokeLeasingCancel = node.getLeaseInfo(stateChangesCancel.id());
+        List<LeaseInfo> leasingListCancel = node.getLeasesInfo(leaseTx.tx().id(), stateChangesCancel.id());
         List<LeaseInfo> activeLeasesCancel = node.getActiveLeases(alice.address());
 
         // assert canceled leasing
