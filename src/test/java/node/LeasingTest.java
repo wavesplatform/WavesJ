@@ -91,6 +91,8 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
 
         // get info
 
+        node.waitBlocks(1);
+
         LeaseInfo leasingCancel = node.getLeaseInfo(leaseTx.tx().id());
         LeaseInfo invokeLeasingCancel = node.getLeaseInfo(stateChangesCancel.id());
         List<LeaseInfo> leasingListCancel = node.getLeasesInfo(leaseTx.tx().id(), stateChangesCancel.id());
