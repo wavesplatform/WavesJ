@@ -1,52 +1,126 @@
 package node;
 
 import base.BaseTestWithNodeInDocker;
+import com.wavesplatform.transactions.DataTransaction;
 import com.wavesplatform.transactions.LeaseCancelTransaction;
 import com.wavesplatform.transactions.LeaseTransaction;
 import com.wavesplatform.transactions.account.PrivateKey;
 import com.wavesplatform.transactions.common.Base58String;
+import com.wavesplatform.transactions.data.StringEntry;
 import com.wavesplatform.wavesj.ApplicationStatus;
+import com.wavesplatform.wavesj.Block;
+import com.wavesplatform.wavesj.BlockHeaders;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class BlocksTest extends BaseTestWithNodeInDocker {
 
-    static final Base58String blockIdAtHeight2;
-
-    static {
-        try {
-            blockIdAtHeight2 = node.getBlockHeaders(2).id();
-        } catch (IOException | NodeException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Test
     void height() throws IOException, NodeException {
+        Base58String blockIdAtHeight2 = node.getBlockHeaders(2).id();
+
         node.getBlockHeight(System.currentTimeMillis());
         node.getBlockHeight(blockIdAtHeight2);
     }
 
     @Test
     void blocks() throws IOException, NodeException {
-        PrivateKey alice = createAccountWithBalance(10_00000000);
+        Base58String blockIdAtHeight2 = node.getBlockHeaders(2).id();
 
-        node.getBlock(2);
-        node.getBlock(blockIdAtHeight2);
-        node.getGenesisBlock();
-        node.getLastBlock();
-        node.getBlockHeaders(2);
-        node.getBlockHeaders(blockIdAtHeight2);
-        node.getBlocks(2, 3);
-        node.getBlocksDelay(blockIdAtHeight2, node.getHeight() - 2);
-        node.getBlocksGeneratedBy(faucet.address(), 2, 101);
-        node.getBlocksHeaders(2, 101);
-        node.getLastBlockHeaders();
+        BlockHeaders headers = node.getBlockHeaders(2);
+        Block block = node.getBlock(2);
+
+        assertAll("All headers are equal",
+                () -> assertThat(headers.id()).isEqualTo(block.id()),
+                () -> assertThat(headers.height()).isEqualTo(block.height()),
+                () -> assertThat(headers.baseTarget()).isEqualTo(block.baseTarget()),
+                () -> assertThat(headers.desiredReward()).isEqualTo(block.desiredReward()),
+                () -> assertThat(headers.generationSignature()).isEqualTo(block.generationSignature()),
+                () -> assertThat(headers.features()).isEqualTo(block.features()),
+                () -> assertThat(headers.generator()).isEqualTo(block.generator()),
+                () -> assertThat(headers.reference()).isEqualTo(block.reference()),
+                () -> assertThat(headers.reward()).isEqualTo(block.reward()),
+                () -> assertThat(headers.signature()).isEqualTo(block.signature()),
+                () -> assertThat(headers.size()).isEqualTo(block.size()),
+                () -> assertThat(headers.timestamp()).isEqualTo(block.timestamp()),
+                () -> assertThat(headers.totalFee()).isEqualTo(block.totalFee()),
+                () -> assertThat(headers.transactionsCount()).isEqualTo(block.transactionsCount()),
+                () -> assertThat(headers.transactionsRoot()).isEqualTo(block.transactionsRoot()),
+                () -> assertThat(headers.version()).isEqualTo(block.version()),
+                () -> assertThat(headers.vrf()).isEqualTo(block.vrf()));
+
+        assertThat(node.getBlock(blockIdAtHeight2)).isEqualTo(block);
+        assertThat(node.getBlocks(2, 5)).contains(block);
+
+        assertThat(node.getBlockHeaders(blockIdAtHeight2)).isEqualTo(headers);
+        assertThat(node.getBlocksHeaders(2, 5)).contains(headers);
+    }
+
+    @Test
+    void lastBlock() throws IOException, NodeException {
+        PrivateKey alice = createAccountWithBalance(DataTransaction.MIN_FEE);
+
+        int txHeight = node.waitForTransaction(node.broadcast(
+                DataTransaction.builder(StringEntry.as("foo", "bar")).getSignedWith(alice)).id())
+                .height();
+
+        Block block = node.getLastBlock();
+        BlockHeaders headers = node.getLastBlockHeaders();
+
+        assumeTrue(block.id().equals(headers.id()), "Failed to request the same block with two requests");
+        assumeTrue(txHeight == block.height(), "Failed to catch the sent tx on current height");
+
+        assertAll("All headers are equal",
+                () -> assertThat(headers.id()).isEqualTo(block.id()),
+                () -> assertThat(headers.height()).isEqualTo(block.height()),
+                () -> assertThat(headers.baseTarget()).isEqualTo(block.baseTarget()),
+                () -> assertThat(headers.desiredReward()).isEqualTo(block.desiredReward()),
+                () -> assertThat(headers.generationSignature()).isEqualTo(block.generationSignature()),
+                () -> assertThat(headers.features()).isEqualTo(block.features()),
+                () -> assertThat(headers.generator()).isEqualTo(block.generator()),
+                () -> assertThat(headers.reference()).isEqualTo(block.reference()),
+                () -> assertThat(headers.reward()).isEqualTo(block.reward()),
+                () -> assertThat(headers.signature()).isEqualTo(block.signature()),
+                () -> assertThat(headers.size()).isEqualTo(block.size()),
+                () -> assertThat(headers.timestamp()).isEqualTo(block.timestamp()),
+                () -> assertThat(headers.totalFee()).isEqualTo(block.totalFee()),
+                () -> assertThat(headers.transactionsCount()).isEqualTo(block.transactionsCount()),
+                () -> assertThat(headers.transactionsRoot()).isEqualTo(block.transactionsRoot()),
+                () -> assertThat(headers.version()).isEqualTo(block.version()),
+                () -> assertThat(headers.vrf()).isEqualTo(block.vrf()));
+
+        assertThat(block.fee()).isPositive();
+        assertThat(block.transactions()).isNotEmpty();
+    }
+
+    @Test
+    void genesisBlock() throws IOException, NodeException {
+        Block genesis = node.getGenesisBlock();
+
+        assertThat(genesis).isEqualTo(node.getBlock(1));
+    }
+
+    @Test
+    void blocksGeneratedByAddress() throws IOException, NodeException {
+        List<Block> blocks = node.getBlocksGeneratedBy(faucet.address(), 2, 3);
+
+        assertThat(blocks).containsExactlyInAnyOrder(node.getBlock(2), node.getBlock(3));
+    }
+
+    @Test
+    void blocksDelay() throws IOException, NodeException {
+        Base58String blockIdAtStart = node.getBlockHeaders(node.getHeight() - 1).id();
+        node.waitBlocks(2);
+
+        assertThat(node.getBlocksDelay(blockIdAtStart, 3)).isGreaterThan(1000);
     }
 
     @Test
