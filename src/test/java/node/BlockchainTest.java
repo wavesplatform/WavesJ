@@ -28,7 +28,7 @@ public class BlockchainTest extends BaseTestWithNodeInDocker {
         assertThat(rewards.nextCheck()).isGreaterThan(rewards.votingIntervalStart());
         assertThat(rewards.votingInterval()).isEqualTo(3);
         assertThat(rewards.votingThreshold()).isEqualTo(2);
-        assertThat(asList(rewards.votes().increase(), rewards.votes().decrease())).containsOnlyOnce(0);
+        assertThat(asList(rewards.votes().increase(), rewards.votes().decrease())).contains(0);
     }
 
 }
