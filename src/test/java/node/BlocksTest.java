@@ -25,10 +25,12 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
 
     @Test
     void height() throws IOException, NodeException {
-        Base58String blockIdAtHeight2 = node.getBlockHeaders(2).id();
+        node.waitForHeight(4);
 
-        node.getBlockHeight(System.currentTimeMillis());
-        node.getBlockHeight(blockIdAtHeight2);
+        long blockTimestamp = node.getBlockHeaders(3).timestamp();
+
+        assertThat(node.getBlockHeight(blockTimestamp)).isEqualTo(3);
+        assertThat(node.getBlockHeight(blockTimestamp - 1)).isEqualTo(2);
     }
 
     @Test

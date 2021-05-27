@@ -1,30 +1,34 @@
 package node;
 
 import base.BaseTestWithNodeInDocker;
-import com.wavesplatform.crypto.Crypto;
-import com.wavesplatform.transactions.IssueTransaction;
-import com.wavesplatform.transactions.account.Address;
-import com.wavesplatform.transactions.account.PrivateKey;
-import com.wavesplatform.transactions.common.AssetId;
+import com.wavesplatform.wavesj.BlockchainRewards;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BlockchainTest extends BaseTestWithNodeInDocker {
 
     @Test
     void rewards() throws IOException, NodeException {
-        PrivateKey alice = createAccountWithBalance(10_00000000);
+        int height = node.getHeight();
+        BlockchainRewards rewards = node.getBlockchainRewards();
 
-        int currentHeight = node.waitForHeight(3);
-        node.getBlockchainRewards();
-        node.getBlockchainRewards(currentHeight - 1);
+        assertThat(node.getBlockchainRewards(rewards.height())).isEqualTo(rewards);
+        assertThat(node.getBlockchainRewards(height - 1)).isNotEqualTo(rewards);
+
+        assertThat(rewards.height()).isBetween(height, height + 1);
+        assertThat(rewards.totalWavesAmount()).isGreaterThan(100000000_00000000L);
+        assertThat(rewards.currentReward()).isBetween(5_00000000L, 7_00000000L);
+        assertThat(rewards.minIncrement()).isEqualTo(50000000);
+        assertThat(rewards.term()).isEqualTo(6);
+        assertThat(rewards.nextCheck()).isGreaterThan(rewards.votingIntervalStart());
+        assertThat(rewards.votingInterval()).isEqualTo(3);
+        assertThat(rewards.votingThreshold()).isEqualTo(2);
+        assertThat(asList(rewards.votes().increase(), rewards.votes().decrease())).containsOnlyOnce(0);
     }
 
 }
