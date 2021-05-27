@@ -37,7 +37,6 @@ public abstract class BaseTestWithNodeInDocker {
     static {
         try {
             node = new Node(NODE_API_URL);
-            System.out.println(node.getVersion());
         } catch (URISyntaxException | NodeException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -46,13 +45,7 @@ public abstract class BaseTestWithNodeInDocker {
     protected static final PrivateKey faucet = PrivateKey.fromSeed("waves private node seed with waves tokens");
 
     protected static PrivateKey createAccountWithBalance() throws IOException, NodeException {
-        PrivateKey account = PrivateKey.fromSeed(Crypto.getRandomSeedBytes());
-
-        System.out.println(account.address().toString() + " :");
-        printAddrBalance(account);
-        printAddrData(account);
-        printAddrTxs(account);
-        return account;
+        return PrivateKey.fromSeed(Crypto.getRandomSeedBytes());
     }
 
     protected static PrivateKey createAccountWithBalance(long wavesAmount) throws IOException, NodeException {
@@ -64,22 +57,6 @@ public abstract class BaseTestWithNodeInDocker {
         node.waitForTransaction(transferTx);
 
         return account;
-    }
-
-    protected static void printAddrBalance(PrivateKey account) {
-        System.out.println(NODE_API_URL + "/addresses/balance/details/" + account.address());
-    }
-
-    protected static void printAddrBalance(PrivateKey account, AssetId assetId) {
-        System.out.println(NODE_API_URL + "/assets/balance/" + account.address() + "/" + assetId);
-    }
-
-    protected static void printAddrData(PrivateKey account) {
-        System.out.println(NODE_API_URL + "/addresses/data/" + account.address());
-    }
-
-    protected static void printAddrTxs(PrivateKey account) {
-        System.out.println(NODE_API_URL + "/transactions/address/" + account.address() + "/limit/100");
     }
 
     protected static void printTxInfo(String description, Id txId) {

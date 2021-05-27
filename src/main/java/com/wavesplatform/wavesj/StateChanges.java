@@ -9,6 +9,7 @@ import com.wavesplatform.wavesj.actions.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class StateChanges {
@@ -44,7 +45,7 @@ public class StateChanges {
         this.leases = leases != null ? leases : new ArrayList<>();
         this.leaseCancels = leaseCancels != null ? leaseCancels : new ArrayList<>();
         this.invokes = invokes != null ? invokes : new ArrayList<>();
-        this.error = error != null ? error : new Error(0, "");
+        this.error = error;
     }
 
     /**
@@ -124,8 +125,8 @@ public class StateChanges {
      * Returns error message if transaction is failed.
      * @return error message
      */
-    public Error error() {
-        return error;
+    public Optional<Error> error() {
+        return Optional.ofNullable(error);
     }
 
     @Override
