@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.Base58String;
-import com.wavesplatform.wavesj.info.TransactionInfo;
+import com.wavesplatform.wavesj.info.TransactionWithStatus;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,8 +15,8 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class Block extends BlockHeaders {
 
+    private final List<TransactionWithStatus<?>> transactions;
     private final long fee;
-    private final List<TransactionInfo> transactions;
 
     @JsonCreator
     public Block(
@@ -36,25 +36,18 @@ public class Block extends BlockHeaders {
             @JsonProperty("reward") long reward,
             @JsonProperty("VRF") Base58String vrf,
             @JsonProperty("fee") long fee,
-            @JsonProperty("transactions") List<TransactionInfo> transactions) {
+            @JsonProperty("transactions") List<TransactionWithStatus<?>> transactions) {
         super(version, timestamp, reference, transactionsRoot, id, features, desiredReward, generator,
                 signature, size, transactionsCount, height, totalFee, reward, vrf);
         this.fee = fee;
         this.transactions = Common.notNull(transactions, "Transactions");
-
-        //transactions in block don't have height field in json
-        for (int i = 0; i < this.transactions.size(); i++) {
-            TransactionInfo info = this.transactions.get(i);
-            if (info.height() == 0)
-                this.transactions.set(i, new TransactionInfo(info.tx(), info.applicationStatus(), this.height()));
-        }
     }
 
     public long fee() {
         return fee;
     }
 
-    public List<TransactionInfo> transactions() {
+    public List<TransactionWithStatus<?>> transactions() {
         return transactions;
     }
 
@@ -76,8 +69,8 @@ public class Block extends BlockHeaders {
     @Override
     public String toString() {
         return "Block{" +
-                "fee=" + fee +
-                ", transactions=" + transactions +
+                "transactions=" + transactions +
+                ", fee=" + fee +
                 "} " + super.toString();
     }
 

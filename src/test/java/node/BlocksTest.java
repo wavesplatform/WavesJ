@@ -12,6 +12,7 @@ import com.wavesplatform.wavesj.Block;
 import com.wavesplatform.wavesj.BlockHeaders;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
+import com.wavesplatform.wavesj.info.TransactionWithStatus;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -133,40 +134,38 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
         // 1. lease
 
         LeaseTransaction leaseTx = LeaseTransaction.builder(bob.address(), 10000).getSignedWith(alice);
-        TransactionInfo leaseTxInfo = node.waitForTransaction(node.broadcast(leaseTx).id());
+        TransactionInfo<?> leaseTxInfo = node.waitForTransaction(node.broadcast(leaseTx).id());
 
-        TransactionInfo leaseTxInBlock = node.getBlock(leaseTxInfo.height())
+        TransactionWithStatus<?> leaseTxInBlock = node.getBlock(leaseTxInfo.height())
                 .transactions().stream()
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
-        TransactionInfo leaseTxInBlocksSeq = node.getBlocks(leaseTxInfo.height(), leaseTxInfo.height())
+        TransactionWithStatus<?> leaseTxInBlocksSeq = node.getBlocks(leaseTxInfo.height(), leaseTxInfo.height())
                 .get(0).transactions().stream()
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
 
         assertThat(leaseTxInBlock).isEqualTo(leaseTxInBlocksSeq);
-        assertThat(leaseTxInBlock).isInstanceOf(TransactionInfo.class);
-        assertThat(leaseTxInBlock).isEqualTo(
-                new TransactionInfo(leaseTx, ApplicationStatus.SUCCEEDED, leaseTxInfo.height()));
+        assertThat(leaseTxInBlock).isInstanceOf(TransactionWithStatus.class);
+        assertThat(leaseTxInBlock).isEqualTo(new TransactionWithStatus<>(leaseTx, ApplicationStatus.SUCCEEDED));
 
         // 2. cancel
 
         LeaseCancelTransaction cancelTx = LeaseCancelTransaction.builder(leaseTx.id()).getSignedWith(alice);
-        TransactionInfo cancelTxInfo = node.waitForTransaction(node.broadcast(cancelTx).id());
+        TransactionInfo<?> cancelTxInfo = node.waitForTransaction(node.broadcast(cancelTx).id());
 
-        TransactionInfo cancelTxInBlock = node.getBlock(cancelTxInfo.height())
+        TransactionWithStatus<?> cancelTxInBlock = node.getBlock(cancelTxInfo.height())
                 .transactions().stream()
                 .filter(t -> t.tx().id().equals(cancelTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
-        TransactionInfo cancelTxInBlocksSeq = node.getBlocks(cancelTxInfo.height(), cancelTxInfo.height())
+        TransactionWithStatus<?> cancelTxInBlocksSeq = node.getBlocks(cancelTxInfo.height(), cancelTxInfo.height())
                 .get(0).transactions().stream()
                 .filter(t -> t.tx().id().equals(cancelTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
 
         assertThat(cancelTxInBlock).isEqualTo(cancelTxInBlocksSeq);
-        assertThat(cancelTxInfo).isInstanceOf(TransactionInfo.class);
-        assertThat(cancelTxInBlock).isEqualTo(
-                new TransactionInfo(cancelTx, ApplicationStatus.SUCCEEDED, cancelTxInfo.height()));
+        assertThat(cancelTxInfo).isInstanceOf(TransactionWithStatus.class);
+        assertThat(cancelTxInBlock).isEqualTo(new TransactionWithStatus<>(cancelTx, ApplicationStatus.SUCCEEDED));
     }
 
 }
