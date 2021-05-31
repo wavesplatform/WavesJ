@@ -134,38 +134,38 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
         // 1. lease
 
         LeaseTransaction leaseTx = LeaseTransaction.builder(bob.address(), 10000).getSignedWith(alice);
-        TransactionInfo<?> leaseTxInfo = node.waitForTransaction(node.broadcast(leaseTx).id());
+        TransactionInfo leaseTxInfo = node.waitForTransaction(node.broadcast(leaseTx).id());
 
-        TransactionWithStatus<?> leaseTxInBlock = node.getBlock(leaseTxInfo.height())
+        TransactionWithStatus leaseTxInBlock = node.getBlock(leaseTxInfo.height())
                 .transactions().stream()
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
-        TransactionWithStatus<?> leaseTxInBlocksSeq = node.getBlocks(leaseTxInfo.height(), leaseTxInfo.height())
+        TransactionWithStatus leaseTxInBlocksSeq = node.getBlocks(leaseTxInfo.height(), leaseTxInfo.height())
                 .get(0).transactions().stream()
                 .filter(t -> t.tx().id().equals(leaseTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
 
         assertThat(leaseTxInBlock).isEqualTo(leaseTxInBlocksSeq);
         assertThat(leaseTxInBlock).isInstanceOf(TransactionWithStatus.class);
-        assertThat(leaseTxInBlock).isEqualTo(new TransactionWithStatus<>(leaseTx, ApplicationStatus.SUCCEEDED));
+        assertThat(leaseTxInBlock).isEqualTo(new TransactionWithStatus(leaseTx, ApplicationStatus.SUCCEEDED));
 
         // 2. cancel
 
         LeaseCancelTransaction cancelTx = LeaseCancelTransaction.builder(leaseTx.id()).getSignedWith(alice);
-        TransactionInfo<?> cancelTxInfo = node.waitForTransaction(node.broadcast(cancelTx).id());
+        TransactionInfo cancelTxInfo = node.waitForTransaction(node.broadcast(cancelTx).id());
 
-        TransactionWithStatus<?> cancelTxInBlock = node.getBlock(cancelTxInfo.height())
+        TransactionWithStatus cancelTxInBlock = node.getBlock(cancelTxInfo.height())
                 .transactions().stream()
                 .filter(t -> t.tx().id().equals(cancelTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
-        TransactionWithStatus<?> cancelTxInBlocksSeq = node.getBlocks(cancelTxInfo.height(), cancelTxInfo.height())
+        TransactionWithStatus cancelTxInBlocksSeq = node.getBlocks(cancelTxInfo.height(), cancelTxInfo.height())
                 .get(0).transactions().stream()
                 .filter(t -> t.tx().id().equals(cancelTx.id()))
                 .findFirst().orElseThrow(AssertionError::new);
 
         assertThat(cancelTxInBlock).isEqualTo(cancelTxInBlocksSeq);
         assertThat(cancelTxInfo).isInstanceOf(TransactionWithStatus.class);
-        assertThat(cancelTxInBlock).isEqualTo(new TransactionWithStatus<>(cancelTx, ApplicationStatus.SUCCEEDED));
+        assertThat(cancelTxInBlock).isEqualTo(new TransactionWithStatus(cancelTx, ApplicationStatus.SUCCEEDED));
     }
 
 }

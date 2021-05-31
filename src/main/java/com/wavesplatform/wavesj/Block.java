@@ -15,7 +15,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public class Block extends BlockHeaders {
 
-    private final List<TransactionWithStatus<?>> transactions;
+    private final List<TransactionWithStatus> transactions;
     private final long fee;
 
     @JsonCreator
@@ -36,7 +36,7 @@ public class Block extends BlockHeaders {
             @JsonProperty("reward") long reward,
             @JsonProperty("VRF") Base58String vrf,
             @JsonProperty("fee") long fee,
-            @JsonProperty("transactions") List<TransactionWithStatus<?>> transactions) {
+            @JsonProperty("transactions") List<TransactionWithStatus> transactions) {
         super(version, timestamp, reference, transactionsRoot, id, features, desiredReward, generator,
                 signature, size, transactionsCount, height, totalFee, reward, vrf);
         this.fee = fee;
@@ -47,7 +47,7 @@ public class Block extends BlockHeaders {
         return fee;
     }
 
-    public List<TransactionWithStatus<?>> transactions() {
+    public List<TransactionWithStatus> transactions() {
         return transactions;
     }
 

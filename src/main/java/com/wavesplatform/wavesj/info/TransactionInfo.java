@@ -6,11 +6,11 @@ import com.wavesplatform.wavesj.ApplicationStatus;
 
 import java.util.Objects;
 
-public abstract class TransactionInfo<T extends Transaction> extends TransactionWithStatus<T> {
+public abstract class TransactionInfo extends TransactionWithStatus {
 
     private final int height;
 
-    public TransactionInfo(T tx,
+    public TransactionInfo(Transaction tx,
                            ApplicationStatus applicationStatus,
                            int height) {
         super(tx, applicationStatus);
@@ -26,7 +26,7 @@ public abstract class TransactionInfo<T extends Transaction> extends Transaction
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        TransactionInfo<?> that = (TransactionInfo<?>) o;
+        TransactionInfo that = (TransactionInfo) o;
         return height == that.height;
     }
 

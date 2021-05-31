@@ -6,12 +6,12 @@ import com.wavesplatform.wavesj.Common;
 
 import java.util.Objects;
 
-public class TransactionWithStatus<T extends Transaction> {
+public class TransactionWithStatus {
 
-    private final T tx;
+    private final Transaction tx;
     private final ApplicationStatus applicationStatus;
 
-    public TransactionWithStatus(T tx, ApplicationStatus applicationStatus) {
+    public TransactionWithStatus(Transaction tx, ApplicationStatus applicationStatus) {
         this.tx = Common.notNull(tx, "Transaction");
         this.applicationStatus = applicationStatus == null ? ApplicationStatus.SUCCEEDED : applicationStatus;
     }
@@ -20,15 +20,19 @@ public class TransactionWithStatus<T extends Transaction> {
         return applicationStatus;
     }
 
-    public T tx() {
+    public Transaction tx() {
         return tx;
+    }
+
+    public <T extends Transaction> T tx(Class<T> clazz) {
+        return (T) tx;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TransactionWithStatus<?> that = (TransactionWithStatus<?>) o;
+        TransactionWithStatus that = (TransactionWithStatus) o;
         return Objects.equals(tx, that.tx) &&
                 applicationStatus == that.applicationStatus;
     }
