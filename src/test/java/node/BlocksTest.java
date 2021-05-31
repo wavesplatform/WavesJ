@@ -4,7 +4,10 @@ import base.BaseTestWithNodeInDocker;
 import com.wavesplatform.transactions.DataTransaction;
 import com.wavesplatform.transactions.LeaseCancelTransaction;
 import com.wavesplatform.transactions.LeaseTransaction;
+import com.wavesplatform.transactions.TransferTransaction;
+import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.account.PrivateKey;
+import com.wavesplatform.transactions.common.Amount;
 import com.wavesplatform.transactions.common.Base58String;
 import com.wavesplatform.transactions.data.StringEntry;
 import com.wavesplatform.wavesj.ApplicationStatus;
@@ -17,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -124,6 +128,40 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
         node.waitBlocks(2);
 
         assertThat(node.getBlocksDelay(blockIdAtStart, 3)).isGreaterThan(1000);
+    }
+
+    @Test
+    void transactions() throws IOException, NodeException {
+        PrivateKey alice = createAccountWithBalance(10_00000000);
+        Address bob = createAccountWithBalance(10_00000000).address();
+
+        TransactionInfo transfer = node.waitForTransaction(node.broadcast(
+                TransferTransaction.builder(bob, Amount.of(10)).getSignedWith(alice)).id());
+        TransactionInfo leasing = node.waitForTransaction(node.broadcast(
+                LeaseTransaction.builder(bob, 20).getSignedWith(alice)).id());
+
+        TransactionWithStatus transferInBlock = node.getBlock(transfer.height())
+                .transactions()
+                .stream()
+                .filter(i -> transfer.tx().id().equals(i.tx().id()))
+                .findFirst()
+                .orElseThrow(() -> new IOException("Can't find transfer tx at height " + transfer.height()));
+        TransactionWithStatus leasingInBlock = node.getBlocks(leasing.height(), leasing.height() + 1)
+                .get(0)
+                .transactions()
+                .stream()
+                .filter(i -> leasing.tx().id().equals(i.tx().id()))
+                .findFirst()
+                .orElseThrow(() -> new IOException("Can't find leasing tx at height " + leasing.height()));
+
+        assertThat(transferInBlock.tx()).isInstanceOf(TransferTransaction.class);
+        assertThat(leasingInBlock.tx()).isInstanceOf(LeaseTransaction.class);
+        assertThat(transferInBlock).isEqualTo(new TransactionWithStatus(transfer.tx(), ApplicationStatus.SUCCEEDED));
+        assertThat(leasingInBlock).isEqualTo(new TransactionWithStatus(leasing.tx(), ApplicationStatus.SUCCEEDED));
+        assertThat(transferInBlock.tx(TransferTransaction.class).amount())
+                .isEqualTo(transfer.tx(TransferTransaction.class).amount());
+        assertThat(leasingInBlock.tx(LeaseTransaction.class).amount())
+                .isEqualTo(leasing.tx(LeaseTransaction.class).amount());
     }
 
     @Test
