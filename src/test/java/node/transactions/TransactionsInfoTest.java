@@ -28,7 +28,6 @@ public class TransactionsInfoTest extends BaseTestWithNodeInDocker {
     void txs() throws IOException, NodeException {
 //TODO
 //        node.broadcast();
-//
 //        node.getTransactionInfo();
 //        node.getTransactionsByAddress();
 //        node.calculateTransactionFee();

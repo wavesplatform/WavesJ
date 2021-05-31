@@ -24,8 +24,7 @@ public class TransactionInfoDeser extends JsonDeserializer<TransactionInfo> {
         //transaction fields and info fields are on the same level
         Transaction tx = Transaction.fromJson(json.toString());
         ApplicationStatus status = codec.treeToValue(json.get("applicationStatus"), ApplicationStatus.class);
-        //transactions in block don't have height, so their height get filled later in the Block constructor
-        int height = json.hasNonNull("height") ? json.get("height").asInt() : 0;
+        int height = json.get("height").asInt();
 
         if (tx instanceof GenesisTransaction)
             return new GenesisTransactionInfo((GenesisTransaction) tx, status, height);

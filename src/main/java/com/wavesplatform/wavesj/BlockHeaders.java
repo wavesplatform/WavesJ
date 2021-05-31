@@ -34,7 +34,7 @@ public class BlockHeaders {
     private final Base58String vrf;
 
     @JsonCreator
-    public BlockHeaders( //todo test on old versions of block
+    public BlockHeaders(
             @JsonProperty("version") int version,
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("reference") Base58String reference,

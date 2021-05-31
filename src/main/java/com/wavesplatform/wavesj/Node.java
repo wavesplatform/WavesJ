@@ -35,7 +35,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
+import static com.wavesplatform.wavesj.Status.CONFIRMED;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("unused")
 public class Node {
@@ -436,7 +438,6 @@ public class Node {
     example to javadoc: IssueTransaction tx = broadcast(IssueTransaction.with("", 1, 0).get());
      */
     public <T extends Transaction> T broadcast(T transaction) throws IOException, NodeException {
-        //TODO support trace
         //noinspection unchecked
         return (T) asType(post("/transactions/broadcast")
                         .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)),
@@ -553,28 +554,12 @@ public class Node {
                 TypeRef.SCRIPT_INFO);
     }
 
-    /* TODO
-    public String decompileScript(Base64String compiledScript) throws IOException, NodeException {
-        return asType(post("/utils/script/compileCode")
-                        .addHeader("Content-Type", "text/plain")
-                        .setEntity(new StringEntity(compiledScript.toString(), StandardCharsets.UTF_8)),
-                TypeRef.SCRIPT_INFO);
-    }
-
-    public String evaluateScript(String source) throws IOException, NodeException {
-        return asType(post("/utils/script/compileCode")
-                        .addHeader("Content-Type", "text/plain")
-                        .setEntity(new StringEntity(source, StandardCharsets.UTF_8)),
-                TypeRef.SCRIPT_INFO);
-    }*/
-
     //===============
     // WAITINGS
     //===============
 
     private final int blockInterval = 60;
 
-    //TODO use /transactions/status
     public TransactionInfo waitForTransaction(Id id, int waitingInSeconds) throws IOException {
         int pollingIntervalInMillis = 100;
 
@@ -601,6 +586,41 @@ public class Node {
 
     public <T extends TransactionInfo> T waitForTransaction(Id id, Class<T> infoClass) throws IOException {
         return infoClass.cast(waitForTransaction(id));
+    }
+
+    public void waitForTransactions(List<Id> ids, int waitingInSeconds) throws IOException, NodeException {
+        int pollingIntervalInMillis = 1000;
+
+        if (waitingInSeconds < 1)
+            throw new IllegalStateException("waitForTransaction: waiting value must be positive. Current: " + waitingInSeconds);
+
+        Exception lastException = null;
+        for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
+            try {
+                List<TransactionStatus> statuses = this.getTransactionsStatus(ids);
+                if (statuses.stream().allMatch(s -> CONFIRMED.equals(s.status())))
+                    return;
+            } catch (NodeException | IOException e) {
+                lastException = e;
+                try {
+                    Thread.sleep(pollingIntervalInMillis);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+
+        List<TransactionStatus> statuses = this.getTransactionsStatus(ids);
+        List<TransactionStatus> unconfirmed =
+                statuses.stream().filter(s -> !CONFIRMED.equals(s.status())).collect(toList());
+        throw new IOException("Could not wait for " + unconfirmed.size() + " of " + ids.size() +
+                " transactions in " + waitingInSeconds + " seconds: " + unconfirmed, lastException);
+    }
+
+    public void waitForTransactions(List<Id> ids) throws IOException, NodeException {
+        waitForTransactions(ids, blockInterval);
+    }
+
+    public void waitForTransactions(Id... ids) throws IOException, NodeException {
+        waitForTransactions(asList(ids));
     }
 
     public int waitForHeight(int target, int waitingInSeconds) throws IOException, NodeException {
