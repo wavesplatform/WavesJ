@@ -110,7 +110,7 @@ public class LeasingTest extends BaseTestWithNodeInDocker {
         assertThat(invokeLeasingCancel).isEqualTo(new LeaseInfo(
                 stateChangesLease.id(), invokeTx.tx().id(), bob.address(), alice.address(),
                 invokeLeaseAmount, invokeTx.height(), LeaseStatus.CANCELED,
-                stateChangesCancel.height(), invokeCancelTx.tx().id()));
+                invokeCancelTx.height(), invokeCancelTx.tx().id()));
         // TODO bug, should be fixed in Node. Uncomment at Node 1.3.5 release
         //assertThat(invokeLeasingCancel).isEqualTo(stateChangesCancel);
 
