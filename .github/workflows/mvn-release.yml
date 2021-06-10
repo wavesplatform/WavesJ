@@ -14,24 +14,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Set version
+      - name: Check Maven version
         id: version
         run: |
-          export git_message=$(git log -1 --pretty=%B)
-          version_msg_regex='Version ([0-9]+\.[0-9]+\.?[0-9]*).*'
-          mvn_version=$(grep -Eo '<version>(.*)</version>' pom.xml | head -1)
-          if [[ $git_message =~ $version_msg_regex ]]; then
-            export version="${BASH_REMATCH[1]}"
-            echo "Version is taken from message: $git_message"
-            ./setversion.sh "$version"
-          else
-            echo "Version is auto-generated"
-            version=$(./setversion.sh release)
-          fi
-          if [[ $mvn_version != "<version>$version</version>" ]]; then
-            echo "Incorrect version set: $mvn_version"
-            exit 1
-          fi
+          echo "::set-output name=mvn_version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      - name: Stop on snapshot
+        if: endsWith(${{ steps.version.outputs.mvn_version }}, "-SNAPSHOT")
+        run: exit 1
       - name: Release Maven package
         uses: samuelmeuli/action-maven-publish@v1.4.0
         with:

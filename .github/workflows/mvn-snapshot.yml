@@ -23,7 +23,7 @@ jobs:
         uses: samuelmeuli/action-maven-publish@v1.4.0
         if: endsWith(${{ steps.version.outputs.mvn_version }}, "-SNAPSHOT")
         with:
-          gpg_private_key: ${{ secrets.gpg_private_key }}
-          gpg_passphrase: ${{ secrets.gpg_passphrase }}
-          nexus_username: ${{ secrets.nexus_username }}
-          nexus_password: ${{ secrets.nexus_password }}
+          gpg_private_key: ${{ secrets.OSSRH_GPG_KEY_ASCII }}
+          gpg_passphrase: ${{ secrets.OSSRH_GPG_PASSPHRASE }}
+          nexus_username: ${{ secrets.OSSRH_USERNAME }}
+          nexus_password: ${{ secrets.OSSRH_PASSWORD }}
