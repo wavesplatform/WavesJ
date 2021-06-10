@@ -34,7 +34,7 @@ public class BlockHeaders {
     private final Base58String vrf;
 
     @JsonCreator
-    public BlockHeaders( //todo test on old versions of block
+    public BlockHeaders(
             @JsonProperty("version") int version,
             @JsonProperty("timestamp") long timestamp,
             @JsonProperty("reference") Base58String reference,
@@ -173,23 +173,23 @@ public class BlockHeaders {
     @Override
     public String toString() {
         return "BlockHeader{" +
-                "version=" + version +
+                "id=" + id +
+                ", height=" + height +
                 ", timestamp=" + timestamp +
+                ", generator=" + generator +
+                ", version=" + version +
                 ", reference=" + reference +
                 ", baseTarget=" + baseTarget +
                 ", generationSignature='" + generationSignature + '\'' +
-                ", transactionsRoot='" + transactionsRoot + '\'' +
-                ", id=" + id +
-                ", features=" + features +
-                ", desiredReward=" + desiredReward +
-                ", generator=" + generator +
-                ", signature='" + signature + '\'' +
-                ", size=" + size +
-                ", transactionsCount=" + transactionsCount +
-                ", height=" + height +
-                ", totalFee=" + totalFee +
-                ", reward=" + reward +
                 ", vrf=" + vrf +
+                ", features=" + features +
+                ", signature='" + signature + '\'' +
+                ", desiredReward=" + desiredReward +
+                ", reward=" + reward +
+                ", totalFee=" + totalFee +
+                ", transactionsCount=" + transactionsCount +
+                ", transactionsRoot='" + transactionsRoot + '\'' +
+                ", size=" + size +
                 '}';
     }
 }

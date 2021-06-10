@@ -11,7 +11,7 @@ public class BurnAction {
     private final long amount;
 
     @JsonCreator
-    BurnAction(@JsonProperty("assetId") AssetId assetId,
+    public BurnAction(@JsonProperty("assetId") AssetId assetId,
                @JsonProperty("amount") long amount) {
         this.assetId = assetId;
         this.amount = amount;

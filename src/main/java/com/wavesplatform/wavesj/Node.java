@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.wavesplatform.transactions.LeaseTransaction;
 import com.wavesplatform.transactions.Transaction;
 import com.wavesplatform.transactions.WavesConfig;
 import com.wavesplatform.transactions.account.Address;
@@ -12,6 +11,7 @@ import com.wavesplatform.transactions.common.*;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.transactions.serializers.json.JsonSerializer;
 import com.wavesplatform.wavesj.exceptions.NodeException;
+import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.json.TypeRef;
 import com.wavesplatform.wavesj.json.WavesJMapper;
 import org.apache.http.HttpResponse;
@@ -30,13 +30,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
+import static com.wavesplatform.wavesj.Status.CONFIRMED;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("unused")
 public class Node {
@@ -52,9 +53,9 @@ public class Node {
                 .custom()
                 .setDefaultRequestConfig(
                         RequestConfig.custom()
-                                .setSocketTimeout(5000)
-                                .setConnectTimeout(5000)
-                                .setConnectionRequestTimeout(5000)
+                                .setSocketTimeout(60000)
+                                .setConnectTimeout(60000)
+                                .setConnectionRequestTimeout(60000)
                                 .setCookieSpec(CookieSpecs.STANDARD)
                                 .build())
                 .build();
@@ -161,11 +162,13 @@ public class Node {
         return asType(get("/addresses/data/" + address.toString() + "/" + key), TypeRef.DATA_ENTRY);
     }
 
+    @Deprecated
     public long getEffectiveBalance(Address address) throws IOException, NodeException {
         return asJson(get("/addresses/effectiveBalance/" + address.toString()))
                 .get("balance").asLong();
     }
 
+    @Deprecated
     public long getEffectiveBalance(Address address, int confirmations) throws IOException, NodeException {
         return asJson(get("/addresses/effectiveBalance/" + address.toString() + "/" + confirmations))
                 .get("balance").asLong();
@@ -250,7 +253,7 @@ public class Node {
         if (after != null)
             request.addParameter("after", after.toString());
 
-        return mapper.readValue(asInputStream(request), TypeRef.ASSETS_DETAILS);
+        return asType(request, TypeRef.ASSETS_DETAILS);
     }
 
     //===============
@@ -285,6 +288,11 @@ public class Node {
 
     public int getBlockHeight(Base58String blockId) throws IOException, NodeException {
         return asJson(get("/blocks/height/" + blockId.toString()))
+                .get("height").asInt();
+    }
+
+    public int getBlockHeight(long timestamp) throws IOException, NodeException {
+        return asJson(get("/blocks/heightByTimestamp/" + timestamp))
                 .get("height").asInt();
     }
 
@@ -385,26 +393,6 @@ public class Node {
         return asType(get("/debug/balances/history/" + address.toString()), TypeRef.HISTORY_BALANCES);
     }
 
-    public TransactionDebugInfo getStateChanges(Id txId) throws IOException, NodeException {
-        return asType(get("/debug/stateChanges/info/" + txId.toString()), TypeRef.TRANSACTION_DEBUG_INFO);
-    }
-
-    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
-        RequestBuilder request = get("/debug/stateChanges/address/" + address.toString() + "/limit/" + limit);
-        if (afterTxId != null)
-            request.addParameter("after", afterTxId.toString());
-
-        return asType(request, TypeRef.TRANSACTIONS_DEBUG_INFO);
-    }
-
-    public List<TransactionDebugInfo> getStateChangesByAddress(Address address, int limit) throws IOException, NodeException {
-        return getStateChangesByAddress(address, limit, null);
-    }
-
-    public List<TransactionDebugInfo> getStateChangesByAddress(Address address) throws IOException, NodeException {
-        return getStateChangesByAddress(address, 10);
-    }
-
     public <T extends Transaction> Validation validateTransaction(T transaction) throws IOException, NodeException {
         return asType(post("/debug/validate")
                 .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)), TypeRef.VALIDATION);
@@ -414,8 +402,27 @@ public class Node {
     // LEASING
     //===============
 
-    public List<LeaseTransaction> getActiveLeases(Address address) throws IOException, NodeException {
-        return asType(get("/leasing/active/" + address.toString()), TypeRef.ACTIVE_LEASES);
+    public List<LeaseInfo> getActiveLeases(Address address) throws IOException, NodeException {
+        return asType(get("/leasing/active/" + address.toString()), TypeRef.LEASES_INFO);
+    }
+
+    public LeaseInfo getLeaseInfo(Id leaseId) throws IOException, NodeException {
+        return asType(get("/leasing/info/" + leaseId.toString()), TypeRef.LEASE_INFO);
+    }
+
+    public List<LeaseInfo> getLeasesInfo(List<Id> leaseIds) throws IOException, NodeException {
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonIds = jsonBody.putArray("ids");
+        leaseIds.forEach(id -> jsonIds.add(id.toString()));
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return asType(post("/leasing/info")
+                .addHeader("Content-Type", "application/json")
+                .setEntity(body), TypeRef.LEASES_INFO);
+    }
+
+    public List<LeaseInfo> getLeasesInfo(Id... leaseIds) throws IOException, NodeException {
+        return getLeasesInfo(asList(leaseIds));
     }
 
     //===============
@@ -446,6 +453,18 @@ public class Node {
      */
     public TransactionInfo getTransactionInfo(Id txId) throws IOException, NodeException {
         return asType(get("/transactions/info/" + txId.toString()), TypeRef.TRANSACTION_INFO);
+    }
+
+    /**
+     * Returns object by its ID.
+     *
+     * @param txId object ID
+     * @return object object
+     * @throws IOException if no object with the given ID exists
+     */
+    public <T extends TransactionInfo> T getTransactionInfo(Id txId, Class<T> transactionInfoClass) throws IOException, NodeException {
+        return transactionInfoClass.cast(
+                asType(get("/transactions/info/" + txId.toString()), TypeRef.TRANSACTION_INFO));
     }
 
     /**
@@ -509,7 +528,7 @@ public class Node {
     }
 
     public List<TransactionStatus> getTransactionsStatus(Id... txIds) throws IOException, NodeException {
-        return getTransactionsStatus(new ArrayList<>(Arrays.asList(txIds)));
+        return getTransactionsStatus(asList(txIds));
     }
 
     public Transaction getUnconfirmedTransaction(Id txId) throws IOException, NodeException {
@@ -533,6 +552,115 @@ public class Node {
                         .addHeader("Content-Type", "text/plain")
                         .setEntity(new StringEntity(source, StandardCharsets.UTF_8)),
                 TypeRef.SCRIPT_INFO);
+    }
+
+    //===============
+    // WAITINGS
+    //===============
+
+    private final int blockInterval = 60;
+
+    public TransactionInfo waitForTransaction(Id id, int waitingInSeconds) throws IOException {
+        int pollingIntervalInMillis = 100;
+
+        if (waitingInSeconds < 1)
+            throw new IllegalStateException("waitForTransaction: waiting value must be positive. Current: " + waitingInSeconds);
+
+        Exception lastException = null;
+        for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
+            try {
+                return this.getTransactionInfo(id);
+            } catch (NodeException | IOException e) {
+                lastException = e;
+                try {
+                    Thread.sleep(pollingIntervalInMillis);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+        throw new IOException("Could not wait for transaction " + id + " in " + waitingInSeconds + " seconds", lastException);
+    }
+
+    public TransactionInfo waitForTransaction(Id id) throws IOException {
+        return waitForTransaction(id, blockInterval);
+    }
+
+    public <T extends TransactionInfo> T waitForTransaction(Id id, Class<T> infoClass) throws IOException {
+        return infoClass.cast(waitForTransaction(id));
+    }
+
+    public void waitForTransactions(List<Id> ids, int waitingInSeconds) throws IOException, NodeException {
+        int pollingIntervalInMillis = 1000;
+
+        if (waitingInSeconds < 1)
+            throw new IllegalStateException("waitForTransaction: waiting value must be positive. Current: " + waitingInSeconds);
+
+        Exception lastException = null;
+        for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
+            try {
+                List<TransactionStatus> statuses = this.getTransactionsStatus(ids);
+                if (statuses.stream().allMatch(s -> CONFIRMED.equals(s.status())))
+                    return;
+            } catch (NodeException | IOException e) {
+                lastException = e;
+                try {
+                    Thread.sleep(pollingIntervalInMillis);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+
+        List<TransactionStatus> statuses = this.getTransactionsStatus(ids);
+        List<TransactionStatus> unconfirmed =
+                statuses.stream().filter(s -> !CONFIRMED.equals(s.status())).collect(toList());
+        throw new IOException("Could not wait for " + unconfirmed.size() + " of " + ids.size() +
+                " transactions in " + waitingInSeconds + " seconds: " + unconfirmed, lastException);
+    }
+
+    public void waitForTransactions(List<Id> ids) throws IOException, NodeException {
+        waitForTransactions(ids, blockInterval);
+    }
+
+    public void waitForTransactions(Id... ids) throws IOException, NodeException {
+        waitForTransactions(asList(ids));
+    }
+
+    public int waitForHeight(int target, int waitingInSeconds) throws IOException, NodeException {
+        int start = this.getHeight();
+        int prev = start;
+        int pollingIntervalInMillis = 100;
+
+        if (waitingInSeconds < 1)
+            throw new IllegalStateException("waitForHeight: value must be positive. Current: " + waitingInSeconds);
+
+        for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
+            int current = this.getHeight();
+
+            if (current >= target)
+                return current;
+            else if (current > prev) {
+                prev = current;
+                spentMillis = 0;
+            }
+
+            try {
+                Thread.sleep(pollingIntervalInMillis);
+            } catch (InterruptedException ignored) {}
+        }
+        throw new IllegalStateException("Could not wait for the height to rise from " + start + " to " + target +
+                ": height " + prev + " did not grow for " + waitingInSeconds + " seconds");
+    }
+
+    public int waitForHeight(int expectedHeight) throws IOException, NodeException {
+        return waitForHeight(expectedHeight, blockInterval * 3);
+    }
+
+    public int waitBlocks(int blocksCount, int waitingInSeconds) throws IOException, NodeException {
+        if (waitingInSeconds < 1)
+            throw new IllegalStateException("waitBlocks: waiting value must be positive. Current: " + waitingInSeconds);
+        return waitForHeight(getHeight() + blocksCount, waitingInSeconds);
+    }
+
+    public int waitBlocks(int blocksCount) throws IOException, NodeException {
+        return waitBlocks(blocksCount, blockInterval * 3);
     }
 
     //===============

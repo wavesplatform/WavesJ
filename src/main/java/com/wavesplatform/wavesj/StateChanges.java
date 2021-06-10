@@ -8,6 +8,8 @@ import com.wavesplatform.wavesj.actions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class StateChanges {
@@ -18,6 +20,9 @@ public class StateChanges {
     private final List<ReissueAction> reissues;
     private final List<BurnAction> burns;
     private final List<SponsorFeeAction> sponsorFees;
+    private final List<LeaseInfo> leases;
+    private final List<LeaseInfo> leaseCancels;
+    private final List<InvokeAction> invokes;
     private final Error error;
 
     @JsonCreator
@@ -27,6 +32,9 @@ public class StateChanges {
                  @JsonProperty("reissues") List<ReissueAction> reissues,
                  @JsonProperty("burns") List<BurnAction> burns,
                  @JsonProperty("sponsorFees") List<SponsorFeeAction> sponsorFees,
+                 @JsonProperty("leases") List<LeaseInfo> leases,
+                 @JsonProperty("leaseCancels") List<LeaseInfo> leaseCancels,
+                 @JsonProperty("invokes") List<InvokeAction> invokes,
                  @JsonProperty("error") Error error) {
         this.data = data != null ? data : new ArrayList<>();
         this.transfers = transfers != null ? transfers : new ArrayList<>();
@@ -34,7 +42,10 @@ public class StateChanges {
         this.reissues = reissues != null ? reissues : new ArrayList<>();
         this.burns = burns != null ? burns : new ArrayList<>();
         this.sponsorFees = sponsorFees != null ? sponsorFees : new ArrayList<>();
-        this.error = error != null ? error : new Error(0, "");
+        this.leases = leases != null ? leases : new ArrayList<>();
+        this.leaseCancels = leaseCancels != null ? leaseCancels : new ArrayList<>();
+        this.invokes = invokes != null ? invokes : new ArrayList<>();
+        this.error = error;
     }
 
     /**
@@ -87,11 +98,73 @@ public class StateChanges {
     }
 
     /**
+     * Returns collection of leasing after applying transaction.
+     * @return collection of leasing or empty list
+     */
+    public List<LeaseInfo> leases() {
+        return leases;
+    }
+
+    /**
+     * Returns collection of leasing cancellations after applying transaction.
+     * @return collection of leasing cancellations or empty list
+     */
+    public List<LeaseInfo> leaseCancels() {
+        return leaseCancels;
+    }
+
+    /**
+     * Returns collection of script invocations during applying transaction.
+     * @return collection of script invocations or empty list
+     */
+    public List<InvokeAction> invokes() {
+        return invokes;
+    }
+
+    /**
      * Returns error message if transaction is failed.
      * @return error message
      */
-    public Error error() {
-        return error;
+    public Optional<Error> error() {
+        return Optional.ofNullable(error);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StateChanges that = (StateChanges) o;
+        return Objects.equals(data, that.data)
+                && Objects.equals(transfers, that.transfers)
+                && Objects.equals(issues, that.issues)
+                && Objects.equals(reissues, that.reissues)
+                && Objects.equals(burns, that.burns)
+                && Objects.equals(sponsorFees, that.sponsorFees)
+                && Objects.equals(leases, that.leases)
+                && Objects.equals(leaseCancels, that.leaseCancels)
+                && Objects.equals(invokes, that.invokes)
+                && Objects.equals(error, that.error);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data, transfers, issues, reissues, burns, sponsorFees, leases, leaseCancels, invokes, error);
+    }
+
+    @Override
+    public String toString() {
+        return "StateChanges{" +
+                "data=" + data +
+                ", transfers=" + transfers +
+                ", issues=" + issues +
+                ", reissues=" + reissues +
+                ", burns=" + burns +
+                ", sponsorFees=" + sponsorFees +
+                ", leases=" + leases +
+                ", leaseCancels=" + leaseCancels +
+                ", invokes=" + invokes +
+                ", error=" + error +
+                '}';
     }
 
 }
