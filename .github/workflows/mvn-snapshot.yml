@@ -15,40 +15,15 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Set version
+      - name: Check Maven version
         id: version
         run: |
-          git fetch --prune --unshallow
-          shopt -s nocasematch
-          if [[ "${{github.event_name}}" == "pull_request" ]]; then
-            ref="${{github.head_ref}}"
-            node_regex="node-([0-9]+)-.*"
-            sc_regex="sc-([0-9]+)-.*"
-            if [[ $ref =~ $node_regex ]]; then
-              issue="${BASH_REMATCH[1]}"
-              prefix="N"
-            elif [[ $ref =~ $sc_regex ]]; then
-              issue="${BASH_REMATCH[1]}"
-              prefix="SC"
-            else
-              echo "$ref doesnt match node-1111-smth regex"
-              exit 1
-            fi
-            version="$prefix$issue"
-            if test -z "$version"; then exit 1; fi
-            ./setversion.sh "$version"
-          else
-            mvn_version=$(grep -Eo '<version>(.*)</version>' pom.xml | head -1)
-            version=$(./setversion.sh snapshot)
-            if [[ $mvn_version != "<version>$version</version>" ]]; then
-              echo "Incorrect version set: $mvn_version, should be $version"
-              exit 1
-            fi
-          fi
-      - name: Release Maven package
+          echo "::set-output name=mvn_version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      - name: Publish Maven snapshot
         uses: samuelmeuli/action-maven-publish@v1.4.0
+        if: endsWith(${{ steps.version.outputs.mvn_version }}, "-SNAPSHOT")
         with:
-          gpg_private_key: ${{ secrets.gpg_private_key }}
-          gpg_passphrase: ${{ secrets.gpg_passphrase }}
-          nexus_username: ${{ secrets.nexus_username }}
-          nexus_password: ${{ secrets.nexus_password }}
+          gpg_private_key: ${{ secrets.OSSRH_GPG_KEY_ASCII }}
+          gpg_passphrase: ${{ secrets.OSSRH_GPG_PASSPHRASE }}
+          nexus_username: ${{ secrets.OSSRH_USERNAME }}
+          nexus_password: ${{ secrets.OSSRH_PASSWORD }}
