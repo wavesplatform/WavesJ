@@ -570,7 +570,7 @@ public class Node {
         for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
             try {
                 return this.getTransactionInfo(id);
-            } catch (NodeException | IOException e) {
+            } catch (Exception e) {
                 lastException = e;
                 try {
                     Thread.sleep(pollingIntervalInMillis);
@@ -600,7 +600,7 @@ public class Node {
                 List<TransactionStatus> statuses = this.getTransactionsStatus(ids);
                 if (statuses.stream().allMatch(s -> CONFIRMED.equals(s.status())))
                     return;
-            } catch (NodeException | IOException e) {
+            } catch (Exception e) {
                 lastException = e;
                 try {
                     Thread.sleep(pollingIntervalInMillis);
