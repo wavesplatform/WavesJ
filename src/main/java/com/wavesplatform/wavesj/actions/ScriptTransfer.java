@@ -2,6 +2,7 @@ package com.wavesplatform.wavesj.actions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wavesplatform.transactions.common.Amount;
 import com.wavesplatform.transactions.common.AssetId;
 import com.wavesplatform.transactions.common.Recipient;
 import com.wavesplatform.wavesj.Common;
@@ -21,6 +22,10 @@ public class ScriptTransfer {
         this.recipient = Common.notNull(recipient, "Recipient");
         this.amount = amount;
         this.assetId = assetId == null ? AssetId.WAVES : assetId;
+    }
+
+    public ScriptTransfer(Recipient recipient, Amount amount) {
+        this(recipient, amount.value(), amount.assetId());
     }
 
     public Recipient recipient() {

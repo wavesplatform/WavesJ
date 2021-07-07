@@ -48,6 +48,10 @@ public class StateChanges {
         this.error = error;
     }
 
+    public StateChanges() {
+        this(null, null, null, null, null, null, null, null, null, null);
+    }
+
     /**
      * Returns collection of account's {@link DataEntry DataEntries} which were modified after applying transaction
      * @return collection of {@link DataEntry DataEntries} or empty list

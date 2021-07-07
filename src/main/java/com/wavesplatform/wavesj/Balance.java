@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.transactions.account.Address;
 
@@ -9,6 +10,7 @@ public class Balance {
     private final Address address;
     private final long balance;
 
+    @JsonCreator
     public Balance(@JsonProperty("id") Address address,
                    @JsonProperty("balance") long balance) {
         this.address = Common.notNull(address, "Id");

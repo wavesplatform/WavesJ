@@ -1,5 +1,6 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public class ScriptMeta {
     private final int metaVersion;
     private final Map<String, List<ArgMeta>> callableFunctions;
 
+    @JsonCreator
     public ScriptMeta(@JsonProperty("version") int metaVersion,
                       @JsonProperty("callableFuncTypes") Map<String, List<ArgMeta>> callableFunctions) {
         this.metaVersion = metaVersion;

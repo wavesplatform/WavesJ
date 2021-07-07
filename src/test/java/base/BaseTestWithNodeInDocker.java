@@ -4,7 +4,6 @@ import com.wavesplatform.crypto.Crypto;
 import com.wavesplatform.transactions.TransferTransaction;
 import com.wavesplatform.transactions.account.PrivateKey;
 import com.wavesplatform.transactions.common.Amount;
-import com.wavesplatform.transactions.common.AssetId;
 import com.wavesplatform.transactions.common.Id;
 import com.wavesplatform.wavesj.Node;
 import com.wavesplatform.wavesj.Profile;
