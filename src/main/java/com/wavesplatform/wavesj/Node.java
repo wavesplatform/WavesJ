@@ -203,7 +203,7 @@ public class Node {
     //===============
 
     public AssetDistribution getAssetDistribution(AssetId assetId, int height) throws IOException, NodeException {
-        return getAssetDistribution(assetId, height, 10);
+        return getAssetDistribution(assetId, height, 1000);
     }
 
     public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit) throws IOException, NodeException {
@@ -241,7 +241,7 @@ public class Node {
     }
 
     public List<AssetDetails> getNft(Address address) throws IOException, NodeException {
-        return this.getNft(address, 10);
+        return this.getNft(address, 1000);
     }
 
     public List<AssetDetails> getNft(Address address, int limit) throws IOException, NodeException {
@@ -475,7 +475,7 @@ public class Node {
      * @throws IOException if something going wrong
      */
     public List<TransactionInfo> getTransactionsByAddress(Address address) throws IOException, NodeException {
-        return getTransactionsByAddress(address, 10);
+        return getTransactionsByAddress(address, 1000);
     }
 
     /**
@@ -570,7 +570,7 @@ public class Node {
         for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
             try {
                 return this.getTransactionInfo(id);
-            } catch (NodeException | IOException e) {
+            } catch (Exception e) {
                 lastException = e;
                 try {
                     Thread.sleep(pollingIntervalInMillis);
@@ -600,7 +600,7 @@ public class Node {
                 List<TransactionStatus> statuses = this.getTransactionsStatus(ids);
                 if (statuses.stream().allMatch(s -> CONFIRMED.equals(s.status())))
                     return;
-            } catch (NodeException | IOException e) {
+            } catch (Exception e) {
                 lastException = e;
                 try {
                     Thread.sleep(pollingIntervalInMillis);
