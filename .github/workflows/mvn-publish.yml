@@ -22,6 +22,7 @@ jobs:
           key: ${{ hashFiles('pom.xml') }}
           path: ~/.m2/repository
       - name: Prepare version
+        id: maven-version
         run: |
           mvn_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           git_ref=${GITHUB_REF##*/}
@@ -29,15 +30,17 @@ jobs:
           if [[ $git_ref =~ v[0-9]+\.[0-9]+\.[0-9]+$ && v$mvn_version != $git_ref ]] ; then
             echo Maven version $mvn_version does not match tag $git_ref
             exit 1
-          elif [[ $pr_number != "" ]] ; then
+          elif [[ $pr_number != "" && $mvn_version =~ -SNAPSHOT$ ]] ; then
             pattern="s/(.+)-SNAPSHOT/\1-"$pr_number"-SNAPSHOT/g"
             mvn_version=$(echo $mvn_version | sed -E $pattern)
             mvn versions:set -DnewVersion=$mvn_version -DgenerateBackupPoms=false -q -DforceStdout
           elif [[ ! $mvn_version =~ -SNAPSHOT$ ]] ; then
             echo Refusing to publish non-snapshot version $mvn_version
-            exit 1
+            echo '::set-output name=skip-publish::true'
           fi
       - uses: samuelmeuli/action-maven-publish@v1.4.0
+        if:
+          ${{ steps.maven-version.outputs.skip-publish != 'true' }}
         with:
           gpg_private_key: ${{ secrets.OSSRH_GPG_KEY_ASCII }}
           gpg_passphrase: ${{ secrets.OSSRH_GPG_PASSPHRASE }}
