@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -169,7 +169,7 @@
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
         </dependency>
 
         <!-- http client -->
