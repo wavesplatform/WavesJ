@@ -6,10 +6,15 @@ import com.wavesplatform.transactions.common.AssetId;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class WavesJMapperTest {
+
+    private static URL getJsonResourceURL(String fileName) {
+        return WavesJMapperTest.class.getResource("/json/"+fileName);
+    }
 
     @Test
     void testDeserializeTransactionData1() throws IOException {
@@ -17,7 +22,7 @@ class WavesJMapperTest {
         ObjectMapper sut = new WavesJMapper();
 
         // sut
-        Transaction transaction = sut.readValue(WavesJMapperTest.class.getResource("/json/transaction-data-1.json"), Transaction.class);
+        Transaction transaction = sut.readValue(getJsonResourceURL("transaction-data-1.json"), Transaction.class);
 
         // verify transaction with json content of /json/transaction-data-1.json
         assertNotNull(transaction);
