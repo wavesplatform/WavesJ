@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 import static com.wavesplatform.wavesj.Status.CONFIRMED;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -107,11 +106,11 @@ public class Node {
     }
 
     public List<Balance> getBalances(List<Address> addresses) throws IOException, NodeException {
-        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ObjectNode jsonBody = this.mapper.createObjectNode();
         ArrayNode jsonAddresses = jsonBody.putArray("addresses");
         addresses.forEach(address -> jsonAddresses.add(address.toString()));
 
-        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(this.mapper.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
 
         return asType(post("/addresses/balance")
                 .addHeader("Content-Type", "application/json")
@@ -119,12 +118,12 @@ public class Node {
     }
 
     public List<Balance> getBalances(List<Address> addresses, int height) throws IOException, NodeException {
-        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ObjectNode jsonBody = this.mapper.createObjectNode();
         ArrayNode jsonAddresses = jsonBody.putArray("addresses");
         addresses.forEach(address -> jsonAddresses.add(address.toString()));
 
         jsonBody.put("height", height);
-        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(this.mapper.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
 
         return asType(post("/addresses/balance")
                 .addHeader("Content-Type", "application/json")
@@ -140,10 +139,10 @@ public class Node {
     }
 
     public List<DataEntry> getData(Address address, List<String> keys) throws IOException, NodeException {
-        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ObjectNode jsonBody = this.mapper.createObjectNode();
         ArrayNode jsonKeys = jsonBody.putArray("keys");
         keys.forEach(jsonKeys::add);
-        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(this.mapper.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
 
         return asType(post("/addresses/data/" + address.toString())
                 .addHeader("Content-Type", "application/json")
@@ -411,10 +410,10 @@ public class Node {
     }
 
     public List<LeaseInfo> getLeasesInfo(List<Id> leaseIds) throws IOException, NodeException {
-        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ObjectNode jsonBody = this.mapper.createObjectNode();
         ArrayNode jsonIds = jsonBody.putArray("ids");
         leaseIds.forEach(id -> jsonIds.add(id.toString()));
-        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(this.mapper.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
 
         return asType(post("/leasing/info")
                 .addHeader("Content-Type", "application/json")
@@ -517,10 +516,10 @@ public class Node {
     }
 
     public List<TransactionStatus> getTransactionsStatus(List<Id> txIds) throws IOException, NodeException {
-        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ObjectNode jsonBody = this.mapper.createObjectNode();
         ArrayNode jsonIds = jsonBody.putArray("ids");
         txIds.forEach(id -> jsonIds.add(id.toString()));
-        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+        StringEntity body = new StringEntity(this.mapper.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
 
         return asType(post("/transactions/status")
                 .addHeader("Content-Type", "application/json")
@@ -691,7 +690,7 @@ public class Node {
     }
 
     protected JsonNode asJson(RequestBuilder request) throws IOException, NodeException {
-        return JSON_MAPPER.readTree(asInputStream(request));
+        return this.mapper.readTree(asInputStream(request));
     }
 
 }
