@@ -63,7 +63,10 @@ public class TransactionInfoDeser extends JsonDeserializer<TransactionInfo> {
                     codec.treeToValue(json.get("stateChanges"), StateChanges.class));
         else if (tx instanceof UpdateAssetInfoTransaction)
             return new UpdateAssetInfoTransactionInfo((UpdateAssetInfoTransaction) tx, status, height);
+        else if (tx instanceof InvokeExpressionTransaction)
+            return new InvokeExpressionTransactionInfo((InvokeExpressionTransaction) tx, status, height,
+                    codec.treeToValue(json.get("stateChanges"), StateChanges.class));
         else
-            throw new IOException("Can't parse transaction info: " + json.toString());
+            throw new IOException("Can't parse transaction info: " + json);
     }
 }
