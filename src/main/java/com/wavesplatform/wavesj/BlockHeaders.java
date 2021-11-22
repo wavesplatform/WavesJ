@@ -69,7 +69,8 @@ public class BlockHeaders {
 
     @JsonProperty("nxt-consensus")
     private void nxtConsensus(Map<String, Object> nxtConsensus) {
-        this.baseTarget = (int) nxtConsensus.get("base-target");
+        Object baseTargetObj = nxtConsensus.get("base-target");
+        this.baseTarget = baseTargetObj instanceof Long ? (Long) baseTargetObj : (Integer) baseTargetObj;
         this.generationSignature = new Base58String((String) nxtConsensus.get("generation-signature"));
     }
 

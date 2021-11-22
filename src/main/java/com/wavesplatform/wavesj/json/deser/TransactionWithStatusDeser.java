@@ -20,7 +20,10 @@ public class TransactionWithStatusDeser extends JsonDeserializer<TransactionWith
 
         //transaction fields and info fields are on the same level
         Transaction tx = Transaction.fromJson(json.toString());
-        ApplicationStatus status = codec.treeToValue(json.get("applicationStatus"), ApplicationStatus.class);
+        ApplicationStatus status =
+                json.has("applicationStatus")
+                        ? codec.treeToValue(json.get("applicationStatus"), ApplicationStatus.class)
+                        : ApplicationStatus.SUCCEEDED;
 
         return new TransactionWithStatus(tx, status);
     }

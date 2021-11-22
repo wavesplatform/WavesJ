@@ -6,6 +6,7 @@ import com.wavesplatform.transactions.account.Address;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class AssetDistribution {
@@ -19,7 +20,7 @@ public class AssetDistribution {
                              @JsonProperty("lastItem") Address lastItem,
                              @JsonProperty("hasNext") boolean hasNext) {
         this.items = Common.notNull(items, "Items");
-        this.lastItem = Common.notNull(lastItem, "LastItem");
+        this.lastItem = lastItem;
         this.hasNext = hasNext;
     }
 
@@ -27,8 +28,11 @@ public class AssetDistribution {
         return items;
     }
 
-    public Address lastItem() {
-        return lastItem;
+    /**
+     * @return last item if there is at least one address, otherwise empty
+     */
+    public Optional<Address> lastItem() {
+        return Optional.ofNullable(lastItem);
     }
 
     public boolean hasNext() {

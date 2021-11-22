@@ -29,6 +29,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.web3j.utils.Numeric;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -43,6 +45,7 @@ import java.util.regex.Pattern;
 import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 import static com.wavesplatform.wavesj.Status.CONFIRMED;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("unused")
@@ -52,6 +55,7 @@ public class Node {
     private final HttpClient client;
     private final URI uri;
     private final WavesJMapper mapper;
+    private final int blockInterval = 60;
 
     public Node(URI uri, HttpClient httpClient) throws IOException, NodeException {
         this.uri = uri;
@@ -496,6 +500,36 @@ public class Node {
     }
 
     /**
+     *
+     * @param txIds IDs of transactions
+     * @return info about requested transactions
+     * @throws IOException
+     * @throws NodeException
+     */
+    public List<TransactionInfo> getTransactionsInfo(List<Id> txIds) throws IOException, NodeException {
+        BasicNameValuePair[] params = txIds
+                .stream()
+                .map(id -> new BasicNameValuePair("id", id.toString()))
+                .toArray(BasicNameValuePair[]::new);
+
+        return asType(get("/transactions/info").addParameters(params), TypeRef.TRANSACTIONS_INFO);
+    }
+
+    /**
+     * @param txIds IDs of transactions
+     * @param transactionInfoClass info class for all the requested transactions
+     * @return typed info about requested transactions. Use this method ONLY if you're sure that all requested transactions are of the same type (for example, txIds contains only InvokeScript transactions)
+     * @throws IOException
+     * @throws NodeException
+     */
+    public <T extends TransactionInfo> List<T> getTransactionsInfo(List<Id> txIds, Class<T> transactionInfoClass) throws IOException, NodeException {
+        return getTransactionsInfo(txIds)
+                .stream()
+                .map(transactionInfoClass::cast)
+                .collect(toCollection(ArrayList::new));
+    }
+
+    /**
      * Returns 10 last transactions by address.
      *
      * @param address address
@@ -598,8 +632,6 @@ public class Node {
     // WAITINGS
     //===============
 
-    private final int blockInterval = 60;
-
     public TransactionInfo waitForTransaction(Id id, int waitingInSeconds) throws IOException {
         int pollingIntervalInMillis = 100;
 
@@ -627,6 +659,14 @@ public class Node {
 
     public <T extends TransactionInfo> T waitForTransaction(Id id, Class<T> infoClass) throws IOException {
         return infoClass.cast(waitForTransaction(id));
+    }
+
+    public <T extends Transaction> TransactionInfo waitForTransaction(T tx) throws IOException {
+        return waitForTransaction(tx.id());
+    }
+
+    public <TI extends TransactionInfo, T extends Transaction> TI waitForTransaction(T tx, Class<TI> infoClass) throws IOException {
+        return waitForTransaction(tx.id(), infoClass);
     }
 
     public void waitForTransactions(List<Id> ids, int waitingInSeconds) throws IOException, NodeException {
