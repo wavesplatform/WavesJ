@@ -81,13 +81,13 @@ public class AssetsTest extends BaseTestWithNodeInDocker {
         AssetDistribution distributionPage1 =
                 node.getAssetDistribution(assetId, node.getHeight() - 1, 1000);
         AssetDistribution distributionPage2 =
-                node.getAssetDistribution(assetId, node.getHeight() - 1, 1000, distributionPage1.lastItem().get());
+                node.getAssetDistribution(assetId, node.getHeight() - 1, 1000, distributionPage1.lastItem());
 
         assertThat(distributionPage1.hasNext()).isTrue();
         assertThat(distributionPage2.hasNext()).isFalse();
 
-        assertThat(distributionPage1.items()).containsKey(distributionPage1.lastItem().get());
-        assertThat(distributionPage2.items()).containsKey(distributionPage2.lastItem().get());
+        assertThat(distributionPage1.items()).containsKey(distributionPage1.lastItem());
+        assertThat(distributionPage2.items()).containsKey(distributionPage2.lastItem());
 
         List<Transfer> items1 = new ArrayList<>();
         distributionPage1.items().forEach((k, v) -> items1.add(Transfer.to(k, v)));
