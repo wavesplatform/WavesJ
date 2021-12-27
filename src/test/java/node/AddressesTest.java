@@ -53,19 +53,19 @@ public class AddressesTest extends BaseTestWithNodeInDocker {
 
         assertThat(node.getBalance(alice)).isEqualTo(balanceAfterLeaseOutFee);
         assertThat(node.getBalanceDetails(alice))
-                        .isEqualTo(new BalanceDetails(
-                                alice,
-                                balanceAfterLeaseOutFee - leasedOut,
-                                balanceAfterLeaseOutFee,
-                                0,
-                                balanceAfterLeaseOutFee - leasedOut + leasedIn));
+                .isEqualTo(new BalanceDetails(
+                        alice,
+                        balanceAfterLeaseOutFee - leasedOut,
+                        balanceAfterLeaseOutFee,
+                        0,
+                        balanceAfterLeaseOutFee - leasedOut + leasedIn));
         assertThat(node.getBalanceDetails(faucet.address()).generating()).isPositive();
         assertThat(node.getEffectiveBalance(alice)).isEqualTo(balanceAfterLeaseOutFee - leasedOut + leasedIn);
 
         assertThat(node.getBalances(asList(alice, bob)))
-                        .containsExactlyInAnyOrder(
-                                new Balance(alice, balanceAfterLeaseOutFee),
-                                new Balance(bob, initBalance));
+                .containsExactlyInAnyOrder(
+                        new Balance(alice, balanceAfterLeaseOutFee),
+                        new Balance(bob, initBalance));
         assertThat(node.getBalances(asList(alice, bob), height))
                 .containsExactlyInAnyOrder(
                         new Balance(alice, balanceAfterLeaseOutFee),
@@ -193,13 +193,27 @@ public class AddressesTest extends BaseTestWithNodeInDocker {
         assertThat(node.getScriptMeta(alice.address())).isEqualTo(
                 new ScriptMeta(2, expectedFunctions));
 
-        // TODO waiting fix in Node. Field `extraFee` should be 0. Uncomment and remove all the assertions below
-        // assertThat(node.getScriptInfo(alice.address())).isEqualTo(scriptInfo);
-        assertThat(compileScriptInfo.extraFee()).isEqualTo(400000);
-        assertThat(actualScriptInfo.script()).isEqualTo(compileScriptInfo.script());
-        assertThat(actualScriptInfo.callableComplexities()).isEqualTo(compileScriptInfo.callableComplexities());
-        assertThat(actualScriptInfo.complexity()).isEqualTo(compileScriptInfo.complexity());
-        assertThat(actualScriptInfo.verifierComplexity()).isEqualTo(compileScriptInfo.verifierComplexity());
+        assertThat(node.getScriptInfo(alice.address())).isEqualTo(compileScriptInfo);
+    }
+
+    @Test
+    void compactionTest() throws IOException, NodeException {
+        String scriptText = "{-# STDLIB_VERSION 5 #-}\n" +
+                "{-# SCRIPT_TYPE ACCOUNT #-}\n" +
+                "{-# CONTENT_TYPE DAPP #-}\n" +
+                "\n" +
+                "func veryLongName0() = true\n" +
+                "func veryLongName1() = if (veryLongName0()) then veryLongName0() else veryLongName0()\n" +
+                "func veryLongName2() = if (veryLongName1()) then veryLongName0() else veryLongName0()\n" +
+                "func veryLongName3() = if (veryLongName2()) then veryLongName0() else veryLongName0()\n" +
+                "func veryLongName4() = if (veryLongName3()) then veryLongName0() else veryLongName0()\n" +
+                "func veryLongName5() = if (veryLongName4()) then veryLongName0() else veryLongName0()\n" +
+                "func veryLongName6() = if (veryLongName5()) then veryLongName0() else veryLongName0()";
+        ScriptInfo fullScriptInfo = node.compileScript(scriptText, false);
+        ScriptInfo compactScriptInfo = node.compileScript(scriptText, true);
+
+        assertThat(fullScriptInfo.script().bytes().length)
+                .isGreaterThan(compactScriptInfo.script().bytes().length);
     }
 
 }
