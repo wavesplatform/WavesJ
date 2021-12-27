@@ -548,8 +548,13 @@ public class Node {
     //===============
 
     public ScriptInfo compileScript(String source) throws IOException, NodeException {
+        return compileScript(source, false);
+    }
+
+    public ScriptInfo compileScript(String source, boolean enableCompaction) throws IOException, NodeException {
         return asType(post("/utils/script/compileCode")
                         .addHeader("Content-Type", "text/plain")
+                        .addParameter("compact", enableCompaction ? "true" : "false")
                         .setEntity(new StringEntity(source, StandardCharsets.UTF_8)),
                 TypeRef.SCRIPT_INFO);
     }
@@ -574,7 +579,8 @@ public class Node {
                 lastException = e;
                 try {
                     Thread.sleep(pollingIntervalInMillis);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
         }
         throw new IOException("Could not wait for transaction " + id + " in " + waitingInSeconds + " seconds", lastException);
@@ -604,7 +610,8 @@ public class Node {
                 lastException = e;
                 try {
                     Thread.sleep(pollingIntervalInMillis);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
         }
 
@@ -643,7 +650,8 @@ public class Node {
 
             try {
                 Thread.sleep(pollingIntervalInMillis);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
         throw new IllegalStateException("Could not wait for the height to rise from " + start + " to " + target +
                 ": height " + prev + " did not grow for " + waitingInSeconds + " seconds");
