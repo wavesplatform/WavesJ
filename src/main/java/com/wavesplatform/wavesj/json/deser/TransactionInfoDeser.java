@@ -69,14 +69,14 @@ public class TransactionInfoDeser extends JsonDeserializer<TransactionInfo> {
                     (EthereumTransaction) tx,
                     status,
                     height,
-                    stateEthTxChangesFromJson(codec, json),
+                    stateChangesFromJson(codec, json),
                     json.get("bytes").asText()
             );
         else
             throw new IOException("Can't parse transaction info: " + json.toString());
     }
 
-    private StateChanges stateEthTxChangesFromJson(ObjectCodec codec, JsonNode json) throws JsonProcessingException {
+    private StateChanges stateChangesFromJson(ObjectCodec codec, JsonNode json) throws JsonProcessingException {
         JsonNode payload = json.get("payload");
         if (payload == null) return null;
         return codec.treeToValue(payload.get("stateChanges"), StateChanges.class);
