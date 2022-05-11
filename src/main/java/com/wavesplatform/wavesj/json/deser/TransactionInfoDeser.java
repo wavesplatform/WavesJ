@@ -77,8 +77,6 @@ public class TransactionInfoDeser extends JsonDeserializer<TransactionInfo> {
     }
 
     private StateChanges stateChangesFromJson(ObjectCodec codec, JsonNode json) throws JsonProcessingException {
-        JsonNode payload = json.get("payload");
-        if (payload == null) return null;
-        return codec.treeToValue(payload.get("stateChanges"), StateChanges.class);
+        return json.get("payload") != null ? codec.treeToValue(json.get("payload").get("stateChanges"), StateChanges.class) : null;
     }
 }
