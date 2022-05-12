@@ -1,6 +1,7 @@
 package com.wavesplatform.wavesj.json.deser;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -63,7 +64,19 @@ public class TransactionInfoDeser extends JsonDeserializer<TransactionInfo> {
                     codec.treeToValue(json.get("stateChanges"), StateChanges.class));
         else if (tx instanceof UpdateAssetInfoTransaction)
             return new UpdateAssetInfoTransactionInfo((UpdateAssetInfoTransaction) tx, status, height);
+        else if (tx instanceof EthereumTransaction)
+            return new EthereumTransactionInfo(
+                    (EthereumTransaction) tx,
+                    status,
+                    height,
+                    stateChangesFromJson(codec, json),
+                    json.get("bytes").asText()
+            );
         else
             throw new IOException("Can't parse transaction info: " + json.toString());
+    }
+
+    private StateChanges stateChangesFromJson(ObjectCodec codec, JsonNode json) throws JsonProcessingException {
+        return json.get("payload") != null ? codec.treeToValue(json.get("payload").get("stateChanges"), StateChanges.class) : null;
     }
 }
