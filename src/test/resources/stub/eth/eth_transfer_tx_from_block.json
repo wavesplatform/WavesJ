@@ -1,0 +1,38 @@
+{
+  "version": 5,
+  "timestamp": 1634966394797,
+  "reference": "DTdk337ekJvRAzARxG1gD1QJ4ngMwuq7jzmqCffJUZxo",
+  "nxt-consensus": {
+    "base-target": 791,
+    "generation-signature": "tjSo3sN4tHYiXUc47XgVULadYZ2HjbH63jkzJPqKrt9Na5SMhEKXHBRdVgTYJ5ADcvRiyNc9fz5oyp4CX11ckJLC9mFsxyDatmX9e8beZF2w59TVMCh28SKrqMUUib5riiK"
+  },
+  "transactionsRoot": "EYkGCU13mr38iZ7tguwKgAwYsHcR4V36uHKAGPiW33VN",
+  "id": "7djwqL7dbBvZLHZ6aNSGLrH1XGMASDAi8uLd6ohrSqEL",
+  "features": [],
+  "desiredReward": -1,
+  "generator": "3Mn5hzck8nYd52Ytd2ZjzoiQLVoMcn1VAs9",
+  "generatorPublicKey": "ENqViaE4kJC1ff3mJPQhZNHFMHEYuQWjjGxQD1jcEh15",
+  "signature": "2D9HmM12r6vvxZ7EyE1MSF2C8SzicMA6W1w7ZYLMgY2eeJ3BUY6puiQsJJuZqHpKY21cf3T88Neu2WCTc6jWAux5",
+  "blocksize": 416,
+  "transactionCount": 1,
+  "height": 1043438,
+  "totalFee": 100000,
+  "reward": 600000000,
+  "VRF": "JfPnyuhhBtVJg1QzdPTkW2pjEvSxRThTyyuwgmqygm3",
+  "fee": 100000,
+  "transactions": [
+    {
+      "type": 18,
+      "id": "Ba4pFx78Ueg3j6CZqjhuBdg5cjxTwTzJJSS6GPpH3Cn4",
+      "fee": 100000,
+      "feeAssetId": null,
+      "timestamp": 1634966428189,
+      "version": 1,
+      "chainId": 83,
+      "bytes": "0xf87486017cab97da1d8502540be400830186a094c01187f4ae820a0c956c48c06ee73f85c373cc03880de0b6b3a76400008081c9a005860b476a8adbc65e1118a27f761059abaf2d097e9246cebec959c74537507ba009f5ba7d8b87628e2a1c5d4e7f2a2a64f3815d88f1ea9cd0e396315a0b8f946b",
+      "sender": "3MXSTprW6rt1baSkKcqXSqqrXFG9Hod6Zg4",
+      "senderPublicKey": "4WcqqW7mkz7AaBgpWQXbewk3wPSHZGqGj38d8HQZe1Umud2HXFswbGhZyoHZWd3thLjz4KW22JM5SB4yyzGiWjNx",
+      "applicationStatus": "succeeded"
+    }
+  ]
+}

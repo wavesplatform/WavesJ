@@ -1,10 +1,13 @@
 package node.transactions;
 
 import com.wavesplatform.transactions.EthereumTransaction;
+import com.wavesplatform.transactions.ExchangeTransaction;
 import com.wavesplatform.transactions.common.ChainId;
 import com.wavesplatform.transactions.common.Id;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.transactions.data.StringEntry;
+import com.wavesplatform.transactions.exchange.Order;
+import com.wavesplatform.transactions.exchange.OrderType;
 import com.wavesplatform.transactions.invocation.Arg;
 import com.wavesplatform.transactions.invocation.ArgType;
 import com.wavesplatform.transactions.invocation.StringArg;
@@ -14,25 +17,41 @@ import com.wavesplatform.wavesj.Node;
 import com.wavesplatform.wavesj.Profile;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.EthereumTransactionInfo;
+import com.wavesplatform.wavesj.info.ExchangeTransactionInfo;
+import com.wavesplatform.wavesj.info.TransactionWithStatus;
+import node.mock.util.MockHttpRsUtil;
+import org.apache.http.client.HttpClient;
+import org.bouncycastle.util.encoders.Hex;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.wavesplatform.transactions.common.ChainId.STAGENET;
+import static com.wavesplatform.transactions.exchange.OrderType.BUY;
+import static com.wavesplatform.transactions.exchange.OrderType.SELL;
+import static com.wavesplatform.wavesj.ApplicationStatus.SUCCEEDED;
+import static node.mock.util.MockHttpRsUtil.*;
+import static org.bouncycastle.util.encoders.Hex.toHexString;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
-//todo rewrite with private node (right now mock response from node)
 //todo move bytes attribute to inner transaction
 public class EthereumTransactionTest {
 
-    private final Node node = new Node(Profile.STAGENET);
+    private final Node node = new Node(Profile.STAGENET, mockHttpClient());
 
     public EthereumTransactionTest() throws NodeException, IOException {
     }
 
     @Test
     void readEthereumTransferTransactionByIdTest() throws NodeException, IOException {
+        mockTransactionInfoRs(node,
+                "Ba4pFx78Ueg3j6CZqjhuBdg5cjxTwTzJJSS6GPpH3Cn4",
+                "src/test/resources/stub/eth/eth_transfer_tx_info.json"
+        );
+
         EthereumTransactionInfo ethTransferTxInfo =
                 (EthereumTransactionInfo) node.getTransactionInfo(
                         new Id("Ba4pFx78Ueg3j6CZqjhuBdg5cjxTwTzJJSS6GPpH3Cn4")
@@ -47,13 +66,13 @@ public class EthereumTransactionTest {
         assertEquals(100000, ethTransferTx.fee().value());
         assertEquals(1634966428189L, ethTransferTx.timestamp());
         assertEquals(1, ethTransferTx.version());
-        assertEquals(ChainId.STAGENET, ethTransferTx.chainId());
+        assertEquals(STAGENET, ethTransferTx.chainId());
         assertEquals(transferBytes, ethTransferTxInfo.getBytes());
         assertEquals("3MXSTprW6rt1baSkKcqXSqqrXFG9Hod6Zg4", ethTransferTx.sender().address().encoded());
         assertEquals("4WcqqW7mkz7AaBgpWQXbewk3wPSHZGqGj38d8HQZe1Umud2HXFswbGhZyoHZWd3thLjz4KW22JM5SB4yyzGiWjNx",
                 ethTransferTx.sender().encoded());
         assertEquals(1043438, ethTransferTxInfo.height());
-        assertEquals(ApplicationStatus.SUCCEEDED, ethTransferTxInfo.applicationStatus());
+        assertEquals(SUCCEEDED, ethTransferTxInfo.applicationStatus());
         assertTrue(ethTransferTxInfo.isTransferTransaction());
         assertEquals("", payload.amount().assetId().encoded());
         assertEquals(100000000, payload.amount().value());
@@ -62,6 +81,12 @@ public class EthereumTransactionTest {
 
     @Test
     public void readEthereumTransferTransactionFromBlockTest() throws NodeException, IOException {
+        mockGetBlockRs(
+                node,
+                1043438,
+                "src/test/resources/stub/eth/eth_transfer_tx_from_block.json"
+        );
+
         Block block = node.getBlock(1043438);
         EthereumTransaction ethTransferTx = (EthereumTransaction) block.transactions().get(0).tx();
         assertEquals("Ba4pFx78Ueg3j6CZqjhuBdg5cjxTwTzJJSS6GPpH3Cn4", ethTransferTx.id().encoded());
@@ -72,7 +97,7 @@ public class EthereumTransactionTest {
         assertEquals("", ethTransferTx.fee().assetId().encoded());
         assertEquals(1634966428189L, ethTransferTx.timestamp());
         assertEquals(1, ethTransferTx.version());
-        assertEquals(ChainId.STAGENET, ethTransferTx.chainId());
+        assertEquals(STAGENET, ethTransferTx.chainId());
         //bytes
         assertEquals("3MXSTprW6rt1baSkKcqXSqqrXFG9Hod6Zg4", ethTransferTx.sender().address().encoded());
         assertEquals("4WcqqW7mkz7AaBgpWQXbewk3wPSHZGqGj38d8HQZe1Umud2HXFswbGhZyoHZWd3thLjz4KW22JM5SB4yyzGiWjNx",
@@ -82,6 +107,11 @@ public class EthereumTransactionTest {
 
     @Test
     void readEthereumInvokeTransactionByIdTest() throws NodeException, IOException {
+        mockTransactionInfoRs(node,
+                "CWuFY42te67sLmc5gwt4NxwHmFjVfJdHkKuLyshTwEct",
+                "src/test/resources/stub/eth/eth_invoke_tx_info.json"
+        );
+
         EthereumTransactionInfo ethInvokeTxInfo =
                 (EthereumTransactionInfo) node.getTransactionInfo(
                         new Id("CWuFY42te67sLmc5gwt4NxwHmFjVfJdHkKuLyshTwEct")
@@ -96,7 +126,7 @@ public class EthereumTransactionTest {
         assertEquals(500000, ethInvokeTx.fee().value());
         assertEquals(1634983329302L, ethInvokeTx.timestamp());
         assertEquals(1, ethInvokeTx.version());
-        assertEquals(ChainId.STAGENET, ethInvokeTx.chainId());
+        assertEquals(STAGENET, ethInvokeTx.chainId());
         assertEquals(invokeBytes, ethInvokeTxInfo.getBytes());
         assertEquals("3MbhUcL94QzSwkgRztUrdh9E5kwRpRK7Tp6", ethInvokeTx.sender().address().encoded());
         assertEquals("2HAk5dPx7Jx7fwbehqA9JRM9de9E7ZXtxVA2u92vYAp9ttZQiVgChPwBdoJ7ck2wcXmgfGxiAK9a6PPmmtEZmhvd",
@@ -118,6 +148,11 @@ public class EthereumTransactionTest {
 
     @Test
     void readEthereumInvokeTransactionFromBlockTest() throws NodeException, IOException {
+        mockGetBlockRs(
+                node,
+                1043725,
+                "src/test/resources/stub/eth/eth_invoke_tx_from_block.json"
+        );
 
         Block block = node.getBlock(1043725);
         EthereumTransaction ethInvokeTx = (EthereumTransaction) block.transactions().get(0).tx();
@@ -130,11 +165,164 @@ public class EthereumTransactionTest {
         assertEquals(500000, ethInvokeTx.fee().value());
         assertEquals(1634983329302L, ethInvokeTx.timestamp());
         assertEquals(1, ethInvokeTx.version());
-        assertEquals(ChainId.STAGENET, ethInvokeTx.chainId());
+        assertEquals(STAGENET, ethInvokeTx.chainId());
         //assertEquals(invokeBytes, ethInvokeTxInfo.getBytes());
         assertEquals("3MbhUcL94QzSwkgRztUrdh9E5kwRpRK7Tp6", ethInvokeTx.sender().address().encoded());
         assertEquals("2HAk5dPx7Jx7fwbehqA9JRM9de9E7ZXtxVA2u92vYAp9ttZQiVgChPwBdoJ7ck2wcXmgfGxiAK9a6PPmmtEZmhvd",
                 ethInvokeTx.sender().encoded());
+    }
+
+    @Test
+    void readExchangeTransactionInfoWithEthereumSignatureTest() throws IOException, NodeException {
+        mockTransactionInfoRs(node,
+                "3ZPyxs4p7abkj5cf43pUkaHaMPRuBaWC89RX93d2AB6R",
+                "src/test/resources/stub/eth/exchange_tx_info_with_eth_sign.json"
+        );
+
+        ExchangeTransactionInfo exchangeTxInfo =
+                node.getTransactionInfo(
+                        new Id("3ZPyxs4p7abkj5cf43pUkaHaMPRuBaWC89RX93d2AB6R"),
+                        ExchangeTransactionInfo.class
+                );
+
+        ExchangeTransaction exchangeTx = exchangeTxInfo.tx();
+        assertEquals(7, exchangeTx.type());
+        assertEquals("3ZPyxs4p7abkj5cf43pUkaHaMPRuBaWC89RX93d2AB6R", exchangeTx.id().encoded());
+        assertEquals(300000, exchangeTx.fee().value());
+        assertEquals("", exchangeTx.fee().assetId().encoded());
+        assertEquals(1652441936773L, exchangeTx.timestamp());
+        assertEquals(3, exchangeTx.version());
+        assertEquals(STAGENET, exchangeTx.chainId());
+        assertEquals("3Mmp16jymXbxfMZCUKiJMXydAqeB1jrxsM8", exchangeTx.sender().address().encoded());
+        assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", exchangeTx.sender().encoded());
+        assertEquals("3vbCSYNC6T3BrooeULFpHewphHKLV8p6cDz9NFYQEpkGzA8HCaL7EDTYRYEyNs26AiqS1gdHnxb4H6AYUqdmH8pd",
+                exchangeTx.proofs().get(0).encoded());
+
+        Order order1 = exchangeTx.buyOrder();
+
+        assertEquals(4, order1.version());
+        assertEquals("GozxekHa86f9TqMiibckWKJR8V2FJzYuksBV2ESWVyHF", order1.id().encoded());
+        assertEquals("3MWKvUgLuatTdCrZtckutE82e5ZvEgfnYMP", order1.sender().address().encoded());
+        assertEquals("4USoKrfmyQ2xFB8jSjpF95Ma2RFgNDkAbk3td5PhEjrk", order1.sender().encoded());
+        assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", order1.matcher().encoded());
+        assertEquals("CDyHKz5S5dmnBceTxix1cGQpetXAwWVXKiez2TpvpVLw", order1.assetPair().left().encoded());
+        assertEquals("", order1.assetPair().right().encoded());
+        assertEquals(BUY, order1.type());
+        assertEquals(10000, order1.amount().value());
+        assertEquals(10000, order1.price().value());
+        assertEquals(1652441936773L, order1.timestamp());
+        assertEquals(1653881936773L, order1.expiration());
+        assertEquals(300000, order1.fee().value());
+        assertEquals("5qneeJ2va7M8uKhy93ycqWeWstNb4FDSSeV86ZHgFrykDpffcqdEQrq1Ux8XHP18a3eMwA6HHCzr19sdQDywfYNU",
+                order1.proofs().get(0).encoded());
+        assertEquals("", order1.fee().assetId().encoded());
+        assertNull(order1.eip712Signature());
+        //priceMode
+
+        Order order2 = exchangeTx.sellOrder();
+        assertEquals(4, order2.version());
+        assertEquals("3qnirddnVRKeFR84RPdxDUeFmqcV3SGyQpwgkgEz6SYM", order2.id().encoded());
+        assertEquals("3MS5UKPhyHqQJapEGE7kLpN1cW9uyJrcs2q", order2.sender().address().encoded());
+        assertEquals(
+                "26Djzne1dkfLBMu6nkf4RS9TETmGhMRiaoao1nEkhj5NeqSmwkGXr9WP6zAU4h1rZFSTjgn3EkfTUonZutRNEBSm",
+                order2.sender().encoded()
+        );
+        assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", order2.matcher().encoded());
+        assertEquals("CDyHKz5S5dmnBceTxix1cGQpetXAwWVXKiez2TpvpVLw", order2.assetPair().left().encoded());
+        assertEquals("", order2.assetPair().right().encoded());
+        assertEquals(SELL, order2.type());
+        assertEquals(10000, order2.amount().value());
+        assertEquals(10000, order2.price().value());
+        assertEquals(1652441936773L, order2.timestamp());
+        assertEquals(1653881936773L, order2.expiration());
+        assertEquals(300000, order2.fee().value());
+        assertTrue(order2.proofs().isEmpty());
+        assertEquals("", order2.fee().assetId().encoded());
+        assertEquals(
+                "0xc44dea13cefb97c71298e73afb1ef8fa18e75b41264554d54c755c54d90df4fe6678fd267c1cb1063c" +
+                        "a73a8ef44bc368d8131a9a936ca4a00f4b7f98fcd9f06e1c",
+                "0x" + toHexString(order2.eip712Signature()));
+        //priceMode
+        assertEquals(10000, exchangeTx.amount());
+        assertEquals(10000, exchangeTx.price());
+        assertEquals(300000, exchangeTx.buyMatcherFee());
+        assertEquals(300000, exchangeTx.sellMatcherFee());
+        assertEquals(1099637, exchangeTxInfo.height());
+        assertEquals(SUCCEEDED, exchangeTxInfo.applicationStatus());
+    }
+
+    @Test
+    void readExchangeTransactionWithEthereumSignatureFormBlockTest() throws IOException, NodeException {
+        mockGetBlockRs(
+                node,
+                1099637,
+                "src/test/resources/stub/eth/exchange_tx_with_eth_sign_from_block.json"
+        );
+
+        ExchangeTransaction exchangeTx =
+                (ExchangeTransaction) node.getBlock(1099637).transactions().get(0).tx();
+
+        assertEquals(7, exchangeTx.type());
+        assertEquals("3ZPyxs4p7abkj5cf43pUkaHaMPRuBaWC89RX93d2AB6R", exchangeTx.id().encoded());
+        assertEquals(300000, exchangeTx.fee().value());
+        assertEquals("", exchangeTx.fee().assetId().encoded());
+        assertEquals(1652441936773L, exchangeTx.timestamp());
+        assertEquals(3, exchangeTx.version());
+        assertEquals(STAGENET, exchangeTx.chainId());
+        assertEquals("3Mmp16jymXbxfMZCUKiJMXydAqeB1jrxsM8", exchangeTx.sender().address().encoded());
+        assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", exchangeTx.sender().encoded());
+        assertEquals("3vbCSYNC6T3BrooeULFpHewphHKLV8p6cDz9NFYQEpkGzA8HCaL7EDTYRYEyNs26AiqS1gdHnxb4H6AYUqdmH8pd",
+                exchangeTx.proofs().get(0).encoded());
+
+        Order order1 = exchangeTx.buyOrder();
+
+        assertEquals(4, order1.version());
+        assertEquals("GozxekHa86f9TqMiibckWKJR8V2FJzYuksBV2ESWVyHF", order1.id().encoded());
+        assertEquals("3MWKvUgLuatTdCrZtckutE82e5ZvEgfnYMP", order1.sender().address().encoded());
+        assertEquals("4USoKrfmyQ2xFB8jSjpF95Ma2RFgNDkAbk3td5PhEjrk", order1.sender().encoded());
+        assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", order1.matcher().encoded());
+        assertEquals("CDyHKz5S5dmnBceTxix1cGQpetXAwWVXKiez2TpvpVLw", order1.assetPair().left().encoded());
+        assertEquals("", order1.assetPair().right().encoded());
+        assertEquals(BUY, order1.type());
+        assertEquals(10000, order1.amount().value());
+        assertEquals(10000, order1.price().value());
+        assertEquals(1652441936773L, order1.timestamp());
+        assertEquals(1653881936773L, order1.expiration());
+        assertEquals(300000, order1.fee().value());
+        assertEquals("5qneeJ2va7M8uKhy93ycqWeWstNb4FDSSeV86ZHgFrykDpffcqdEQrq1Ux8XHP18a3eMwA6HHCzr19sdQDywfYNU",
+                order1.proofs().get(0).encoded());
+        assertEquals("", order1.fee().assetId().encoded());
+        assertNull(order1.eip712Signature());
+        //priceMode
+
+        Order order2 = exchangeTx.sellOrder();
+        assertEquals(4, order2.version());
+        assertEquals("3qnirddnVRKeFR84RPdxDUeFmqcV3SGyQpwgkgEz6SYM", order2.id().encoded());
+        assertEquals("3MS5UKPhyHqQJapEGE7kLpN1cW9uyJrcs2q", order2.sender().address().encoded());
+        assertEquals(
+                "26Djzne1dkfLBMu6nkf4RS9TETmGhMRiaoao1nEkhj5NeqSmwkGXr9WP6zAU4h1rZFSTjgn3EkfTUonZutRNEBSm",
+                order2.sender().encoded()
+        );
+        assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", order2.matcher().encoded());
+        assertEquals("CDyHKz5S5dmnBceTxix1cGQpetXAwWVXKiez2TpvpVLw", order2.assetPair().left().encoded());
+        assertEquals("", order2.assetPair().right().encoded());
+        assertEquals(SELL, order2.type());
+        assertEquals(10000, order2.amount().value());
+        assertEquals(10000, order2.price().value());
+        assertEquals(1652441936773L, order2.timestamp());
+        assertEquals(1653881936773L, order2.expiration());
+        assertEquals(300000, order2.fee().value());
+        assertTrue(order2.proofs().isEmpty());
+        assertEquals("", order2.fee().assetId().encoded());
+        assertEquals(
+                "0xc44dea13cefb97c71298e73afb1ef8fa18e75b41264554d54c755c54d90df4fe6678fd267c1cb1063c" +
+                        "a73a8ef44bc368d8131a9a936ca4a00f4b7f98fcd9f06e1c",
+                "0x" + toHexString(order2.eip712Signature()));
+        //priceMode
+        assertEquals(10000, exchangeTx.amount());
+        assertEquals(10000, exchangeTx.price());
+        assertEquals(300000, exchangeTx.buyMatcherFee());
+        assertEquals(300000, exchangeTx.sellMatcherFee());
     }
 
     private static final String transferBytes = "0xf87486017cab97da1d8502540be400830186a094c01187f4ae820a0c956c48c06ee" +

@@ -47,6 +47,22 @@ public class Node {
     private final URI uri;
     private final WavesJMapper mapper;
 
+    public Node(URI uri, HttpClient httpClient) throws IOException, NodeException {
+        this.uri = uri;
+        this.client = httpClient;
+        this.mapper = new WavesJMapper();
+        this.chainId = getAddresses().get(0).chainId();
+        WavesConfig.chainId(this.chainId);
+    }
+
+    public Node(String url, HttpClient httpClient) throws URISyntaxException, IOException, NodeException {
+        this(new URI(url), httpClient);
+    }
+
+    public Node(Profile profile, HttpClient httpClient) throws IOException, NodeException {
+        this(profile.uri(), httpClient);
+    }
+
     public Node(URI uri) throws IOException, NodeException {
         this.uri = uri;
         this.client = HttpClients
@@ -684,6 +700,7 @@ public class Node {
     }
 
     protected HttpResponse exec(HttpUriRequest request) throws IOException, NodeException {
+        HttpUriRequest rq = RequestBuilder.get(Profile.STAGENET.uri().resolve("/addresses")).build();
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
             throw mapper.readValue(r.getEntity().getContent(), NodeException.class);
