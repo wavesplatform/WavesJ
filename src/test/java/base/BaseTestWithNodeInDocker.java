@@ -13,6 +13,11 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 public abstract class BaseTestWithNodeInDocker {
     private static final boolean DEBUG = false;
@@ -25,7 +30,8 @@ public abstract class BaseTestWithNodeInDocker {
             NODE_API_URL = Profile.LOCAL.uri().toString();
         } else {
             NODE_CONTAINER = new GenericContainer<>(DockerImageName.parse("wavesplatform/waves-private-node:v1.3.11"))
-                    .withExposedPorts(6869);
+                    .withExposedPorts(6869)
+                    .withStartupTimeout(Duration.of(5, MINUTES));
             NODE_CONTAINER.start();
             NODE_API_URL = "http://" + NODE_CONTAINER.getHost() + ":" + NODE_CONTAINER.getFirstMappedPort();
         }
