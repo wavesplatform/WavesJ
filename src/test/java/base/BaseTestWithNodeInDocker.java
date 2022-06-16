@@ -29,7 +29,7 @@ public abstract class BaseTestWithNodeInDocker {
             NODE_CONTAINER = null;
             NODE_API_URL = Profile.LOCAL.uri().toString();
         } else {
-            NODE_CONTAINER = new GenericContainer<>(DockerImageName.parse("wavesplatform/waves-private-node:v1.3.11"))
+            NODE_CONTAINER = new GenericContainer<>(DockerImageName.parse("wavesplatform/waves-private-node:v1.4.6"))
                     .withExposedPorts(6869)
                     .withStartupTimeout(Duration.of(5, MINUTES));
             NODE_CONTAINER.start();

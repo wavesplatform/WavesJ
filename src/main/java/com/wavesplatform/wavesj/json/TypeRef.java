@@ -1,12 +1,14 @@
 package com.wavesplatform.wavesj.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.wavesplatform.transactions.EthereumTransaction;
 import com.wavesplatform.transactions.Transaction;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.Alias;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.LeaseInfo;
+import com.wavesplatform.wavesj.actions.EthRpcResponse;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 
 import java.util.List;
@@ -58,6 +60,8 @@ public class TypeRef {
     public static final TypeReference<List<TransactionInfo>> TRANSACTIONS_INFO = new TypeReference<List<TransactionInfo>>() {};
 
     public static final TypeReference<Transaction> TRANSACTION = new TypeReference<Transaction>() {};
+
+    public static final TypeReference<EthRpcResponse> ETH_TRANSACTION_RS = new TypeReference<EthRpcResponse>() {};
 
     public static final TypeReference<List<Transaction>> TRANSACTIONS = new TypeReference<List<Transaction>>() {};
 
