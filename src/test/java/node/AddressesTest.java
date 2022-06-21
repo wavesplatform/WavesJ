@@ -148,7 +148,7 @@ public class AddressesTest extends BaseTestWithNodeInDocker {
 
         assertThat(node.getScriptInfo(alice.address())).isEqualTo(scriptInfo);
         assertThat(scriptInfo).isEqualTo(
-                new ScriptInfo(expectedScript, 209, 209, new HashMap<>(), 400000));
+                new ScriptInfo(expectedScript, 202, 202, new HashMap<>(), 400000));
         assertThat(assertThrows(NodeException.class, () ->
                 node.getScriptMeta(alice.address())))
                 .hasMessage("ScriptParseError(Expected DApp)"); //TODO waiting fix in Node. The scenario should work
@@ -171,7 +171,7 @@ public class AddressesTest extends BaseTestWithNodeInDocker {
 
         HashMap<String, Integer> expectedComplexities = new HashMap<>();
         expectedComplexities.put("foo", 1);
-        expectedComplexities.put("bar", 6);
+        expectedComplexities.put("bar", 1);
 
         HashMap<String, List<ArgMeta>> expectedFunctions = new HashMap<>();
         expectedFunctions.put("foo", new ArrayList<>());
@@ -189,7 +189,7 @@ public class AddressesTest extends BaseTestWithNodeInDocker {
 
         ScriptInfo actualScriptInfo = node.getScriptInfo(alice.address());
         assertThat(actualScriptInfo).isEqualTo(
-                new ScriptInfo(expectedScript, 6, 0, expectedComplexities, 0));
+                new ScriptInfo(expectedScript, 1, 0, expectedComplexities, 0));
         assertThat(node.getScriptMeta(alice.address())).isEqualTo(
                 new ScriptMeta(2, expectedFunctions));
 

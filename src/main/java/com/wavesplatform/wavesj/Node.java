@@ -1,15 +1,19 @@
 package com.wavesplatform.wavesj;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.wavesplatform.transactions.EthereumTransaction;
 import com.wavesplatform.transactions.Transaction;
 import com.wavesplatform.transactions.WavesConfig;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.common.*;
 import com.wavesplatform.transactions.data.DataEntry;
 import com.wavesplatform.transactions.serializers.json.JsonSerializer;
+import com.wavesplatform.wavesj.actions.EthRpcRequest;
+import com.wavesplatform.wavesj.actions.EthRpcResponse;
 import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.json.TypeRef;
@@ -24,12 +28,14 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -460,6 +466,12 @@ public class Node {
                 TypeRef.TRANSACTION);
     }
 
+    public EthRpcResponse broadcastEthTransaction(EthereumTransaction ethTransaction) throws IOException, NodeException {
+        HttpUriRequest rq = buildSendRawTransactionRq(ethTransaction.toRawHexString());
+        ObjectNode rs = sendEthRequest(rq);
+        return handleEthResponse(rs);
+    }
+
     /**
      * Returns object by its ID.
      *
@@ -707,7 +719,6 @@ public class Node {
     }
 
     protected HttpResponse exec(HttpUriRequest request) throws IOException, NodeException {
-        HttpUriRequest rq = RequestBuilder.get(Profile.STAGENET.uri().resolve("/addresses")).build();
         HttpResponse r = client.execute(request);
         if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
             throw mapper.readValue(r.getEntity().getContent(), NodeException.class);
@@ -724,6 +735,39 @@ public class Node {
 
     protected JsonNode asJson(RequestBuilder request) throws IOException, NodeException {
         return JSON_MAPPER.readTree(asInputStream(request));
+    }
+
+    protected HttpUriRequest buildSendRawTransactionRq(String rawData) throws JsonProcessingException {
+        return post("/eth")
+                .setEntity(
+                        new StringEntity(
+                                new EthRpcRequest(
+                                        "2.0",
+                                        "eth_sendRawTransaction",
+                                        Collections.singletonList(rawData),
+                                        0
+                                ).toJsonString(),
+                                ContentType.APPLICATION_JSON)
+                )
+                .build();
+    }
+
+    protected ObjectNode sendEthRequest(HttpUriRequest rq) throws IOException {
+        return mapper.readValue(
+                client.execute(rq).getEntity().getContent(),
+                ObjectNode.class
+        );
+    }
+
+    protected EthRpcResponse handleEthResponse(ObjectNode rs) throws NodeException, JsonProcessingException {
+        JsonNode result = rs.get("result");
+        if (result.hasNonNull("error")) {
+            throw new NodeException(
+                    result.get("error").intValue(),
+                    result.get("message").textValue()
+            );
+        }
+        return mapper.treeToValue(rs, EthRpcResponse.class);
     }
 
 }
