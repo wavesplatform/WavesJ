@@ -1,8 +1,8 @@
 package node.transactions;
 
 import com.google.protobuf.ByteString;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import com.wavesplatform.crypto.base.Base58;
+import com.wavesplatform.crypto.base.Base64;
 import com.wavesplatform.events.protobuf.Events.TransactionMetadata;
 import com.wavesplatform.events.protobuf.Events.TransactionMetadata.EthereumMetadata;
 import com.wavesplatform.protobuf.AmountOuterClass.Amount;
