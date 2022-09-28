@@ -134,9 +134,9 @@ public class EthereumTransactionFromProtobufTest {
                 .setEthereum(
                         EthereumMetadata
                                 .newBuilder()
-                                .setSenderAddress(
+                                .setSenderPublicKey(
                                         ByteString.copyFrom(
-                                                Base58.decode("3MiKAyPxv5ccsFToCQiazxvBn4SMxECaFkU")
+                                                Base58.decode("5BcWEhVZFuvMhs8DRF1C8GLSbXvobkfaaRvANa86MboLSQLxC5989Zgo3Djp8WwWKo3JshYP39NnBAJRqTCXZ5Qd")
                                         )
                                 )
                                 .setInvoke(
@@ -159,9 +159,10 @@ public class EthereumTransactionFromProtobufTest {
                 .setEthereum(
                         EthereumMetadata
                                 .newBuilder()
-                                .setSenderAddress(
+
+                                .setSenderPublicKey(
                                         ByteString.copyFrom(
-                                                Base58.decode("3MUCDguXmP55K7ZE1B7xagYbEh9CNpzBRTJ")
+                                                Base58.decode("5HxN2EUK3WQrfYBdWqVByPwVe7qYtEcrQhQGYqqqZZiTRSapUWkvGAqVmqXJ2TvFgW2gAYk7d1bNz9bHjAytdHV9")
                                         )
                                 )
                                 .setInvoke(
