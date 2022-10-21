@@ -621,6 +621,14 @@ public class Node {
                 TypeRef.SCRIPT_INFO);
     }
 
+    public String decompileScript(Base64String compiledScript) throws IOException, NodeException {
+        return asJson(post("/utils/script/decompile")
+                        .addHeader("Content-Type", "application/json")
+                        .setEntity(new StringEntity(compiledScript.toString(), StandardCharsets.UTF_8)))
+                .get("script")
+                .asText();
+    }
+
     public String ethToWavesAsset(String asset) throws NodeException, IOException {
         return asType(
                 get("/eth/assets").addParameter("id", asset),
