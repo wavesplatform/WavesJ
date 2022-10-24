@@ -19,7 +19,7 @@ public class AssetDistribution {
                              @JsonProperty("lastItem") Address lastItem,
                              @JsonProperty("hasNext") boolean hasNext) {
         this.items = Common.notNull(items, "Items");
-        this.lastItem = Common.notNull(lastItem, "LastItem");
+        this.lastItem = lastItem;
         this.hasNext = hasNext;
     }
 

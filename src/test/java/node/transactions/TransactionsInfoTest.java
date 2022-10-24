@@ -4,10 +4,7 @@ import base.BaseTestWithNodeInDocker;
 import com.wavesplatform.transactions.*;
 import com.wavesplatform.transactions.account.Address;
 import com.wavesplatform.transactions.account.PrivateKey;
-import com.wavesplatform.transactions.common.Alias;
-import com.wavesplatform.transactions.common.Amount;
-import com.wavesplatform.transactions.common.AssetId;
-import com.wavesplatform.transactions.common.Base64String;
+import com.wavesplatform.transactions.common.*;
 import com.wavesplatform.transactions.data.*;
 import com.wavesplatform.transactions.exchange.Order;
 import com.wavesplatform.transactions.exchange.OrderType;
@@ -19,8 +16,11 @@ import com.wavesplatform.wavesj.info.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TransactionsInfoTest extends BaseTestWithNodeInDocker {
 
@@ -396,6 +396,51 @@ public class TransactionsInfoTest extends BaseTestWithNodeInDocker {
         assertThat(txInfo).isEqualTo(commonInfo);
         assertThat(txInfo.height()).isPositive();
         assertThat(txInfo.tx()).isEqualTo(tx);
+    }
+
+    @Test
+    void multipleTransactionsInfo() throws NodeException, IOException {
+        PrivateKey alice = createAccountWithBalance(10_00000000);
+
+        Id issueTxId = node.waitForTransaction(
+                node.broadcast(IssueTransaction.builder("Asset", 1000, 2).getSignedWith(alice))
+        ).tx().id();
+
+        Id aliasTxId = node.waitForTransaction(
+                node.broadcast(CreateAliasTransaction.builder("alice").getSignedWith(alice))
+        ).tx().id();
+
+        List<TransactionInfo> txsInfo = node.getTransactionsInfo(asList(issueTxId, aliasTxId));
+
+        assertThat(txsInfo).hasSize(2);
+        assertThat(txsInfo).hasAtLeastOneElementOfType(IssueTransactionInfo.class);
+        assertThat(txsInfo).hasAtLeastOneElementOfType(CreateAliasTransactionInfo.class);
+    }
+
+    @Test
+    void multipleTransactionsInfoWithSpecifiedType() throws NodeException, IOException {
+        PrivateKey alice = createAccountWithBalance(10_00000000);
+
+        Id aliasTxId1 = node.waitForTransaction(
+                node.broadcast(CreateAliasTransaction.builder("alice1").getSignedWith(alice))
+        ).tx().id();
+
+        Id aliasTxId2 = node.waitForTransaction(
+                node.broadcast(CreateAliasTransaction.builder("alice2").getSignedWith(alice))
+        ).tx().id();
+
+        Id issueTxId = node.waitForTransaction(
+                node.broadcast(IssueTransaction.builder("Asset", 1000, 2).getSignedWith(alice))
+        ).tx().id();
+
+        List<CreateAliasTransactionInfo> txsInfo = node.getTransactionsInfo(asList(aliasTxId1, aliasTxId2), CreateAliasTransactionInfo.class);
+
+        assertThat(txsInfo).hasSize(2);
+        assertThat(txsInfo).hasOnlyElementsOfType(CreateAliasTransactionInfo.class);
+
+        assertThrows(ClassCastException.class, () ->
+                node.getTransactionsInfo(asList(aliasTxId1, issueTxId), CreateAliasTransactionInfo.class),
+                "Cannot cast com.wavesplatform.wavesj.info.IssueTransactionInfo to com.wavesplatform.wavesj.info.CreateAliasTransactionInfo");
     }
 
 }

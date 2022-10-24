@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.4.3</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -35,7 +35,7 @@
             <name>Peter Zhelezniakov</name>
             <email>peterz@rambler.ru</email>
             <organization>Waves</organization>
-            <organizationUrl>http://wavesplatform.com</organizationUrl>
+            <organizationUrl>https://waves.tech/</organizationUrl>
             <roles>
                 <role>Developer</role>
             </roles>
