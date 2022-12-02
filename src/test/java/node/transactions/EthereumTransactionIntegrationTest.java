@@ -75,7 +75,7 @@ public class EthereumTransactionIntegrationTest extends BaseTestWithNodeInDocker
         AssetId assetId = createAsset(alice);
         transferBalance(alice, new Address(bobAddress), Amount.of(100, assetId));
         broadcastScript(alice);
-        transferBalance(alice, new Address(bobAddress), Amount.of(1_00_000_000));
+        transferBalance(alice, new Address(bobAddress), Amount.of(3_00_000_000));
 
         ArrayList<Amount> payments = new ArrayList<>();
         payments.add(Amount.of(1, assetId));
