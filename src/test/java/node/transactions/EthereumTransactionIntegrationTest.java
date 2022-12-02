@@ -73,7 +73,7 @@ public class EthereumTransactionIntegrationTest extends BaseTestWithNodeInDocker
         String bobAddress = WavesEthConverter.ethToWavesAddress(bob.getAddress(), WavesConfig.chainId());
 
         AssetId assetId = createAsset(alice);
-        transferBalance(alice, new Address(bobAddress), Amount.of(100, assetId));
+        transferBalance(alice, new Address(bobAddress), Amount.of(1_00_000_000, assetId));
         broadcastScript(alice);
         transferBalance(alice, new Address(bobAddress), Amount.of(1_00_000_000));
 
