@@ -32,7 +32,6 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
-import org.web3j.utils.Numeric;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
@@ -40,8 +39,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -662,10 +661,16 @@ public class Node {
     // UTILS
     //===============
 
+    /**
+     * For local compilation use {@link com.wavesplatform.wavesj.util.CompilationUtil#compile(String, boolean, boolean)}
+     */
     public ScriptInfo compileScript(String source) throws IOException, NodeException {
         return compileScript(source, false);
     }
 
+    /**
+     * For local compilation use {@link com.wavesplatform.wavesj.util.CompilationUtil#compile(String, boolean, boolean)}
+     */
     public ScriptInfo compileScript(String source, boolean enableCompaction) throws IOException, NodeException {
         return asType(post("/utils/script/compileCode")
                         .addHeader("Content-Type", "text/plain")

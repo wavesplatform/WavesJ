@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.5.2</version>
+    <version>1.6.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -53,6 +53,13 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -170,6 +177,14 @@
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
             <version>1.2.3</version>
+        </dependency>
+
+
+        <!-- Compiler -->
+        <dependency>
+            <groupId>com.ridecompiler</groupId>
+            <artifactId>compiler</artifactId>
+            <version>1.4.12-2-g3faa9fa</version>
         </dependency>
 
         <!-- http client -->
