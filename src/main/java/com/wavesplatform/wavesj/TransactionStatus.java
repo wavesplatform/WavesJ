@@ -23,7 +23,7 @@ public class TransactionStatus {
                              @JsonProperty(value = "confirmations", defaultValue = "0") int confirmations) {
         this.id = Common.notNull(id, "Id");
         this.status = Common.notNull(status, "Status");
-        this.applicationStatus = Common.notNull(applicationStatus, "ApplicationStatus");
+        this.applicationStatus = applicationStatus != null ? applicationStatus : ApplicationStatus.UNKNOWN;
         this.height = height;
         this.confirmations = confirmations;
     }
