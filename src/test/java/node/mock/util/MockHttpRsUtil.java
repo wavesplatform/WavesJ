@@ -44,7 +44,7 @@ public class MockHttpRsUtil {
         when(
                 mockHttpClient.execute(
                         argThat(rq ->
-                                rq != null && rq.getURI().equals(Profile.STAGENET.uri().resolve("/addresses"))
+                                rq != null && rq.getURI().toString().endsWith("/addresses")
                         )
                 )
         ).thenReturn(createBasicRs("src/test/resources/stub/addresses.json"));

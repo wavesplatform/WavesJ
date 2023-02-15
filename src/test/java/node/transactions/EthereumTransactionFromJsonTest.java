@@ -32,7 +32,9 @@ import static org.junit.jupiter.api.Assertions.*;
 //todo move bytes attribute to inner transaction
 public class EthereumTransactionFromJsonTest {
 
-    private final Node node = new Node(Profile.STAGENET, mockHttpClient());
+    private final Node node = new Node(Profile.LOCAL, mockHttpClient());
+
+    private static final byte PRIVATE_NODE_CHAIN_ID = 'R';
 
     public EthereumTransactionFromJsonTest() throws NodeException, IOException {
     }
@@ -58,9 +60,9 @@ public class EthereumTransactionFromJsonTest {
         assertEquals(100000, ethTransferTx.fee().value());
         assertEquals(1634966428189L, ethTransferTx.timestamp());
         assertEquals(1, ethTransferTx.version());
-        assertEquals(STAGENET, ethTransferTx.chainId());
+        assertEquals(PRIVATE_NODE_CHAIN_ID, ethTransferTx.chainId());
         assertEquals(transferBytes, ethTransferTxInfo.getBytes());
-        assertEquals("3MXSTprW6rt1baSkKcqXSqqrXFG9Hod6Zg4", ethTransferTx.sender().address().encoded());
+        assertEquals("3M86rqkCp9hYim1cEbRC8MiajcktM16ogVx", ethTransferTx.sender().address().encoded());
         assertEquals("4WcqqW7mkz7AaBgpWQXbewk3wPSHZGqGj38d8HQZe1Umud2HXFswbGhZyoHZWd3thLjz4KW22JM5SB4yyzGiWjNx",
                 ethTransferTx.sender().encoded());
         assertEquals(1043438, ethTransferTxInfo.height());
@@ -89,9 +91,9 @@ public class EthereumTransactionFromJsonTest {
         assertEquals("", ethTransferTx.fee().assetId().encoded());
         assertEquals(1634966428189L, ethTransferTx.timestamp());
         assertEquals(1, ethTransferTx.version());
-        assertEquals(STAGENET, ethTransferTx.chainId());
+        assertEquals(PRIVATE_NODE_CHAIN_ID, ethTransferTx.chainId());
         //bytes
-        assertEquals("3MXSTprW6rt1baSkKcqXSqqrXFG9Hod6Zg4", ethTransferTx.sender().address().encoded());
+        assertEquals("3M86rqkCp9hYim1cEbRC8MiajcktM16ogVx", ethTransferTx.sender().address().encoded());
         assertEquals("4WcqqW7mkz7AaBgpWQXbewk3wPSHZGqGj38d8HQZe1Umud2HXFswbGhZyoHZWd3thLjz4KW22JM5SB4yyzGiWjNx",
                 ethTransferTx.sender().encoded());
         // application status
@@ -118,9 +120,9 @@ public class EthereumTransactionFromJsonTest {
         assertEquals(500000, ethInvokeTx.fee().value());
         assertEquals(1634983329302L, ethInvokeTx.timestamp());
         assertEquals(1, ethInvokeTx.version());
-        assertEquals(STAGENET, ethInvokeTx.chainId());
+        assertEquals(PRIVATE_NODE_CHAIN_ID, ethInvokeTx.chainId());
         assertEquals(invokeBytes, ethInvokeTxInfo.getBytes());
-        assertEquals("3MbhUcL94QzSwkgRztUrdh9E5kwRpRK7Tp6", ethInvokeTx.sender().address().encoded());
+        assertEquals("3MCMsdDqmhoz4wFHus4XKD1xJ8SAsimgBTW", ethInvokeTx.sender().address().encoded());
         assertEquals("2HAk5dPx7Jx7fwbehqA9JRM9de9E7ZXtxVA2u92vYAp9ttZQiVgChPwBdoJ7ck2wcXmgfGxiAK9a6PPmmtEZmhvd",
                 ethInvokeTx.sender().encoded());
         assertEquals(1043725, ethInvokeTxInfo.height());
@@ -155,9 +157,9 @@ public class EthereumTransactionFromJsonTest {
         assertEquals(500000, ethInvokeTx.fee().value());
         assertEquals(1634983329302L, ethInvokeTx.timestamp());
         assertEquals(1, ethInvokeTx.version());
-        assertEquals(STAGENET, ethInvokeTx.chainId());
+        assertEquals(PRIVATE_NODE_CHAIN_ID, ethInvokeTx.chainId());
         //assertEquals(invokeBytes, ethInvokeTxInfo.getBytes());
-        assertEquals("3MbhUcL94QzSwkgRztUrdh9E5kwRpRK7Tp6", ethInvokeTx.sender().address().encoded());
+        assertEquals("3MCMsdDqmhoz4wFHus4XKD1xJ8SAsimgBTW", ethInvokeTx.sender().address().encoded());
         assertEquals("2HAk5dPx7Jx7fwbehqA9JRM9de9E7ZXtxVA2u92vYAp9ttZQiVgChPwBdoJ7ck2wcXmgfGxiAK9a6PPmmtEZmhvd",
                 ethInvokeTx.sender().encoded());
     }
@@ -182,8 +184,8 @@ public class EthereumTransactionFromJsonTest {
         assertEquals("", exchangeTx.fee().assetId().encoded());
         assertEquals(1652441936773L, exchangeTx.timestamp());
         assertEquals(3, exchangeTx.version());
-        assertEquals(STAGENET, exchangeTx.chainId());
-        assertEquals("3Mmp16jymXbxfMZCUKiJMXydAqeB1jrxsM8", exchangeTx.sender().address().encoded());
+        assertEquals(PRIVATE_NODE_CHAIN_ID, exchangeTx.chainId());
+        assertEquals("3MNUQ7dgUpRVnY84PJHy33rMPD8v4zm3FDJ", exchangeTx.sender().address().encoded());
         assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", exchangeTx.sender().encoded());
         assertEquals("3vbCSYNC6T3BrooeULFpHewphHKLV8p6cDz9NFYQEpkGzA8HCaL7EDTYRYEyNs26AiqS1gdHnxb4H6AYUqdmH8pd",
                 exchangeTx.proofs().get(0).encoded());
@@ -192,7 +194,7 @@ public class EthereumTransactionFromJsonTest {
 
         assertEquals(4, order1.version());
         assertEquals("GozxekHa86f9TqMiibckWKJR8V2FJzYuksBV2ESWVyHF", order1.id().encoded());
-        assertEquals("3MWKvUgLuatTdCrZtckutE82e5ZvEgfnYMP", order1.sender().address().encoded());
+        assertEquals("3M6zKVa3cshzkPRRobLaZjzkrT4fHtuSn3Z", order1.sender().address().encoded());
         assertEquals("4USoKrfmyQ2xFB8jSjpF95Ma2RFgNDkAbk3td5PhEjrk", order1.sender().encoded());
         assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", order1.matcher().encoded());
         assertEquals("CDyHKz5S5dmnBceTxix1cGQpetXAwWVXKiez2TpvpVLw", order1.assetPair().left().encoded());
@@ -212,7 +214,7 @@ public class EthereumTransactionFromJsonTest {
         Order order2 = exchangeTx.sellOrder();
         assertEquals(4, order2.version());
         assertEquals("3qnirddnVRKeFR84RPdxDUeFmqcV3SGyQpwgkgEz6SYM", order2.id().encoded());
-        assertEquals("3MS5UKPhyHqQJapEGE7kLpN1cW9uyJrcs2q", order2.sender().address().encoded());
+        assertEquals("3M2jsLHQgaewRmP6BChR2LEjpsef2VZSixf", order2.sender().address().encoded());
         assertEquals(
                 "26Djzne1dkfLBMu6nkf4RS9TETmGhMRiaoao1nEkhj5NeqSmwkGXr9WP6zAU4h1rZFSTjgn3EkfTUonZutRNEBSm",
                 order2.sender().encoded()
@@ -258,8 +260,8 @@ public class EthereumTransactionFromJsonTest {
         assertEquals("", exchangeTx.fee().assetId().encoded());
         assertEquals(1652441936773L, exchangeTx.timestamp());
         assertEquals(3, exchangeTx.version());
-        assertEquals(STAGENET, exchangeTx.chainId());
-        assertEquals("3Mmp16jymXbxfMZCUKiJMXydAqeB1jrxsM8", exchangeTx.sender().address().encoded());
+        assertEquals(PRIVATE_NODE_CHAIN_ID, exchangeTx.chainId());
+        assertEquals("3MNUQ7dgUpRVnY84PJHy33rMPD8v4zm3FDJ", exchangeTx.sender().address().encoded());
         assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", exchangeTx.sender().encoded());
         assertEquals("3vbCSYNC6T3BrooeULFpHewphHKLV8p6cDz9NFYQEpkGzA8HCaL7EDTYRYEyNs26AiqS1gdHnxb4H6AYUqdmH8pd",
                 exchangeTx.proofs().get(0).encoded());
@@ -268,7 +270,7 @@ public class EthereumTransactionFromJsonTest {
 
         assertEquals(4, order1.version());
         assertEquals("GozxekHa86f9TqMiibckWKJR8V2FJzYuksBV2ESWVyHF", order1.id().encoded());
-        assertEquals("3MWKvUgLuatTdCrZtckutE82e5ZvEgfnYMP", order1.sender().address().encoded());
+        assertEquals("3M6zKVa3cshzkPRRobLaZjzkrT4fHtuSn3Z", order1.sender().address().encoded());
         assertEquals("4USoKrfmyQ2xFB8jSjpF95Ma2RFgNDkAbk3td5PhEjrk", order1.sender().encoded());
         assertEquals("CsdeJPgJebkW4tsvAaWtfzNvaFd7nWJUGiHrqrtEGN9p", order1.matcher().encoded());
         assertEquals("CDyHKz5S5dmnBceTxix1cGQpetXAwWVXKiez2TpvpVLw", order1.assetPair().left().encoded());
@@ -288,7 +290,7 @@ public class EthereumTransactionFromJsonTest {
         Order order2 = exchangeTx.sellOrder();
         assertEquals(4, order2.version());
         assertEquals("3qnirddnVRKeFR84RPdxDUeFmqcV3SGyQpwgkgEz6SYM", order2.id().encoded());
-        assertEquals("3MS5UKPhyHqQJapEGE7kLpN1cW9uyJrcs2q", order2.sender().address().encoded());
+        assertEquals("3M2jsLHQgaewRmP6BChR2LEjpsef2VZSixf", order2.sender().address().encoded());
         assertEquals(
                 "26Djzne1dkfLBMu6nkf4RS9TETmGhMRiaoao1nEkhj5NeqSmwkGXr9WP6zAU4h1rZFSTjgn3EkfTUonZutRNEBSm",
                 order2.sender().encoded()
