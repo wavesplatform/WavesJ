@@ -650,6 +650,7 @@ public class Node {
         for (long spentMillis = 0; spentMillis < waitingInSeconds * 1000L; spentMillis += pollingIntervalInMillis) {
             try {
                 if (this.getTransactionStatus(id).status() == CONFIRMED) return this.getTransactionInfo(id);
+                else Thread.sleep(pollingIntervalInMillis);
             } catch (Exception e) {
                 lastException = e;
                 try {
