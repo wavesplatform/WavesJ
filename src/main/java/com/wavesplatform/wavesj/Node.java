@@ -111,6 +111,14 @@ public class Node {
     }
 
     //===============
+    // ACTIVATION
+    //===============
+
+    public ActivationStatus getActivationStatus() throws IOException, NodeException {
+        return asType(get("/activation/status"), TypeRef.ACTIVATION_STATUS);
+    }
+
+    //===============
     // ADDRESSES
     //===============
 
