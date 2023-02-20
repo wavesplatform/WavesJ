@@ -52,7 +52,7 @@ System.out.println("With 100 confirmations: " + node.getBalance(address, 100));
 Send some money to a buddy:
 ```java
 Address buddy = new Address("3N9gDFq8tKFhBDBTQxR3zqvtpXjw5wW3syA");
-node.broadcast(TransferTransaction.builder(buddy, Amount.of(1_00000000, Asset.WAVES)).getSignedWith(privateKey));
+node.broadcast(TransferTransaction.builder(buddy, Amount.of(1_00000000, AssetId.WAVES)).getSignedWith(privateKey));
 ```
 
 Set a script on an account. Be careful with the script you pass here, as it may lock the account forever!
