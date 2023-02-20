@@ -48,6 +48,9 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * This class represents a node.
+ */
 @SuppressWarnings("unused")
 public class Node {
 
@@ -114,24 +117,62 @@ public class Node {
     // ADDRESSES
     //===============
 
+    /**
+     * Get a list of account addresses in the node wallet
+     *
+     * @return sequences of addresses
+     * @throws IOException if no addresses exists
+     */
     public List<Address> getAddresses() throws IOException, NodeException {
         return asType(get("/addresses"), TypeRef.ADDRESSES);
     }
 
+    /**
+     * Get a list addresses in the node wallet by a given range of indices. Max range {from}-{to} is 1000 addresses.
+     *
+     * @param fromIndex start index
+     * @param toIndex end index
+     * @return sequences of addresses
+     * @throws IOException if no addresses exists
+     */
     public List<Address> getAddresses(int fromIndex, int toIndex) throws IOException, NodeException {
         return asType(get("/addresses/seq/" + fromIndex + "/" + toIndex), TypeRef.ADDRESSES);
     }
 
+    /**
+     * Get the regular balance in WAVES at a given address
+     *
+     * @param address address base58 encoded
+     * @return the balance value
+     * @throws IOException if no address exist
+     */
     public long getBalance(Address address) throws IOException, NodeException {
         return asJson(get("/addresses/balance/" + address.toString()))
                 .get("balance").asLong();
     }
 
+    /**
+     * Get the minimum regular balance at a given address for {confirmations} blocks back from the current height.
+     * Max number of confirmations is set by waves.db.max-rollback-depth, 2000 by default
+     *
+     * @param address address base58 encoded
+     * @param confirmations confirmations
+     * @return the balance value
+     * @throws IOException if no address exist
+     */
     public long getBalance(Address address, int confirmations) throws IOException, NodeException {
         return asJson(get("/addresses/balance/" + address.toString() + "/" + confirmations))
                 .get("balance").asLong();
     }
 
+    /**
+     * Get regular balances for multiple addresses.
+     * Max number of addresses is set by waves.rest-api.transactions-by-address-limit, 1000 by default
+     *
+     * @param addresses sequences of addresses base58 encoded
+     * @return sequences of Balance objects
+     * @throws IOException if no address exist
+     */
     public List<Balance> getBalances(List<Address> addresses) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonAddresses = jsonBody.putArray("addresses");
@@ -144,6 +185,15 @@ public class Node {
                 .setEntity(body), TypeRef.BALANCES);
     }
 
+    /**
+     * Get regular balances for multiple addresses.
+     * Max number of addresses is set by waves.rest-api.transactions-by-address-limit, 1000 by default
+     *
+     * @param addresses sequences of addresses base58 encoded
+     * @param height blockchain height
+     * @return sequences of Balance objects
+     * @throws IOException if no address exist or no block exist at the given height
+     */
     public List<Balance> getBalances(List<Address> addresses, int height) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonAddresses = jsonBody.putArray("addresses");
@@ -157,14 +207,38 @@ public class Node {
                 .setEntity(body), TypeRef.BALANCES);
     }
 
+    /**
+     * Get the available, regular, generating, and effective balance
+     *
+     * @see <a href="https://docs.waves.tech/en/blockchain/account/account-balance#account-balance-in-waves">definitions</a>
+     * @param address address base58 encoded
+     * @return BalanceDetails object
+     * @throws IOException if no address exist
+     */
     public BalanceDetails getBalanceDetails(Address address) throws IOException, NodeException {
         return asType(get("/addresses/balance/details/" + address.toString()), TypeRef.BALANCE_DETAILS);
     }
 
+    /**
+     * Read account data entries by given keys or a regular expression.
+     * Limited by rest-api.data-keys-request-limit, 1000 by default.
+     *
+     * @param address address base58 encoded
+     * @return sequence of DataEntry objects
+     * @throws IOException if no address exist
+     */
     public List<DataEntry> getData(Address address) throws IOException, NodeException {
         return asType(get("/addresses/data/" + address.toString()), TypeRef.DATA_ENTRIES);
     }
 
+    /**
+     * Read account data entries by given keys. Limited by rest-api.data-keys-request-limit, 1000 by default.
+     *
+     * @param address address base58 encoded
+     * @param keys sequence of keys of records
+     * @return sequence of DataEntry objects
+     * @throws IOException if no address exist or key exist
+     */
     public List<DataEntry> getData(Address address, List<String> keys) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonKeys = jsonBody.putArray("keys");
@@ -176,34 +250,82 @@ public class Node {
                 .setEntity(body), TypeRef.DATA_ENTRIES);
     }
 
-    /*
-    example to javadoc: Pattern.compile("st.+")
+    /**
+     * Read account data entries by given keys or a regular expression.
+     * Limited by rest-api.data-keys-request-limit, 1000 by default.
+     *
+     * <pre>Pattern.compile("st.+")</pre>
+     *
+     * @param address address base58 encoded
+     * @param regex regular expression for filter keys
+     * @return sequence of DataEntry objects
+     * @throws IOException if no address exist
     */
     public List<DataEntry> getData(Address address, Pattern regex) throws IOException, NodeException {
         return asType(get("/addresses/data/" + address.toString())
                 .addParameter("matches", regex.toString()), TypeRef.DATA_ENTRIES);
     }
 
+    /**
+     * Read account data entries by a given key
+     *
+     * @param address address base58 encoded
+     * @param key key
+     * @return DataEntry object
+     * @throws IOException if no address exist
+     */
     public DataEntry getData(Address address, String key) throws IOException, NodeException {
         return asType(get("/addresses/data/" + address.toString() + "/" + key), TypeRef.DATA_ENTRY);
     }
 
+    /**
+     * Get the effective balance in WAVES at a given address
+     *
+     * @param address address base58 encoded
+     * @return the balance value
+     * @deprecated {@link #getBalance(Address)}
+     * @throws IOException if no address exist
+     */
     @Deprecated
     public long getEffectiveBalance(Address address) throws IOException, NodeException {
         return asJson(get("/addresses/effectiveBalance/" + address.toString()))
                 .get("balance").asLong();
     }
 
+    /**
+     * Get the minimum effective balance at a given address for {confirmations} blocks from the current height.
+     * Max number of confirmations is set by waves.db.max-rollback-depth, 2000 by default
+     *
+     * @param address address base58 encoded
+     * @param confirmations confirmations
+     * @return the balance value
+     * @deprecated {@link #getBalance(Address, int)}
+     * @throws IOException if no address exist
+     */
     @Deprecated
     public long getEffectiveBalance(Address address, int confirmations) throws IOException, NodeException {
         return asJson(get("/addresses/effectiveBalance/" + address.toString() + "/" + confirmations))
                 .get("balance").asLong();
     }
 
+    /**
+     * Get an account script or a dApp script with additional info by a given address
+     *
+     * @param address address base58 encoded
+     * @return ScriptInfo object
+     * @throws IOException if no address exist
+     */
     public ScriptInfo getScriptInfo(Address address) throws IOException, NodeException {
         return asType(get("/addresses/scriptInfo/" + address.toString()), TypeRef.SCRIPT_INFO);
     }
 
+    /**
+     * Get an account script meta
+     *
+     * @param address address base58 encoded
+     * @return ScriptMeta object
+     * @throws IOException if no address exist
+     */
     public ScriptMeta getScriptMeta(Address address) throws IOException, NodeException {
         JsonNode json = asJson(get("/addresses/scriptInfo/" + address.toString() + "/meta"));
         if (json.hasNonNull("meta"))
@@ -216,10 +338,24 @@ public class Node {
     // ALIAS
     //===============
 
+    /**
+     * Get a list of aliases associated with a given address
+     *
+     * @param address address base58 encoded
+     * @return sequence of Alias object
+     * @throws IOException if no address exist
+     */
     public List<Alias> getAliasesByAddress(Address address) throws IOException, NodeException {
         return asType(get("/alias/by-address/" + address.toString()), TypeRef.ALIASES);
     }
 
+    /**
+     * Get an address associated with a given alias. Alias should be plain text without an 'alias' prefix and chain ID.
+     *
+     * @param alias alias
+     * @return Address object
+     * @throws IOException if no alias exist
+     */
     public Address getAddressByAlias(Alias alias) throws IOException, NodeException {
         return Address.as(asJson(get("/alias/by-alias/" + alias.name())).get("address").asText());
     }
@@ -228,14 +364,44 @@ public class Node {
     // ASSETS
     //===============
 
+    /**
+     * Get asset balance distribution by addresses at a given height.
+     * Max number of addresses is set by waves.rest-api.distribution-address-limit, 1000 by default.
+     *
+     * @param assetId asset ID base58 encoded
+     * @param height blockchain height
+     * @return AssetDistribution object
+     * @throws IOException if no asset exist with given id
+     */
     public AssetDistribution getAssetDistribution(AssetId assetId, int height) throws IOException, NodeException {
         return getAssetDistribution(assetId, height, 1000);
     }
 
+    /**
+     * Get asset balance distribution by addresses at a given height.
+     * Max number of addresses is set by waves.rest-api.distribution-address-limit, 1000 by default.
+     *
+     * @param assetId asset ID base58 encoded
+     * @param height blockchain height
+     * @param limit number of addresses to be returned
+     * @return AssetDistribution object
+     * @throws IOException if no asset exist with given id
+     */
     public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit) throws IOException, NodeException {
         return getAssetDistribution(assetId, height, limit, null);
     }
 
+    /**
+     * Get asset balance distribution by addresses at a given height.
+     * Max number of addresses is set by waves.rest-api.distribution-address-limit, 1000 by default.
+     *
+     * @param assetId asset ID base58 encoded
+     * @param height blockchain height
+     * @param limit number of addresses to be returned
+     * @param after address
+     * @return AssetDistribution object
+     * @throws IOException if no asset exist with given id
+     */
     public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit, Address after) throws IOException, NodeException {
         RequestBuilder request = get("/assets/" + assetId.toString() + "/distribution/" + height + "/limit/" + limit);
         if (after != null)
@@ -243,22 +409,52 @@ public class Node {
         return asType(request, TypeRef.ASSET_DISTRIBUTION);
     }
 
+    /**
+     * Get account balances in all or specified assets (excluding WAVES) at a given address.
+     *
+     * @param address address base58 encoded
+     * @return sequence of AssetBalance object
+     * @throws IOException if no address exist
+     */
     public List<AssetBalance> getAssetsBalance(Address address) throws IOException, NodeException {
         return mapper.readerFor(TypeRef.ASSET_BALANCES)
                 .readValue(asJson(get("/assets/balance/" + address.toString())).get("balances"));
     }
 
+    /**
+     * Get the account balance in a given asset. 0 for non-existent asset
+     *
+     * @param address address base58 encoded
+     * @param assetId asset ID base58 encoded
+     * @return value of account balance in a given asset, 0 for non-existent asset
+     * @throws IOException if no address exist
+     */
     public long getAssetBalance(Address address, AssetId assetId) throws IOException, NodeException {
         return asJson(get("/assets/balance/" + address.toString() + "/" + assetId.toString()))
                 .get("balance").asLong();
     }
 
+    /**
+     * Get detailed information about a given asset
+     *
+     * @param assetId asset ID base58 encoded
+     * @see <a href="https://docs.waves.tech/en/blockchain/token/#custom-token-parameters">fields descriptions</a>
+     * @return AssetDetails object
+     * @throws IOException if no address exist
+     */
     public AssetDetails getAssetDetails(AssetId assetId) throws IOException, NodeException {
         return asType(get("/assets/details/" + assetId.toString()).addParameter("full", "true"),
                 TypeRef.ASSET_DETAILS);
     }
 
     //todo what if some asset doesn't exist? (error json with code and message) Either in java?
+    /**
+     * Get detailed information about a given asset
+     *
+     * @param assetIds sequence of assets ID's base58 encoded
+     * @return sequence of AssetDetails
+     * @throws IOException if no address exist
+     */
     public List<AssetDetails> getAssetsDetails(List<AssetId> assetIds) throws IOException, NodeException {
         RequestBuilder request = get("/assets/details").addParameter("full", "true");
         assetIds.forEach(id -> request.addParameter("id", id.toString()));
@@ -266,14 +462,38 @@ public class Node {
         return asType(request, TypeRef.ASSETS_DETAILS);
     }
 
+    /**
+     * Get a list of non-fungible tokens at a given address
+     *
+     * @param address address base58 encoded
+     * @return sequence of AssetDetails
+     * @throws IOException if no address exist
+     */
     public List<AssetDetails> getNft(Address address) throws IOException, NodeException {
         return this.getNft(address, 1000);
     }
 
+    /**
+     * Get a list of non-fungible tokens at a given address
+     *
+     * @param address address base58 encoded
+     * @param limit number of addresses to be returned
+     * @return sequence of AssetDetails
+     * @throws IOException if no address exist
+     */
     public List<AssetDetails> getNft(Address address, int limit) throws IOException, NodeException {
         return this.getNft(address, limit, null);
     }
 
+    /**
+     * Get a list of non-fungible tokens at a given address
+     *
+     * @param address address base58 encoded
+     * @param limit number of addresses to be returned
+     * @param after ID of the token to paginate after
+     * @return sequence of AssetDetails
+     * @throws IOException if no address exist
+     */
     public List<AssetDetails> getNft(Address address, int limit, AssetId after) throws IOException, NodeException {
         RequestBuilder request = get("/assets/nft/" + address.toString() + "/limit/" + limit);
         if (after != null)
@@ -308,20 +528,44 @@ public class Node {
     // BLOCKS
     //===============
 
+    /**
+     * Get the current blockchain height
+     *
+     * @return current blockchain height
+     */
     public int getHeight() throws IOException, NodeException {
         return asJson(get("/blocks/height")).get("height").asInt();
     }
 
+    /**
+     * Get a block by its ID
+     *
+     * @param blockId block ID base58 encoded
+     * @return height of block with {blockId}
+     */
     public int getBlockHeight(Base58String blockId) throws IOException, NodeException {
         return asJson(get("/blocks/height/" + blockId.toString()))
                 .get("height").asInt();
     }
 
+    /**
+     * Get height of the most recent block such that its timestamp does not exceed the given {timestamp}.
+     *
+     * @param timestamp timestamp
+     * @return height of block
+     */
     public int getBlockHeight(long timestamp) throws IOException, NodeException {
         return asJson(get("/blocks/heightByTimestamp/" + timestamp))
                 .get("height").asInt();
     }
 
+    /**
+     * Average delay in milliseconds between last blockNum blocks starting from block with id
+     *
+     * @param startBlockId block ID base58 encoded
+     * @param blocksNum number of blocks to count delay
+     * @return average delay in milliseconds
+     */
     public int getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
         return asJson(get("/blocks/delay/" + startBlockId.toString() + "/" + blocksNum))
                 .get("delay").asInt();
@@ -338,6 +582,13 @@ public class Node {
         return asType(get("/blocks/headers/at/" + height), TypeRef.BLOCK_HEADERS);
     }
 
+    /**
+     * Returns headers of a given block
+     *
+     * @param blockId block ID base58 encoded
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
     public BlockHeaders getBlockHeaders(Base58String blockId) throws IOException, NodeException {
         return asType(get("/blocks/headers/" + blockId.toString()), TypeRef.BLOCK_HEADERS);
     }
