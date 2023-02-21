@@ -666,7 +666,7 @@ public class Node {
      * @throws IOException
      * @throws NodeException
      */
-    public Block getBlock(int height) throws NodeException, IOException {
+    public Block getBlock(int height) throws IOException, NodeException {
         return asType(get("/blocks/at/" + height), TypeRef.BLOCK);
     }
 
