@@ -264,8 +264,10 @@ public class Node {
 
         return mapper.readerFor(TypeRef.ASSET_BALANCES)
                 .readValue(
-                        asJson(post("/assets/balance/" + address.toString())
-                                .setEntity(body)
+                        asJson(
+                                post("/assets/balance/" + address.toString())
+                                        .setEntity(body)
+                                        .addHeader("Content-Type", "application/json")
                         ).get("balances"));
     }
 
@@ -525,7 +527,6 @@ public class Node {
     }
 
     /**
-     *
      * @param txIds IDs of transactions
      * @return info about requested transactions
      * @throws IOException
@@ -541,7 +542,7 @@ public class Node {
     }
 
     /**
-     * @param txIds IDs of transactions
+     * @param txIds                IDs of transactions
      * @param transactionInfoClass info class for all the requested transactions
      * @return typed info about requested transactions. Use this method ONLY if you're sure that all requested transactions are of the same type (for example, txIds contains only InvokeScript transactions)
      * @throws IOException
@@ -648,8 +649,8 @@ public class Node {
 
     public String decompileScript(Base64String compiledScript) throws IOException, NodeException {
         return asJson(post("/utils/script/decompile")
-                        .addHeader("Content-Type", "application/json")
-                        .setEntity(new StringEntity(compiledScript.toString(), StandardCharsets.UTF_8)))
+                .addHeader("Content-Type", "application/json")
+                .setEntity(new StringEntity(compiledScript.toString(), StandardCharsets.UTF_8)))
                 .get("script")
                 .asText();
     }
