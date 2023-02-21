@@ -121,7 +121,8 @@ public class Node {
      * Get a list of account addresses in the node wallet
      *
      * @return sequences of addresses
-     * @throws IOException if no addresses exists
+     * @throws IOException
+     * @throws NodeException
      */
     public List<Address> getAddresses() throws IOException, NodeException {
         return asType(get("/addresses"), TypeRef.ADDRESSES);
@@ -133,7 +134,8 @@ public class Node {
      * @param fromIndex start index
      * @param toIndex end index
      * @return sequences of addresses
-     * @throws IOException if no addresses exists
+     * @throws IOException
+     * @throws NodeException
      */
     public List<Address> getAddresses(int fromIndex, int toIndex) throws IOException, NodeException {
         return asType(get("/addresses/seq/" + fromIndex + "/" + toIndex), TypeRef.ADDRESSES);
@@ -144,7 +146,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return the balance value
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public long getBalance(Address address) throws IOException, NodeException {
         return asJson(get("/addresses/balance/" + address.toString()))
@@ -158,7 +161,8 @@ public class Node {
      * @param address address base58 encoded
      * @param confirmations confirmations
      * @return the balance value
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public long getBalance(Address address, int confirmations) throws IOException, NodeException {
         return asJson(get("/addresses/balance/" + address.toString() + "/" + confirmations))
@@ -171,7 +175,8 @@ public class Node {
      *
      * @param addresses sequences of addresses base58 encoded
      * @return sequences of Balance objects
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<Balance> getBalances(List<Address> addresses) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
@@ -192,7 +197,8 @@ public class Node {
      * @param addresses sequences of addresses base58 encoded
      * @param height blockchain height
      * @return sequences of Balance objects
-     * @throws IOException if no address exist or no block exist at the given height
+     * @throws IOException
+     * @throws NodeException
      */
     public List<Balance> getBalances(List<Address> addresses, int height) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
@@ -213,7 +219,8 @@ public class Node {
      * @see <a href="https://docs.waves.tech/en/blockchain/account/account-balance#account-balance-in-waves">definitions</a>
      * @param address address base58 encoded
      * @return BalanceDetails object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public BalanceDetails getBalanceDetails(Address address) throws IOException, NodeException {
         return asType(get("/addresses/balance/details/" + address.toString()), TypeRef.BALANCE_DETAILS);
@@ -225,7 +232,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return sequence of DataEntry objects
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<DataEntry> getData(Address address) throws IOException, NodeException {
         return asType(get("/addresses/data/" + address.toString()), TypeRef.DATA_ENTRIES);
@@ -237,7 +245,8 @@ public class Node {
      * @param address address base58 encoded
      * @param keys sequence of keys of records
      * @return sequence of DataEntry objects
-     * @throws IOException if no address exist or key exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<DataEntry> getData(Address address, List<String> keys) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
@@ -259,7 +268,8 @@ public class Node {
      * @param address address base58 encoded
      * @param regex regular expression for filter keys
      * @return sequence of DataEntry objects
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
     */
     public List<DataEntry> getData(Address address, Pattern regex) throws IOException, NodeException {
         return asType(get("/addresses/data/" + address.toString())
@@ -272,7 +282,8 @@ public class Node {
      * @param address address base58 encoded
      * @param key key
      * @return DataEntry object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public DataEntry getData(Address address, String key) throws IOException, NodeException {
         return asType(get("/addresses/data/" + address.toString() + "/" + key), TypeRef.DATA_ENTRY);
@@ -284,7 +295,8 @@ public class Node {
      * @param address address base58 encoded
      * @return the balance value
      * @deprecated {@link #getBalance(Address)}
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     @Deprecated
     public long getEffectiveBalance(Address address) throws IOException, NodeException {
@@ -300,7 +312,8 @@ public class Node {
      * @param confirmations confirmations
      * @return the balance value
      * @deprecated {@link #getBalance(Address, int)}
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     @Deprecated
     public long getEffectiveBalance(Address address, int confirmations) throws IOException, NodeException {
@@ -313,7 +326,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return ScriptInfo object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public ScriptInfo getScriptInfo(Address address) throws IOException, NodeException {
         return asType(get("/addresses/scriptInfo/" + address.toString()), TypeRef.SCRIPT_INFO);
@@ -324,7 +338,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return ScriptMeta object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public ScriptMeta getScriptMeta(Address address) throws IOException, NodeException {
         JsonNode json = asJson(get("/addresses/scriptInfo/" + address.toString() + "/meta"));
@@ -343,7 +358,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return sequence of Alias object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<Alias> getAliasesByAddress(Address address) throws IOException, NodeException {
         return asType(get("/alias/by-address/" + address.toString()), TypeRef.ALIASES);
@@ -354,7 +370,8 @@ public class Node {
      *
      * @param alias alias
      * @return Address object
-     * @throws IOException if no alias exist
+     * @throws IOException
+     * @throws NodeException
      */
     public Address getAddressByAlias(Alias alias) throws IOException, NodeException {
         return Address.as(asJson(get("/alias/by-alias/" + alias.name())).get("address").asText());
@@ -371,7 +388,8 @@ public class Node {
      * @param assetId asset ID base58 encoded
      * @param height blockchain height
      * @return AssetDistribution object
-     * @throws IOException if no asset exist with given id
+     * @throws IOException
+     * @throws NodeException
      */
     public AssetDistribution getAssetDistribution(AssetId assetId, int height) throws IOException, NodeException {
         return getAssetDistribution(assetId, height, 1000);
@@ -385,7 +403,8 @@ public class Node {
      * @param height blockchain height
      * @param limit number of addresses to be returned
      * @return AssetDistribution object
-     * @throws IOException if no asset exist with given id
+     * @throws IOException
+     * @throws NodeException
      */
     public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit) throws IOException, NodeException {
         return getAssetDistribution(assetId, height, limit, null);
@@ -400,7 +419,8 @@ public class Node {
      * @param limit number of addresses to be returned
      * @param after address
      * @return AssetDistribution object
-     * @throws IOException if no asset exist with given id
+     * @throws IOException
+     * @throws NodeException
      */
     public AssetDistribution getAssetDistribution(AssetId assetId, int height, int limit, Address after) throws IOException, NodeException {
         RequestBuilder request = get("/assets/" + assetId.toString() + "/distribution/" + height + "/limit/" + limit);
@@ -414,7 +434,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return sequence of AssetBalance object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<AssetBalance> getAssetsBalance(Address address) throws IOException, NodeException {
         return mapper.readerFor(TypeRef.ASSET_BALANCES)
@@ -427,7 +448,8 @@ public class Node {
      * @param address address base58 encoded
      * @param assetId asset ID base58 encoded
      * @return value of account balance in a given asset, 0 for non-existent asset
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public long getAssetBalance(Address address, AssetId assetId) throws IOException, NodeException {
         return asJson(get("/assets/balance/" + address.toString() + "/" + assetId.toString()))
@@ -440,7 +462,8 @@ public class Node {
      * @param assetId asset ID base58 encoded
      * @see <a href="https://docs.waves.tech/en/blockchain/token/#custom-token-parameters">fields descriptions</a>
      * @return AssetDetails object
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public AssetDetails getAssetDetails(AssetId assetId) throws IOException, NodeException {
         return asType(get("/assets/details/" + assetId.toString()).addParameter("full", "true"),
@@ -453,7 +476,8 @@ public class Node {
      *
      * @param assetIds sequence of assets ID's base58 encoded
      * @return sequence of AssetDetails
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<AssetDetails> getAssetsDetails(List<AssetId> assetIds) throws IOException, NodeException {
         RequestBuilder request = get("/assets/details").addParameter("full", "true");
@@ -467,7 +491,8 @@ public class Node {
      *
      * @param address address base58 encoded
      * @return sequence of AssetDetails
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<AssetDetails> getNft(Address address) throws IOException, NodeException {
         return this.getNft(address, 1000);
@@ -479,7 +504,8 @@ public class Node {
      * @param address address base58 encoded
      * @param limit number of addresses to be returned
      * @return sequence of AssetDetails
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<AssetDetails> getNft(Address address, int limit) throws IOException, NodeException {
         return this.getNft(address, limit, null);
@@ -492,7 +518,8 @@ public class Node {
      * @param limit number of addresses to be returned
      * @param after ID of the token to paginate after
      * @return sequence of AssetDetails
-     * @throws IOException if no address exist
+     * @throws IOException
+     * @throws NodeException
      */
     public List<AssetDetails> getNft(Address address, int limit, AssetId after) throws IOException, NodeException {
         RequestBuilder request = get("/assets/nft/" + address.toString() + "/limit/" + limit);
@@ -510,6 +537,8 @@ public class Node {
      * Returns current blockchain rewards info
      *
      * @return @return Rewards
+     * @throws IOException
+     * @throws NodeException
      */
     public BlockchainRewards getBlockchainRewards() throws IOException, NodeException {
         return asType(get("/blockchain/rewards"), TypeRef.BLOCKCHAIN_REWARDS);
@@ -519,6 +548,8 @@ public class Node {
      * Returns miner’s reward status at height
      *
      * @return Rewards
+     * @throws IOException
+     * @throws NodeException
      */
     public BlockchainRewards getBlockchainRewards(int height) throws IOException, NodeException {
         return asType(get("/blockchain/rewards/" + height), TypeRef.BLOCKCHAIN_REWARDS);
@@ -532,6 +563,8 @@ public class Node {
      * Get the current blockchain height
      *
      * @return current blockchain height
+     * @throws IOException
+     * @throws NodeException
      */
     public int getHeight() throws IOException, NodeException {
         return asJson(get("/blocks/height")).get("height").asInt();
@@ -542,6 +575,8 @@ public class Node {
      *
      * @param blockId block ID base58 encoded
      * @return height of block with {blockId}
+     * @throws IOException
+     * @throws NodeException
      */
     public int getBlockHeight(Base58String blockId) throws IOException, NodeException {
         return asJson(get("/blocks/height/" + blockId.toString()))
@@ -553,6 +588,8 @@ public class Node {
      *
      * @param timestamp timestamp
      * @return height of block
+     * @throws IOException
+     * @throws NodeException
      */
     public int getBlockHeight(long timestamp) throws IOException, NodeException {
         return asJson(get("/blocks/heightByTimestamp/" + timestamp))
@@ -565,6 +602,8 @@ public class Node {
      * @param startBlockId block ID base58 encoded
      * @param blocksNum number of blocks to count delay
      * @return average delay in milliseconds
+     * @throws IOException
+     * @throws NodeException
      */
     public int getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
         return asJson(get("/blocks/delay/" + startBlockId.toString() + "/" + blocksNum))
@@ -576,7 +615,8 @@ public class Node {
      *
      * @param height blockchain height
      * @return block object without transactions
-     * @throws IOException if no block exists at the given height
+     * @throws IOException
+     * @throws NodeException
      */
     public BlockHeaders getBlockHeaders(int height) throws IOException, NodeException {
         return asType(get("/blocks/headers/at/" + height), TypeRef.BLOCK_HEADERS);
@@ -587,7 +627,8 @@ public class Node {
      *
      * @param blockId block ID base58 encoded
      * @return block object without transactions
-     * @throws IOException if no block exists at the given height
+     * @throws IOException
+     * @throws NodeException
      */
     public BlockHeaders getBlockHeaders(Base58String blockId) throws IOException, NodeException {
         return asType(get("/blocks/headers/" + blockId.toString()), TypeRef.BLOCK_HEADERS);
@@ -599,7 +640,8 @@ public class Node {
      * @param fromHeight start block
      * @param toHeight   end block
      * @return sequences of block objects without transactions
-     * @throws IOException if no block exists at the given height
+     * @throws IOException
+     * @throws NodeException
      */
     public List<BlockHeaders> getBlocksHeaders(int fromHeight, int toHeight) throws IOException, NodeException {
         return asType(get("/blocks/headers/seq/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS_HEADERS);
@@ -609,7 +651,8 @@ public class Node {
      * Returns last block header
      *
      * @return block object without transactions
-     * @throws IOException if no block exists at the given height
+     * @throws IOException
+     * @throws NodeException
      */
     public BlockHeaders getLastBlockHeaders() throws IOException, NodeException {
         return asType(get("/blocks/headers/last"), TypeRef.BLOCK_HEADERS);
@@ -620,9 +663,10 @@ public class Node {
      *
      * @param height blockchain height
      * @return block object
-     * @throws IOException if no block exists at the given height
+     * @throws IOException
+     * @throws NodeException
      */
-    public Block getBlock(int height) throws IOException, NodeException {
+    public Block getBlock(int height) throws NodeException, IOException {
         return asType(get("/blocks/at/" + height), TypeRef.BLOCK);
     }
 
@@ -631,24 +675,60 @@ public class Node {
      *
      * @param blockId block id
      * @return block object
-     * @throws IOException if no block with the given signature exists
+     * @throws IOException
+     * @throws NodeException
      */
     public Block getBlock(Base58String blockId) throws IOException, NodeException {
         return asType(get("/blocks/" + blockId.toString()), TypeRef.BLOCK);
     }
 
+    /**
+     * Get blocks at a given range of heights.
+     * Max range {from}-{to} is limited by rest-api.blocks-request-limit, 100 by default.
+     *
+     * @param fromHeight start block height
+     * @param toHeight end block height
+     * @return sequence of block objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<Block> getBlocks(int fromHeight, int toHeight) throws IOException, NodeException {
         return asType(get("/blocks/seq/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS);
     }
 
+    /**
+     * Returns first block
+     *
+     * @return block object
+     * @throws IOException
+     * @throws NodeException
+     */
     public Block getGenesisBlock() throws IOException, NodeException {
         return asType(get("/blocks/first"), TypeRef.BLOCK);
     }
 
+    /**
+     * Get the block at the current blockchain height
+     *
+     * @return block object
+     * @throws IOException
+     * @throws NodeException
+     */
     public Block getLastBlock() throws IOException, NodeException {
         return asType(get("/blocks/last"), TypeRef.BLOCK);
     }
 
+    /**
+     * Get a list of blocks forged by a given address.
+     * Max range {from}-{to} is limited by rest-api.blocks-request-limit, 100 by default.
+     *
+     * @param generator address base58 encoded
+     * @param fromHeight start block height
+     * @param toHeight end block height
+     * @return sequence of block objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<Block> getBlocksGeneratedBy(Address generator, int fromHeight, int toHeight) throws IOException, NodeException {
         return asType(get(
                 "/blocks/address/" + generator.toString() + "/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS);
@@ -658,6 +738,13 @@ public class Node {
     // NODE
     //===============
 
+    /**
+     * Get Waves node version
+     *
+     * @return waves node version
+     * @throws IOException
+     * @throws NodeException
+     */
     public String getVersion() throws IOException, NodeException {
         return asJson(get("/node/version")).get("version").asText();
     }
@@ -666,10 +753,28 @@ public class Node {
     // DEBUG
     //===============
 
+    /**
+     * Get history of the regular balance at a given address.
+     * Max depth is set by waves.db.max-rollback-depth, 2000 by default
+     *
+     * @param address address base58 encoded
+     * @return sequence of HistoryBalance objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<HistoryBalance> getBalanceHistory(Address address) throws IOException, NodeException {
         return asType(get("/debug/balances/history/" + address.toString()), TypeRef.HISTORY_BALANCES);
     }
 
+    /**
+     * Validates a transaction and measures time spent in milliseconds.
+     * You should use the JSON transaction format with proofs
+     *
+     * @param transaction signed transaction
+     * @return validation result
+     * @throws IOException
+     * @throws NodeException
+     */
     public <T extends Transaction> Validation validateTransaction(T transaction) throws IOException, NodeException {
         return asType(post("/debug/validate")
                 .setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)), TypeRef.VALIDATION);
@@ -679,14 +784,38 @@ public class Node {
     // LEASING
     //===============
 
+    /**
+     * Get all active leases involving a given address
+     *
+     * @param address address base58 encoded
+     * @return sequence of LeaseInfo objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<LeaseInfo> getActiveLeases(Address address) throws IOException, NodeException {
         return asType(get("/leasing/active/" + address.toString()), TypeRef.LEASES_INFO);
     }
 
+    /**
+     * Get lease parameters by lease ID
+     *
+     * @param leaseId lease ID base58 encoded
+     * @return LeaseInfo object
+     * @throws IOException
+     * @throws NodeException
+     */
     public LeaseInfo getLeaseInfo(Id leaseId) throws IOException, NodeException {
         return asType(get("/leasing/info/" + leaseId.toString()), TypeRef.LEASE_INFO);
     }
 
+    /**
+     * Get lease parameters by lease IDs
+     *
+     * @param leaseIds sequence of lease IDs base58 encoded
+     * @return sequence of LeaseInfo objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<LeaseInfo> getLeasesInfo(List<Id> leaseIds) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonIds = jsonBody.putArray("ids");
@@ -698,6 +827,14 @@ public class Node {
                 .setEntity(body), TypeRef.LEASES_INFO);
     }
 
+    /**
+     * Get lease parameters by lease IDs
+     *
+     * @param leaseIds sequence of lease IDs base58 encoded
+     * @return sequence of LeaseInfo objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<LeaseInfo> getLeasesInfo(Id... leaseIds) throws IOException, NodeException {
         return getLeasesInfo(asList(leaseIds));
     }
@@ -706,13 +843,32 @@ public class Node {
     // TRANSACTIONS
     //===============
 
+    /**
+     * Get the minimum fee for a given transaction
+     *
+     * @param transaction Transaction <a href="https://docs.waves.tech/en/blockchain/transaction/#json-representation">data in JSON</a>
+     *                   including type and senderPublicKey.
+     *                   To calculate a sponsored fee, specify feeAssetId. fee and sender are ignored.
+     * @return amount fee with asset id
+     * @throws IOException
+     * @throws NodeException
+     */
     public <T extends Transaction> Amount calculateTransactionFee(T transaction) throws IOException, NodeException {
         JsonNode json = asJson(post("/transactions/calculateFee").setEntity(new StringEntity(transaction.toJson(), ContentType.APPLICATION_JSON)));
         return Amount.of(json.get("feeAmount").asLong(), JsonSerializer.assetIdFromJson(json.get("feeAssetId")));
     }
 
-    /*
-    example to javadoc: IssueTransaction tx = broadcast(IssueTransaction.with("", 1, 0).get());
+    /**
+     * Broadcast a signed transaction.
+     * Check out <a href="https://docs.waves.tech/en/waves-node/node-api/transactions#step-4-broadcast-transaction">how to use this endpoint</a>
+     *
+     * @param transaction Transaction <a href="https://docs.waves.tech/en/blockchain/transaction/#json-representation">data in JSON</a>
+     *                     including type and signature/proofs.
+     * <pre>IssueTransaction tx = broadcast(IssueTransaction.with("", 1, 0).get());</pre>
+     *
+     * @return Transaction object
+     * @throws IOException
+     * @throws NodeException
      */
     public <T extends Transaction> T broadcast(T transaction) throws IOException, NodeException {
         //noinspection unchecked
@@ -732,7 +888,8 @@ public class Node {
      *
      * @param txId object ID
      * @return object object
-     * @throws IOException if no object with the given ID exists
+     * @throws IOException
+     * @throws NodeException
      */
     public TransactionInfo getTransactionInfo(Id txId) throws IOException, NodeException {
         return asType(get("/transactions/info/" + txId.toString()), TypeRef.TRANSACTION_INFO);
@@ -743,7 +900,8 @@ public class Node {
      *
      * @param txId object ID
      * @return object object
-     * @throws IOException if no object with the given ID exists
+     * @throws IOException
+     * @throws NodeException
      */
     public <T extends TransactionInfo> T getTransactionInfo(Id txId, Class<T> transactionInfoClass) throws IOException, NodeException {
         return transactionInfoClass.cast(
@@ -785,7 +943,8 @@ public class Node {
      *
      * @param address address
      * @return list of transactions
-     * @throws IOException if something going wrong
+     * @throws IOException
+     * @throws NodeException
      */
     public List<TransactionInfo> getTransactionsByAddress(Address address) throws IOException, NodeException {
         return getTransactionsByAddress(address, 1000);
@@ -797,7 +956,8 @@ public class Node {
      * @param address address
      * @param limit   transactions limit
      * @return list of transactions
-     * @throws IOException if something going wrong
+     * @throws IOException
+     * @throws NodeException
      */
     public List<TransactionInfo> getTransactionsByAddress(Address address, int limit) throws IOException, NodeException {
         return getTransactionsByAddress(address, limit, null);
@@ -810,7 +970,8 @@ public class Node {
      * @param limit     transactions limit
      * @param afterTxId separate transaction id
      * @return list of transactions
-     * @throws IOException if something going wrong
+     * @throws IOException
+     * @throws NodeException
      */
     public List<TransactionInfo> getTransactionsByAddress(Address address, int limit, Id afterTxId) throws IOException, NodeException {
         RequestBuilder request = get("/transactions/address/" + address.toString() + "/limit/" + limit);
@@ -824,11 +985,30 @@ public class Node {
                 .readValue(asJson(request).get(0));
     }
 
+    /**
+     * Get transaction statuses by their ID.
+     * Transactions in the response are in the same order as in the request.
+     *
+     * @param txId transaction ID
+     * @return TransactionStatus object
+     * @throws IOException
+     * @throws NodeException
+     */
     public TransactionStatus getTransactionStatus(Id txId) throws IOException, NodeException {
         return asType(get("/transactions/status").addParameter("id", txId.toString()),
                 TypeRef.TRANSACTIONS_STATUS).get(0);
     }
 
+    /**
+     * Get transaction statuses by their ID.
+     * Max number of transactions is set by waves.rest-api.transactions-by-address-limit, 1000 by default.
+     * Transactions in the response are in the same order as in the request.
+     *
+     * @param txIds sequence of transaction IDs
+     * @return sequence of TransactionStatus objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<TransactionStatus> getTransactionsStatus(List<Id> txIds) throws IOException, NodeException {
         ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
         ArrayNode jsonIds = jsonBody.putArray("ids");
@@ -840,18 +1020,50 @@ public class Node {
                 .setEntity(body), TypeRef.TRANSACTIONS_STATUS);
     }
 
+    /**
+     * Get transaction statuses by their ID.
+     * Max number of transactions is set by waves.rest-api.transactions-by-address-limit, 1000 by default.
+     * Transactions in the response are in the same order as in the request.
+     *
+     * @param txIds sequence of transaction IDs
+     * @return sequence of TransactionStatus objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<TransactionStatus> getTransactionsStatus(Id... txIds) throws IOException, NodeException {
         return getTransactionsStatus(asList(txIds));
     }
 
+    /**
+     * Get an unconfirmed transaction by its ID
+     *
+     * @param txId transaction ID
+     * @return Transaction object
+     * @throws IOException
+     * @throws NodeException
+     */
     public Transaction getUnconfirmedTransaction(Id txId) throws IOException, NodeException {
         return asType(get("/transactions/unconfirmed/info/" + txId.toString()), TypeRef.TRANSACTION);
     }
 
+    /**
+     * Get a list of transactions in node's UTX pool
+     *
+     * @return sequence of Transaction objects
+     * @throws IOException
+     * @throws NodeException
+     */
     public List<Transaction> getUnconfirmedTransactions() throws IOException, NodeException {
         return asType(get("/transactions/unconfirmed"), TypeRef.TRANSACTIONS);
     }
 
+    /**
+     * Get the number of transactions in the UTX pool
+     *
+     * @return number of transactions in the UTX pool
+     * @throws IOException
+     * @throws NodeException
+     */
     public int getUtxSize() throws IOException, NodeException {
         return asJson(get("/transactions/unconfirmed/size")).get("size").asInt();
     }
@@ -860,10 +1072,27 @@ public class Node {
     // UTILS
     //===============
 
+    /**
+     * Compiles string code to base64 script representation
+     *
+     * @param source script source
+     * @return ScripInfo object
+     * @throws IOException
+     * @throws NodeException
+     */
     public ScriptInfo compileScript(String source) throws IOException, NodeException {
         return compileScript(source, false);
     }
 
+    /**
+     * Compiles string code to base64 script representation
+     *
+     * @param source script source
+     * @param enableCompaction if true, compacts the contract. False by default
+     * @return ScripInfo object
+     * @throws IOException
+     * @throws NodeException
+     */
     public ScriptInfo compileScript(String source, boolean enableCompaction) throws IOException, NodeException {
         return asType(post("/utils/script/compileCode")
                         .addHeader("Content-Type", "text/plain")
@@ -872,6 +1101,14 @@ public class Node {
                 TypeRef.SCRIPT_INFO);
     }
 
+    /**
+     * Decompiles base64 script representation to string code
+     *
+     * @param compiledScript base64 script
+     * @return string code
+     * @throws IOException
+     * @throws NodeException
+     */
     public String decompileScript(Base64String compiledScript) throws IOException, NodeException {
         return asJson(post("/utils/script/decompile")
                         .addHeader("Content-Type", "application/json")
