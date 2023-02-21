@@ -68,6 +68,9 @@ public class TypeRef {
     public static final TypeReference<List<TransactionStatus>> TRANSACTIONS_STATUS = new TypeReference<List<TransactionStatus>>() {};
 
     public static final TypeReference<Validation> VALIDATION = new TypeReference<Validation>() {};
+
     public static final TypeReference<ActivationStatus> ACTIVATION_STATUS = new TypeReference<ActivationStatus>() {};
+
+    public static final TypeReference<NodeStatus> NODE_STATUS = new TypeReference<NodeStatus>() {};
 
 }

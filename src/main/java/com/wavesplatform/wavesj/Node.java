@@ -256,6 +256,19 @@ public class Node {
                 .readValue(asJson(get("/assets/balance/" + address.toString())).get("balances"));
     }
 
+    public List<AssetBalance> getAssetsBalance(Address address, List<AssetId> assetIds) throws IOException, NodeException {
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonAssetIds = jsonBody.putArray("ids");
+        assetIds.forEach(id -> jsonAssetIds.add(id.toString()));
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return mapper.readerFor(TypeRef.ASSET_BALANCES)
+                .readValue(
+                        asJson(post("/assets/balance/" + address.toString())
+                                .setEntity(body)
+                        ).get("balances"));
+    }
+
     public long getAssetBalance(Address address, AssetId assetId) throws IOException, NodeException {
         return asJson(get("/assets/balance/" + address.toString() + "/" + assetId.toString()))
                 .get("balance").asLong();
@@ -417,6 +430,10 @@ public class Node {
 
     public String getVersion() throws IOException, NodeException {
         return asJson(get("/node/version")).get("version").asText();
+    }
+
+    public NodeStatus getStatus() throws IOException, NodeException {
+        return asType(get("/node/status"), TypeRef.NODE_STATUS);
     }
 
     //===============
