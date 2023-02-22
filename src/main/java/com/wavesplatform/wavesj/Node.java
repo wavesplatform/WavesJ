@@ -18,6 +18,10 @@ import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.json.TypeRef;
 import com.wavesplatform.wavesj.json.WavesJMapper;
+import com.wavesplatform.wavesj.peers.BlacklistedPeer;
+import com.wavesplatform.wavesj.peers.ConnectedPeer;
+import com.wavesplatform.wavesj.peers.Peer;
+import com.wavesplatform.wavesj.peers.SuspendedPeer;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -437,6 +441,29 @@ public class Node {
     public NodeStatus getStatus() throws IOException, NodeException {
         return asType(get("/node/status"), TypeRef.NODE_STATUS);
     }
+
+    //===============
+    // PEERS
+    //===============
+
+    public List<Peer> getAllPeers() throws NodeException, IOException {
+        return mapper.readerFor(TypeRef.ALL_PEERS)
+                .readValue(asJson(get("/peers/all")).get("peers"));
+    }
+
+    public List<BlacklistedPeer> getBlacklistedPeers() throws NodeException, IOException {
+        return asType(get("/peers/blacklisted"), TypeRef.BLACKLISTED_PEERS);
+    }
+
+    public List<ConnectedPeer> getConnectedPeers() throws NodeException, IOException {
+        return mapper.readerFor(TypeRef.CONNECTED_PEERS)
+                .readValue(asJson(get("/peers/connected")).get("peers"));
+    }
+
+    public List<SuspendedPeer> getSuspendedPeers() throws NodeException, IOException {
+        return asType(get("/peers/suspended"), TypeRef.SUSPENDED_PEERS);
+    }
+
 
     //===============
     // DEBUG
