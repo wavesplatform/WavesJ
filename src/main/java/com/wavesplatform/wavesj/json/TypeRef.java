@@ -10,6 +10,10 @@ import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.LeaseInfo;
 import com.wavesplatform.wavesj.actions.EthRpcResponse;
 import com.wavesplatform.wavesj.info.TransactionInfo;
+import com.wavesplatform.wavesj.peers.BlacklistedPeer;
+import com.wavesplatform.wavesj.peers.ConnectedPeer;
+import com.wavesplatform.wavesj.peers.Peer;
+import com.wavesplatform.wavesj.peers.SuspendedPeer;
 
 import java.util.List;
 
@@ -68,5 +72,17 @@ public class TypeRef {
     public static final TypeReference<List<TransactionStatus>> TRANSACTIONS_STATUS = new TypeReference<List<TransactionStatus>>() {};
 
     public static final TypeReference<Validation> VALIDATION = new TypeReference<Validation>() {};
+
+    public static final TypeReference<ActivationStatus> ACTIVATION_STATUS = new TypeReference<ActivationStatus>() {};
+
+    public static final TypeReference<NodeStatus> NODE_STATUS = new TypeReference<NodeStatus>() {};
+
+    public static final TypeReference<List<Peer>> ALL_PEERS = new TypeReference<List<Peer>>() {};
+
+    public static final TypeReference<List<BlacklistedPeer>> BLACKLISTED_PEERS = new TypeReference<List<BlacklistedPeer>>() {};
+
+    public static final TypeReference<List<ConnectedPeer>> CONNECTED_PEERS = new TypeReference<List<ConnectedPeer>>() {};
+
+    public static final TypeReference<List<SuspendedPeer>> SUSPENDED_PEERS = new TypeReference<List<SuspendedPeer>>() {};
 
 }

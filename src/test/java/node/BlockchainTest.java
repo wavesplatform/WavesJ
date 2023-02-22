@@ -14,6 +14,8 @@ public class BlockchainTest extends BaseTestWithNodeInDocker {
 
     @Test
     void rewards() throws IOException, NodeException {
+        node.waitForHeight(5);
+
         int height = node.getHeight();
         BlockchainRewards rewards = node.getBlockchainRewards();
 

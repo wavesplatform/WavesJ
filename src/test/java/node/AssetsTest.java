@@ -9,8 +9,10 @@ import com.wavesplatform.transactions.account.PrivateKey;
 import com.wavesplatform.transactions.common.AssetId;
 import com.wavesplatform.transactions.common.Id;
 import com.wavesplatform.transactions.mass.Transfer;
+import com.wavesplatform.wavesj.AssetBalance;
 import com.wavesplatform.wavesj.AssetDistribution;
 import com.wavesplatform.wavesj.exceptions.NodeException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -51,7 +53,7 @@ public class AssetsTest extends BaseTestWithNodeInDocker {
 
         int recipientsNumber = 1100;
         AssetId assetId = node.broadcast(IssueTransaction
-                .builder("Asset", IntStream.range(1, recipientsNumber + 1).sum(), 2).getSignedWith(alice))
+                        .builder("Asset", IntStream.range(1, recipientsNumber + 1).sum(), 2).getSignedWith(alice))
                 .assetId();
         node.waitForTransaction(assetId);
 
@@ -75,7 +77,7 @@ public class AssetsTest extends BaseTestWithNodeInDocker {
 
         for (MassTransferTransaction massTransferTx : massTransferTxs)
             node.broadcast(massTransferTx);
-        node.waitForTransactions(massTransferTxIds, 120);
+        node.waitForTransactions(massTransferTxIds, 240);
 
         node.waitBlocks(1);
         AssetDistribution distributionPage1 =
@@ -122,6 +124,38 @@ public class AssetsTest extends BaseTestWithNodeInDocker {
 
         node.getAssetsBalance(alice.address());
         node.getAssetBalance(alice.address(), assetId1);
+    }
+
+    @Test
+    void balanceWithAssetsFilter() throws IOException, NodeException {
+        PrivateKey alice = createAccountWithBalance(10_00000000);
+
+        AssetId assetId1 = node.broadcast(IssueTransaction
+                .builder("Asset 1", 10000000, 2)
+                .getSignedWith(alice)
+        ).assetId();
+        node.waitForTransaction(assetId1);
+
+        AssetId assetId2 = node.broadcast(IssueTransaction
+                .builder("Asset 2", 10000000, 2)
+                .getSignedWith(alice)
+        ).assetId();
+        node.waitForTransaction(assetId2);
+
+        AssetId assetId3 = node.broadcast(IssueTransaction
+                .builder("Asset 3", 10000000, 2)
+                .getSignedWith(alice)
+        ).assetId();
+        node.waitForTransaction(assetId3);
+
+        ArrayList<AssetId> assetIds = new ArrayList<>();
+        assetIds.add(assetId1);
+        assetIds.add(assetId3);
+
+        List<AssetBalance> assetsBalance = node.getAssetsBalance(alice.address(), assetIds);
+        Assertions.assertEquals(assetsBalance.size(), 2);
+        Assertions.assertEquals(assetsBalance.get(0).assetId(), assetId1);
+        Assertions.assertEquals(assetsBalance.get(1).assetId(), assetId3);
     }
 
     @Test

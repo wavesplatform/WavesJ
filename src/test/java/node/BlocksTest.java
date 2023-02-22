@@ -39,6 +39,8 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
 
     @Test
     void blocks() throws IOException, NodeException {
+        node.waitForHeight(5);
+
         Base58String blockIdAtHeight2 = node.getBlockHeaders(2).id();
 
         BlockHeaders headers = node.getBlockHeaders(2);
@@ -116,6 +118,8 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
 
     @Test
     void blocksGeneratedByAddress() throws IOException, NodeException {
+        node.waitForHeight(4);
+
         List<Block> blocks = node.getBlocksGeneratedBy(faucet.address(), 2, 3);
 
         assertThat(blocks).containsExactlyInAnyOrder(node.getBlock(2), node.getBlock(3));
@@ -123,7 +127,9 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
 
     @Test
     void blocksDelay() throws IOException, NodeException {
-        Base58String blockIdAtStart = node.getBlockHeaders(node.getHeight() - 1).id();
+        node.waitForHeight(5);
+
+        Base58String blockIdAtStart = node.getBlockHeaders(node.getHeight() - 2).id();
         node.waitBlocks(2);
 
         assertThat(node.getBlocksDelay(blockIdAtStart, 3)).isGreaterThan(1000);
