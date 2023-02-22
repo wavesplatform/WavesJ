@@ -18,6 +18,10 @@ import com.wavesplatform.wavesj.exceptions.NodeException;
 import com.wavesplatform.wavesj.info.TransactionInfo;
 import com.wavesplatform.wavesj.json.TypeRef;
 import com.wavesplatform.wavesj.json.WavesJMapper;
+import com.wavesplatform.wavesj.peers.BlacklistedPeer;
+import com.wavesplatform.wavesj.peers.ConnectedPeer;
+import com.wavesplatform.wavesj.peers.Peer;
+import com.wavesplatform.wavesj.peers.SuspendedPeer;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -108,6 +112,14 @@ public class Node {
 
     public URI uri() {
         return uri;
+    }
+
+    //===============
+    // ACTIVATION
+    //===============
+
+    public ActivationStatus getActivationStatus() throws IOException, NodeException {
+        return asType(get("/activation/status"), TypeRef.ACTIVATION_STATUS);
     }
 
     //===============
@@ -248,6 +260,21 @@ public class Node {
                 .readValue(asJson(get("/assets/balance/" + address.toString())).get("balances"));
     }
 
+    public List<AssetBalance> getAssetsBalance(Address address, List<AssetId> assetIds) throws IOException, NodeException {
+        ObjectNode jsonBody = JSON_MAPPER.createObjectNode();
+        ArrayNode jsonAssetIds = jsonBody.putArray("ids");
+        assetIds.forEach(id -> jsonAssetIds.add(id.toString()));
+        StringEntity body = new StringEntity(JSON_MAPPER.writeValueAsString(jsonBody), StandardCharsets.UTF_8);
+
+        return mapper.readerFor(TypeRef.ASSET_BALANCES)
+                .readValue(
+                        asJson(
+                                post("/assets/balance/" + address.toString())
+                                        .setEntity(body)
+                                        .addHeader("Content-Type", "application/json")
+                        ).get("balances"));
+    }
+
     public long getAssetBalance(Address address, AssetId assetId) throws IOException, NodeException {
         return asJson(get("/assets/balance/" + address.toString() + "/" + assetId.toString()))
                 .get("balance").asLong();
@@ -322,9 +349,9 @@ public class Node {
                 .get("height").asInt();
     }
 
-    public int getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
+    public long getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
         return asJson(get("/blocks/delay/" + startBlockId.toString() + "/" + blocksNum))
-                .get("delay").asInt();
+                .get("delay").asLong();
     }
 
     /**
@@ -410,6 +437,33 @@ public class Node {
     public String getVersion() throws IOException, NodeException {
         return asJson(get("/node/version")).get("version").asText();
     }
+
+    public NodeStatus getStatus() throws IOException, NodeException {
+        return asType(get("/node/status"), TypeRef.NODE_STATUS);
+    }
+
+    //===============
+    // PEERS
+    //===============
+
+    public List<Peer> getAllPeers() throws NodeException, IOException {
+        return mapper.readerFor(TypeRef.ALL_PEERS)
+                .readValue(asJson(get("/peers/all")).get("peers"));
+    }
+
+    public List<BlacklistedPeer> getBlacklistedPeers() throws NodeException, IOException {
+        return asType(get("/peers/blacklisted"), TypeRef.BLACKLISTED_PEERS);
+    }
+
+    public List<ConnectedPeer> getConnectedPeers() throws NodeException, IOException {
+        return mapper.readerFor(TypeRef.CONNECTED_PEERS)
+                .readValue(asJson(get("/peers/connected")).get("peers"));
+    }
+
+    public List<SuspendedPeer> getSuspendedPeers() throws NodeException, IOException {
+        return asType(get("/peers/suspended"), TypeRef.SUSPENDED_PEERS);
+    }
+
 
     //===============
     // DEBUG
@@ -500,7 +554,6 @@ public class Node {
     }
 
     /**
-     *
      * @param txIds IDs of transactions
      * @return info about requested transactions
      * @throws IOException
@@ -516,7 +569,7 @@ public class Node {
     }
 
     /**
-     * @param txIds IDs of transactions
+     * @param txIds                IDs of transactions
      * @param transactionInfoClass info class for all the requested transactions
      * @return typed info about requested transactions. Use this method ONLY if you're sure that all requested transactions are of the same type (for example, txIds contains only InvokeScript transactions)
      * @throws IOException
@@ -623,8 +676,8 @@ public class Node {
 
     public String decompileScript(Base64String compiledScript) throws IOException, NodeException {
         return asJson(post("/utils/script/decompile")
-                        .addHeader("Content-Type", "application/json")
-                        .setEntity(new StringEntity(compiledScript.toString(), StandardCharsets.UTF_8)))
+                .addHeader("Content-Type", "application/json")
+                .setEntity(new StringEntity(compiledScript.toString(), StandardCharsets.UTF_8)))
                 .get("script")
                 .asText();
     }
