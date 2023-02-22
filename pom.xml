@@ -57,7 +57,7 @@
     <repositories>
         <repository>
             <id>gt260</id>
-            <url>https://nexus.gt260.com/repository/maven-public</url>
+            <url>https://nexus.gt260.com/repository/maven-public/</url>
         </repository>
         <repository>
             <id>ossrh</id>
