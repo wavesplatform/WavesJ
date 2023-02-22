@@ -877,6 +877,14 @@ public class Node {
                 TypeRef.TRANSACTION);
     }
 
+    /**
+     * Broadcast a signed ethereum transaction.
+     *
+     * @param ethTransaction transaction data
+     * @return EthRpcResponse object
+     * @throws IOException
+     * @throws NodeException
+     */
     public EthRpcResponse broadcastEthTransaction(EthereumTransaction ethTransaction) throws IOException, NodeException {
         HttpUriRequest rq = buildSendRawTransactionRq(ethTransaction.toRawHexString());
         ObjectNode rs = sendEthRequest(rq);
@@ -1117,6 +1125,14 @@ public class Node {
                 .asText();
     }
 
+    /**
+     * Get asset details by ethereum assetId
+     *
+     * @param asset ethereum assetId
+     * @return asset details
+     * @throws IOException
+     * @throws NodeException
+     */
     public String ethToWavesAsset(String asset) throws NodeException, IOException {
         return asType(
                 get("/eth/assets").addParameter("id", asset),
@@ -1128,6 +1144,14 @@ public class Node {
     // WAITINGS
     //===============
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param id transaction ID
+     * @param waitingInSeconds waiting time
+     * @return TransactionInfo object
+     * @throws IOException
+     */
     public TransactionInfo waitForTransaction(Id id, int waitingInSeconds) throws IOException {
         int pollingIntervalInMillis = 100;
 
@@ -1150,22 +1174,60 @@ public class Node {
         throw new IOException("Could not wait for transaction " + id + " in " + waitingInSeconds + " seconds", lastException);
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param id transaction ID
+     * @return TransactionInfo object
+     * @throws IOException
+     */
     public TransactionInfo waitForTransaction(Id id) throws IOException {
         return waitForTransaction(id, blockInterval);
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param id transaction ID
+     * @param infoClass type of TransactionInfo object
+     * @return TransactionInfo object
+     * @throws IOException
+     */
     public <T extends TransactionInfo> T waitForTransaction(Id id, Class<T> infoClass) throws IOException {
         return infoClass.cast(waitForTransaction(id));
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param tx TransactionInfo object
+     * @return TransactionInfo object
+     * @throws IOException
+     */
     public <T extends Transaction> TransactionInfo waitForTransaction(T tx) throws IOException {
         return waitForTransaction(tx.id());
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param tx TransactionInfo object
+     * @param infoClass type of TransactionInfo object
+     * @return TransactionInfo object
+     * @throws IOException
+     */
     public <TI extends TransactionInfo, T extends Transaction> TI waitForTransaction(T tx, Class<TI> infoClass) throws IOException {
         return waitForTransaction(tx.id(), infoClass);
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param ids sequence of transactions ID's
+     * @param waitingInSeconds waiting time
+     * @throws IOException
+     * @throws NodeException
+     */
     public void waitForTransactions(List<Id> ids, int waitingInSeconds) throws IOException, NodeException {
         int pollingIntervalInMillis = 1000;
 
@@ -1194,14 +1256,37 @@ public class Node {
                 " transactions in " + waitingInSeconds + " seconds: " + unconfirmed, lastException);
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param ids sequence of transactions ID's
+     * @throws IOException
+     * @throws NodeException
+     */
     public void waitForTransactions(List<Id> ids) throws IOException, NodeException {
         waitForTransactions(ids, blockInterval);
     }
 
+    /**
+     * Waiting for include transaction in the blockchain
+     *
+     * @param ids sequence of transactions ID's
+     * @throws IOException
+     * @throws NodeException
+     */
     public void waitForTransactions(Id... ids) throws IOException, NodeException {
         waitForTransactions(asList(ids));
     }
 
+    /**
+     * Waiting for target blockchain height
+     *
+     * @param target target blockchain height
+     * @param waitingInSeconds waiting time
+     * @return blockchain height after waiting
+     * @throws IOException
+     * @throws NodeException
+     */
     public int waitForHeight(int target, int waitingInSeconds) throws IOException, NodeException {
         int start = this.getHeight();
         int prev = start;
@@ -1229,16 +1314,41 @@ public class Node {
                 ": height " + prev + " did not grow for " + waitingInSeconds + " seconds");
     }
 
+    /**
+     * Waiting for target blockchain height
+     *
+     * @param expectedHeight expected height of blockchain
+     * @return blockchain height after waiting
+     * @throws IOException
+     * @throws NodeException
+     */
     public int waitForHeight(int expectedHeight) throws IOException, NodeException {
         return waitForHeight(expectedHeight, blockInterval * 3);
     }
 
+    /**
+     * Waiting for target blockchain height
+     *
+     * @param blocksCount number of skipped blocks
+     * @param waitingInSeconds waiting time
+     * @return blockchain height after waiting
+     * @throws IOException
+     * @throws NodeException
+     */
     public int waitBlocks(int blocksCount, int waitingInSeconds) throws IOException, NodeException {
         if (waitingInSeconds < 1)
             throw new IllegalStateException("waitBlocks: waiting value must be positive. Current: " + waitingInSeconds);
         return waitForHeight(getHeight() + blocksCount, waitingInSeconds);
     }
 
+    /**
+     * Waiting for target blockchain height
+     *
+     * @param blocksCount number of skipped blocks
+     * @return blockchain height after waiting
+     * @throws IOException
+     * @throws NodeException
+     */
     public int waitBlocks(int blocksCount) throws IOException, NodeException {
         return waitBlocks(blocksCount, blockInterval * 3);
     }
