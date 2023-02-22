@@ -349,9 +349,9 @@ public class Node {
                 .get("height").asInt();
     }
 
-    public int getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
+    public long getBlocksDelay(Base58String startBlockId, int blocksNum) throws IOException, NodeException {
         return asJson(get("/blocks/delay/" + startBlockId.toString() + "/" + blocksNum))
-                .get("delay").asInt();
+                .get("delay").asLong();
     }
 
     /**

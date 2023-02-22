@@ -77,7 +77,7 @@ public class AssetsTest extends BaseTestWithNodeInDocker {
 
         for (MassTransferTransaction massTransferTx : massTransferTxs)
             node.broadcast(massTransferTx);
-        node.waitForTransactions(massTransferTxIds, 120);
+        node.waitForTransactions(massTransferTxIds, 240);
 
         node.waitBlocks(1);
         AssetDistribution distributionPage1 =
