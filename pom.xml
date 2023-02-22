@@ -189,7 +189,6 @@
             <groupId>com.ridecompiler</groupId>
             <artifactId>compiler</artifactId>
             <version>1.4.12-2-g3faa9fa</version>
-            <classifier>g3faa9fa</classifier>
         </dependency>
 
         <!-- http client -->
