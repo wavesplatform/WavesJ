@@ -129,7 +129,7 @@ public class BlocksTest extends BaseTestWithNodeInDocker {
     void blocksDelay() throws IOException, NodeException {
         node.waitForHeight(5);
 
-        Base58String blockIdAtStart = node.getBlockHeaders(node.getHeight() - 1).id();
+        Base58String blockIdAtStart = node.getBlockHeaders(node.getHeight() - 2).id();
         node.waitBlocks(2);
 
         assertThat(node.getBlocksDelay(blockIdAtStart, 3)).isGreaterThan(1000);
