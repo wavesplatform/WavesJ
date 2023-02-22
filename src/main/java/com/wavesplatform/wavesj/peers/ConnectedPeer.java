@@ -78,12 +78,3 @@ public class ConnectedPeer {
                 '}';
     }
 }
-
-//{
-//      "address": "/185.32.14.61:56934",
-//      "declaredAddress": "N/A",
-//      "peerName": "Node-64119",
-//      "peerNonce": 64119,
-//      "applicationName": "wavesW",
-//      "applicationVersion": "1.4.10"
-//    }
