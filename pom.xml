@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.5.2</version>
+    <version>1.6.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -53,6 +53,17 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>gt260</id>
+            <url>https://nexus.gt260.com/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -138,6 +149,11 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.5.0</version>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.2.2</version>
@@ -170,6 +186,20 @@
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
             <version>1.2.3</version>
+        </dependency>
+
+
+        <!-- Compiler -->
+        <dependency>
+            <groupId>com.ridecompiler</groupId>
+            <artifactId>compiler</artifactId>
+            <version>1.4.12-2-g3faa9fa</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.13.10</version>
         </dependency>
 
         <!-- http client -->
