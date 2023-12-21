@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -185,15 +185,15 @@
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.4-16-SNAPSHOT</version>
         </dependency>
 
 
         <!-- Compiler -->
         <dependency>
-            <groupId>com.ridecompiler</groupId>
-            <artifactId>compiler</artifactId>
-            <version>1.4.12-2-g3faa9fa</version>
+            <groupId>com.wavesplatform</groupId>
+            <artifactId>lang</artifactId>
+            <version>1.5.1</version>
         </dependency>
 
         <dependency>
