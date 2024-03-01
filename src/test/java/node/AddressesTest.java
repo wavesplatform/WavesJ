@@ -13,8 +13,8 @@ import com.wavesplatform.transactions.common.Base64String;
 import com.wavesplatform.transactions.data.*;
 import com.wavesplatform.wavesj.*;
 import com.wavesplatform.wavesj.exceptions.NodeException;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
