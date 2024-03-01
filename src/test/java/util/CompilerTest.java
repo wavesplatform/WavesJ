@@ -41,6 +41,22 @@ public class CompilerTest {
         Assert.assertEquals(0L, scriptInfo.extraFee());
     }
 
+    @Test
+    public void compileV8() throws CompilationException {
+        String script = "{-# STDLIB_VERSION 8 #-}\n" +
+                "{-# CONTENT_TYPE EXPRESSION #-}\n" +
+                "{-# SCRIPT_TYPE ACCOUNT #-}\n" +
+                "\n" +
+                "let a = calculateDelay(Address(base58''), 0)\n" +
+                "let b = [1, 2, 3].replaceByIndex(1, 0)\n" +
+                "a == b[0]";
+        ScriptInfo scriptInfo = CompilationUtil.compile(script);
+        Assert.assertEquals(12, scriptInfo.complexity());
+        Assert.assertEquals(12, scriptInfo.verifierComplexity());
+        Assert.assertTrue(scriptInfo.callableComplexities().isEmpty());
+        Assert.assertEquals(0, scriptInfo.extraFee());
+    }
+
     @Test(expected = CompilationException.class)
     public void compilationError() throws CompilationException {
         CompilationUtil.compile("{-# STDLIB_V 1 #-}");
