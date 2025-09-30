@@ -39,7 +39,7 @@ public class MockHttpRsUtil {
         ).thenReturn(createBasicRs(rsFilePath));
     }
 
-    public static HttpClient mockHttpClient() throws IOException {
+    public static HttpClient mockHttpClient(String addressFilePath) throws IOException {
         HttpClient mockHttpClient = Mockito.mock(HttpClient.class);
         when(
                 mockHttpClient.execute(
@@ -47,7 +47,7 @@ public class MockHttpRsUtil {
                                 rq != null && rq.getURI().toString().endsWith("/addresses")
                         )
                 )
-        ).thenReturn(createBasicRs("src/test/resources/stub/addresses.json"));
+        ).thenReturn(createBasicRs(addressFilePath));
         return mockHttpClient;
     }
 

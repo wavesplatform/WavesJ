@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 //todo move bytes attribute to inner transaction
 public class EthereumTransactionFromJsonTest {
 
-    private final Node node = new Node(Profile.LOCAL, mockHttpClient());
+    private final Node node = new Node(Profile.LOCAL, mockHttpClient("src/test/resources/stub/addresses.json"));
 
     private static final byte PRIVATE_NODE_CHAIN_ID = 'R';
 
@@ -43,7 +43,7 @@ public class EthereumTransactionFromJsonTest {
     void readEthereumTransferTransactionByIdTest() throws NodeException, IOException {
         mockTransactionInfoRs(node,
                 "Ba4pFx78Ueg3j6CZqjhuBdg5cjxTwTzJJSS6GPpH3Cn4",
-                "src/test/resources/stub/eth/eth_transfer_tx_info.json"
+                "src/test/resources/stub/txs/eth/eth_transfer_tx_info.json"
         );
 
         EthereumTransactionInfo ethTransferTxInfo =
@@ -78,7 +78,7 @@ public class EthereumTransactionFromJsonTest {
         mockGetBlockRs(
                 node,
                 1043438,
-                "src/test/resources/stub/eth/eth_transfer_tx_from_block.json"
+                "src/test/resources/stub/txs/eth/eth_transfer_tx_from_block.json"
         );
 
         Block block = node.getBlock(1043438);
@@ -103,7 +103,7 @@ public class EthereumTransactionFromJsonTest {
     void readEthereumInvokeTransactionByIdTest() throws NodeException, IOException {
         mockTransactionInfoRs(node,
                 "CWuFY42te67sLmc5gwt4NxwHmFjVfJdHkKuLyshTwEct",
-                "src/test/resources/stub/eth/eth_invoke_tx_info.json"
+                "src/test/resources/stub/txs/eth/eth_invoke_tx_info.json"
         );
 
         EthereumTransactionInfo ethInvokeTxInfo =
@@ -145,7 +145,7 @@ public class EthereumTransactionFromJsonTest {
         mockGetBlockRs(
                 node,
                 1043725,
-                "src/test/resources/stub/eth/eth_invoke_tx_from_block.json"
+                "src/test/resources/stub/txs/eth/eth_invoke_tx_from_block.json"
         );
 
         Block block = node.getBlock(1043725);
@@ -168,7 +168,7 @@ public class EthereumTransactionFromJsonTest {
     void readExchangeTransactionInfoWithEthereumSignatureTest() throws IOException, NodeException {
         mockTransactionInfoRs(node,
                 "3ZPyxs4p7abkj5cf43pUkaHaMPRuBaWC89RX93d2AB6R",
-                "src/test/resources/stub/eth/exchange_tx_info_with_eth_sign.json"
+                "src/test/resources/stub/txs/eth/exchange_tx_info_with_eth_sign.json"
         );
 
         ExchangeTransactionInfo exchangeTxInfo =
@@ -248,7 +248,7 @@ public class EthereumTransactionFromJsonTest {
         mockGetBlockRs(
                 node,
                 1099637,
-                "src/test/resources/stub/eth/exchange_tx_with_eth_sign_from_block.json"
+                "src/test/resources/stub/txs/eth/exchange_tx_with_eth_sign_from_block.json"
         );
 
         ExchangeTransaction exchangeTx =

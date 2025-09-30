@@ -75,6 +75,8 @@ public class TransactionInfoDeser extends JsonDeserializer<TransactionInfo> {
                     stateChangesFromJson(codec, json),
                     json.get("bytes").asText()
             );
+        else if (tx instanceof CommitToGenerationTransaction)
+            return new CommitToGenerationTransactionInfo((CommitToGenerationTransaction) tx, status, height);
         else
             throw new IOException("Can't parse transaction info: " + json.toString());
     }
