@@ -417,7 +417,7 @@ public class Node {
     }
 
     public Block getGenesisBlock() throws IOException, NodeException {
-        return asType(get("/blocks/first"), TypeRef.BLOCK);
+        return asType(get("/blocks/at/1"), TypeRef.BLOCK);
     }
 
     public Block getLastBlock() throws IOException, NodeException {
@@ -750,6 +750,8 @@ public class Node {
                     return;
             } catch (Exception e) {
                 lastException = e;
+                break;
+            } finally {
                 try {
                     Thread.sleep(pollingIntervalInMillis);
                 } catch (InterruptedException ignored) {

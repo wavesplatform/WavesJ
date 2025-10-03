@@ -51,7 +51,7 @@ public class CommitToGenerationTxTest {
         assertEquals(1, ctgTx.version());
         assertEquals(CHAIN_ID, ctgTx.chainId());
         assertEquals(80, ctgTx.generationPeriodStart());
-        assertEquals("3FSgXpgbT6m1speWgVx3cVxAZKmdr4barHU", ctgTx.sender().address().encoded());
+        assertEquals("3FSgXpgbT6m1speWgVx3cVxAZKmdr4barHU", ctgTx.sender().address(CHAIN_ID).encoded());
         assertEquals("2JYMTjUK7tC8NQi6TD6oWgy41YbrnXuoLzZydrFKTKt6", ctgTx.sender().encoded());
         assertEquals("6TGkDGP9my3dLeU1LphyCsYDcxeqfiz6xbFdNPG38PdQwEuUZeBTDr8QTTiR3XvMKR",
                 ctgTx.endorserPublicKey().encoded());
