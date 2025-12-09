@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 import static com.wavesplatform.wavesj.Status.CONFIRMED;
@@ -388,6 +389,29 @@ public class Node {
      */
     public BlockHeaders getLastBlockHeaders() throws IOException, NodeException {
         return asType(get("/blocks/headers/last"), TypeRef.BLOCK_HEADERS);
+    }
+
+    public BlockHeaders getFinalizedBlockHeaders() throws IOException, NodeException {
+        return asType(get("/blocks/headers/finalized"), TypeRef.BLOCK_HEADERS);
+    }
+
+    /**
+     * Returns committed generators at given height.
+     *
+     * @param height blockchain height
+     * @return list of committed generators
+     * @throws IOException
+     */
+    public List<CommittedGenerator> getCommittedGeneratorsAt(int height) throws IOException, NodeException {
+        return asType(get("/generators/at/" + height), TypeRef.COMMITTED_GENERATORS);
+    }
+
+    public int getCommittedGeneratorIndex(Address address, int height) throws IOException, NodeException {
+        List<CommittedGenerator> committedGeneratorList = getCommittedGeneratorsAt(height);
+        return IntStream.range(0, committedGeneratorList.size())
+                .filter(i -> committedGeneratorList.get(i).address().equals(address))
+                .findFirst()
+                .orElse(-1);
     }
 
     /**

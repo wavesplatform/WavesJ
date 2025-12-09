@@ -32,6 +32,7 @@ public class BlockHeaders {
     private final long totalFee;
     private final long reward;
     private final Base58String vrf;
+    private FinalizationVoting finalizationVoting;
 
     @JsonCreator
     public BlockHeaders(
@@ -72,6 +73,15 @@ public class BlockHeaders {
         Object baseTargetObj = nxtConsensus.get("base-target");
         this.baseTarget = baseTargetObj instanceof Long ? (Long) baseTargetObj : (Integer) baseTargetObj;
         this.generationSignature = new Base58String((String) nxtConsensus.get("generation-signature"));
+    }
+
+    @JsonProperty("finalizationVoting")
+    private void setFinalizationVoting(FinalizationVoting fv) {
+        this.finalizationVoting = fv;
+    }
+
+    public FinalizationVoting getFinalizationVoting() {
+        return finalizationVoting;
     }
 
     public int version() {
@@ -163,12 +173,14 @@ public class BlockHeaders {
                 Objects.equals(features, that.features) &&
                 Objects.equals(generator, that.generator) &&
                 Objects.equals(signature, that.signature) &&
-                Objects.equals(vrf, that.vrf);
+                Objects.equals(vrf, that.vrf) &&
+                Objects.equals(finalizationVoting, that.finalizationVoting);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, timestamp, reference, baseTarget, generationSignature, transactionsRoot, id, features, desiredReward, generator, signature, size, transactionsCount, height, totalFee, reward, vrf);
+        return Objects.hash(version, timestamp, reference, baseTarget, generationSignature, transactionsRoot, id, features, desiredReward, generator, signature, size, transactionsCount, height, totalFee, reward, vrf,
+                finalizationVoting);
     }
 
     @Override
@@ -191,6 +203,7 @@ public class BlockHeaders {
                 ", transactionsCount=" + transactionsCount +
                 ", transactionsRoot='" + transactionsRoot + '\'' +
                 ", size=" + size +
+                ", finalizationVoting=" + finalizationVoting +
                 '}';
     }
 }
