@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import static com.wavesplatform.transactions.serializers.json.JsonSerializer.JSON_MAPPER;
 import static com.wavesplatform.wavesj.Status.CONFIRMED;
@@ -364,6 +365,13 @@ public class Node {
         return asType(get("/blocks/headers/at/" + height), TypeRef.BLOCK_HEADERS);
     }
 
+    /**
+     * Returns block header at given height.
+     *
+     * @param blockId block id
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
     public BlockHeaders getBlockHeaders(Base58String blockId) throws IOException, NodeException {
         return asType(get("/blocks/headers/" + blockId.toString()), TypeRef.BLOCK_HEADERS);
     }
@@ -381,13 +389,23 @@ public class Node {
     }
 
     /**
-     * Returns last block header
+     * Returns last block headers
      *
      * @return block object without transactions
      * @throws IOException if no block exists at the given height
      */
     public BlockHeaders getLastBlockHeaders() throws IOException, NodeException {
         return asType(get("/blocks/headers/last"), TypeRef.BLOCK_HEADERS);
+    }
+
+    /**
+     * Returns last finalized block headers
+     *
+     * @return block object without transactions
+     * @throws IOException if no block exists at the given height
+     */
+    public BlockHeaders getFinalizedBlockHeaders() throws IOException, NodeException {
+        return asType(get("/blocks/headers/finalized"), TypeRef.BLOCK_HEADERS);
     }
 
     /**
@@ -417,7 +435,7 @@ public class Node {
     }
 
     public Block getGenesisBlock() throws IOException, NodeException {
-        return asType(get("/blocks/first"), TypeRef.BLOCK);
+        return asType(get("/blocks/at/1"), TypeRef.BLOCK);
     }
 
     public Block getLastBlock() throws IOException, NodeException {
@@ -427,6 +445,31 @@ public class Node {
     public List<Block> getBlocksGeneratedBy(Address generator, int fromHeight, int toHeight) throws IOException, NodeException {
         return asType(get(
                 "/blocks/address/" + generator.toString() + "/" + fromHeight + "/" + toHeight), TypeRef.BLOCKS);
+    }
+
+    /**
+     * Returns committed generators at given height.
+     *
+     * @param height blockchain height
+     * @return list of committed generators
+     */
+    public List<CommittedGenerator> getCommittedGeneratorsAt(int height) throws IOException, NodeException {
+        return asType(get("/generators/at/" + height), TypeRef.COMMITTED_GENERATORS);
+    }
+
+    /**
+     * Returns committed generator index at given height.
+     *
+     * @param address address of commited generator
+     * @param height blockchain height
+     * @return index of committed generator
+     */
+    public int getCommittedGeneratorIndex(Address address, int height) throws IOException, NodeException {
+        List<CommittedGenerator> committedGeneratorList = getCommittedGeneratorsAt(height);
+        return IntStream.range(0, committedGeneratorList.size())
+                .filter(i -> committedGeneratorList.get(i).address().equals(address))
+                .findFirst()
+                .orElse(-1);
     }
 
     //===============
@@ -750,6 +793,8 @@ public class Node {
                     return;
             } catch (Exception e) {
                 lastException = e;
+                break;
+            } finally {
                 try {
                     Thread.sleep(pollingIntervalInMillis);
                 } catch (InterruptedException ignored) {

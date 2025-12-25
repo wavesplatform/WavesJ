@@ -1,0 +1,44 @@
+{
+  "version": 5,
+  "timestamp": 1766555613090,
+  "reference": "6mb8A1dnf8zdvkuCHbqPi8qukALDm97in9wfiNFcbHNq",
+  "nxt-consensus": {
+    "base-target": 20120,
+    "generation-signature": "jUqHiYP7E7LZMS8facqNrjp9m6jLB31TjmCxX3aqubyApK9q6qEBUbqapXi6X38oYjYsW1qBA7rTmAo4GvTC8vSDVRWeLrwfxwsQCgUV7MNyqcMt3efJD6bHuuyUh7yfVie"
+  },
+  "transactionsRoot": "AdHHXpTvCPxQw6Ge57BaPpkLKHrVmAy4VBv2UPR3rzBu",
+  "id": "9xhR5xULkazyC5Po7bPfTHV8APbrH72N2KHfkV4nYDXi",
+  "features": [],
+  "desiredReward": -1,
+  "generator": "3FZs7eqZSmG56AqfTdWj2wJ1NWTrUZNgS6Q",
+  "generatorPublicKey": "BCuRAvrPqngYBKvJ3HKERz3nZZQRKEUMY81FJCEQPfNV",
+  "stateHash": "HwLttQ7xwStDavkXbBtfaeUy3QoKJMbCbTkNEezivEL6",
+  "finalizationVoting": {
+    "endorserIndexes": [
+      1,
+      3
+    ],
+    "aggregatedEndorsementSignature": "xgHXeGVftVtfxEZhRrfC5Q3pb8DajoGnFed7PxDBC9JegLuW7e1jYjh9QXzU9AeDSB4dShS8id9oThaKwgG4wddevXbiBwenuVFdRXUM3hyqbkcgMCnDLexhZtWhxfrs7AU",
+    "finalizedHeight": 14,
+    "conflictEndorsements": [
+      {
+        "endorserIndex": 2,
+        "finalizedBlockId": "3LKirJGRvMcdaachGNEuWVSyGbpzWKcagrjsQQuaYXwq",
+        "finalizedHeight": 13,
+        "signature": "omjkPiJX473jCxnScb5XXwi7MRf8Sb4Wom18X68eFodkMuSv3ztNK8fW3886cSqEDJ9PwWV9goJ4H6EPMSkoZmFNSkfnbZzRwrbrCdYFrjDgWzxw91tyWLtX7F2xKAcHsQq"
+      }
+    ]
+  },
+  "signature": "67HpHJnrEwJuqvn44JjgHJy5TuRLXfu4kAi1fujVHq8y356JFTmLs1LXJciBpJAbTRV9jkxZYGsUNfzS7G9i5LVN",
+  "blocksize": 1068,
+  "transactionCount": 3,
+  "height": 16,
+  "totalFee": 300000,
+  "reward": 6000000000,
+  "rewardShares": {
+    "3FVGizGxjdi8m4e8WKjbwtzg4rdiiUGkLCu": 2000000000,
+    "3FZQMZsyypqDUk2r5katP1AUChe7Uzc9dC4": 2000000000,
+    "3FZs7eqZSmG56AqfTdWj2wJ1NWTrUZNgS6Q": 2000000000
+  },
+  "VRF": "5VjPUXb4NU9QQFoTsEET2xM9ncJfVzjQYZwpUQENStMH"
+}

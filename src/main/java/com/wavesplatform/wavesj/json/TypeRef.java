@@ -39,6 +39,8 @@ public class TypeRef {
 
     public static final TypeReference<List<Block>> BLOCKS = new TypeReference<List<Block>>() {};
 
+    public static final TypeReference<List<CommittedGenerator>> COMMITTED_GENERATORS = new TypeReference<List<CommittedGenerator>>() {};
+
     public static final TypeReference<BlockHeaders> BLOCK_HEADERS = new TypeReference<BlockHeaders>() {};
 
     public static final TypeReference<List<BlockHeaders>> BLOCKS_HEADERS = new TypeReference<List<BlockHeaders>>() {};

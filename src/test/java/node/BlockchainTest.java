@@ -26,7 +26,7 @@ public class BlockchainTest extends BaseTestWithNodeInDocker {
         assertThat(rewards.totalWavesAmount()).isGreaterThan(100000000_00000000L);
         assertThat(rewards.currentReward()).isBetween(5_00000000L, 7_00000000L);
         assertThat(rewards.minIncrement()).isEqualTo(50000000);
-        assertThat(rewards.term()).isEqualTo(6);
+        assertThat(rewards.term()).isEqualTo(3);
         assertThat(rewards.nextCheck()).isGreaterThan(rewards.votingIntervalStart());
         assertThat(rewards.votingInterval()).isEqualTo(3);
         assertThat(rewards.votingThreshold()).isEqualTo(2);

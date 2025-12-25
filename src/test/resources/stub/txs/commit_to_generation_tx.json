@@ -1,0 +1,18 @@
+{
+  "id": "2r6kpnJbGqNTmLxi9cPuavgxqumGufnisnN8vhuSCpaX",
+  "type": 19,
+  "version": 1,
+  "chainId": 68,
+  "senderPublicKey": "Bn21Eg8HbwZWZQMHXnTFnb64MhVjgH2HygDekQDbjjMq",
+  "sender": "3FmjX4FAeDXE4ZdDj2JKxzE4QtbxaioXzxM",
+  "generationPeriodStart": 2941,
+  "endorserPublicKey": "5t9zL1oqXW6kL3YUAuF8r4rKUaPwohPVrpMWR8Y1bAJtSMipP3TQJYZvpBFB7GWZwo",
+  "commitmentSignature": "u9CTxLENQWyd5egnHrnbnnDKy7mvtrWJfR1AuCL4e4e7uuRTobzxVy1SQBz7ayoY5mRfiTG3PR8niJPT3fdVfsD97EkagBha8ehrLAzdutWSLbiQF2VDwPfi7uvTcp5csMC",
+  "fee": 10000000,
+  "feeAssetId": null,
+  "timestamp": 1766488084192,
+  "proofs": [
+    "2H7TeCFEBSq6gb325Up2iZPr1jbZk99XugFijYTLbvgH2Ts8NQyCusG5p84FxKySEsVz7RUqsmQQJcCGU3xx75jt"
+  ],
+  "height": 73
+}

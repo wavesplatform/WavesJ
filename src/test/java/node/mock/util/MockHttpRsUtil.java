@@ -1,7 +1,6 @@
 package node.mock.util;
 
 import com.wavesplatform.wavesj.Node;
-import com.wavesplatform.wavesj.Profile;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
@@ -39,7 +38,17 @@ public class MockHttpRsUtil {
         ).thenReturn(createBasicRs(rsFilePath));
     }
 
-    public static HttpClient mockHttpClient() throws IOException {
+    public static void mockGBlockHeadersRs(Node nodeMock, int height, String rsFilePath) throws IOException {
+        when(
+                nodeMock.client().execute(
+                        argThat(rq ->
+                                rq != null && rq.getURI().equals(nodeMock.uri().resolve("/blocks/headers/at/" + height))
+                        )
+                )
+        ).thenReturn(createBasicRs(rsFilePath));
+    }
+
+    public static HttpClient mockHttpClient(String addressFilePath) throws IOException {
         HttpClient mockHttpClient = Mockito.mock(HttpClient.class);
         when(
                 mockHttpClient.execute(
@@ -47,7 +56,7 @@ public class MockHttpRsUtil {
                                 rq != null && rq.getURI().toString().endsWith("/addresses")
                         )
                 )
-        ).thenReturn(createBasicRs("src/test/resources/stub/addresses.json"));
+        ).thenReturn(createBasicRs(addressFilePath));
         return mockHttpClient;
     }
 
