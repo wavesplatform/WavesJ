@@ -4,41 +4,41 @@ import com.wavesplatform.transactions.common.Base64String;
 import com.wavesplatform.wavesj.ScriptInfo;
 import com.wavesplatform.wavesj.exceptions.CompilationException;
 import com.wavesplatform.wavesj.util.CompilationUtil;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CompilerTest {
 
     @Test
     public void compileContract() throws CompilationException {
         ScriptInfo scriptInfo = CompilationUtil.compile(contract);
-        Assert.assertEquals(new Base64String(compiledContract), scriptInfo.script());
-        Assert.assertEquals(207, scriptInfo.complexity());
-        Assert.assertEquals(207, scriptInfo.verifierComplexity());
-        Assert.assertEquals(Integer.valueOf(21), scriptInfo.callableComplexities().get("issueNft"));
-        Assert.assertEquals(Integer.valueOf(4), scriptInfo.callableComplexities().get("setPrice"));
-        Assert.assertEquals(Integer.valueOf(207), scriptInfo.callableComplexities().get("pullTheLever"));
-        Assert.assertEquals(0L, scriptInfo.extraFee());
+        Assertions.assertEquals(new Base64String(compiledContract), scriptInfo.script());
+        Assertions.assertEquals(207, scriptInfo.complexity());
+        Assertions.assertEquals(207, scriptInfo.verifierComplexity());
+        Assertions.assertEquals(Integer.valueOf(21), scriptInfo.callableComplexities().get("issueNft"));
+        Assertions.assertEquals(Integer.valueOf(4), scriptInfo.callableComplexities().get("setPrice"));
+        Assertions.assertEquals(Integer.valueOf(207), scriptInfo.callableComplexities().get("pullTheLever"));
+        Assertions.assertEquals(0L, scriptInfo.extraFee());
     }
 
     @Test
     public void compileExpression() throws CompilationException {
         ScriptInfo scriptInfo = CompilationUtil.compile(expression);
-        Assert.assertEquals(new Base64String(compiledExpression), scriptInfo.script());
-        Assert.assertEquals(3, scriptInfo.complexity());
-        Assert.assertEquals(3, scriptInfo.verifierComplexity());
-        Assert.assertTrue(scriptInfo.callableComplexities().isEmpty());
-        Assert.assertEquals(0L, scriptInfo.extraFee());
+        Assertions.assertEquals(new Base64String(compiledExpression), scriptInfo.script());
+        Assertions.assertEquals(3, scriptInfo.complexity());
+        Assertions.assertEquals(3, scriptInfo.verifierComplexity());
+        Assertions.assertTrue(scriptInfo.callableComplexities().isEmpty());
+        Assertions.assertEquals(0L, scriptInfo.extraFee());
     }
 
     @Test
     public void compileLibrary() throws CompilationException {
         ScriptInfo scriptInfo = CompilationUtil.compile(library);
-        Assert.assertEquals(new Base64String(compiledLibrary), scriptInfo.script());
-        Assert.assertEquals(0, scriptInfo.complexity());
-        Assert.assertEquals(0, scriptInfo.verifierComplexity());
-        Assert.assertTrue(scriptInfo.callableComplexities().isEmpty());
-        Assert.assertEquals(0L, scriptInfo.extraFee());
+        Assertions.assertEquals(new Base64String(compiledLibrary), scriptInfo.script());
+        Assertions.assertEquals(0, scriptInfo.complexity());
+        Assertions.assertEquals(0, scriptInfo.verifierComplexity());
+        Assertions.assertTrue(scriptInfo.callableComplexities().isEmpty());
+        Assertions.assertEquals(0L, scriptInfo.extraFee());
     }
 
     @Test
@@ -51,15 +51,15 @@ public class CompilerTest {
                 "let b = [1, 2, 3].replaceByIndex(1, 0)\n" +
                 "a == b[0]";
         ScriptInfo scriptInfo = CompilationUtil.compile(script);
-        Assert.assertEquals(12, scriptInfo.complexity());
-        Assert.assertEquals(12, scriptInfo.verifierComplexity());
-        Assert.assertTrue(scriptInfo.callableComplexities().isEmpty());
-        Assert.assertEquals(0, scriptInfo.extraFee());
+        Assertions.assertEquals(12, scriptInfo.complexity());
+        Assertions.assertEquals(12, scriptInfo.verifierComplexity());
+        Assertions.assertTrue(scriptInfo.callableComplexities().isEmpty());
+        Assertions.assertEquals(0, scriptInfo.extraFee());
     }
 
-    @Test(expected = CompilationException.class)
-    public void compilationError() throws CompilationException {
-        CompilationUtil.compile("{-# STDLIB_V 1 #-}");
+    @Test
+    public void compilationError() {
+        Assertions.assertThrows(CompilationException.class, () -> CompilationUtil.compile("{-# STDLIB_V 1 #-}"));
     }
 
     private static final String contract = "{-# STDLIB_VERSION 6 #-}\n" +
