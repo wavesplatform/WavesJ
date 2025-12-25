@@ -3,10 +3,12 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.transactions.account.Address;
+import com.wavesplatform.transactions.account.PublicKey;
 import com.wavesplatform.transactions.common.Base58String;
 import com.wavesplatform.wavesj.info.TransactionWithStatus;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -28,6 +30,9 @@ public class Block extends BlockHeaders {
             @JsonProperty("features") List<Integer> features,
             @JsonProperty("desiredReward") long desiredReward,
             @JsonProperty("generator") Address generator,
+            @JsonProperty("generatorPublicKey") PublicKey generatorPublicKey,
+            @JsonProperty("stateHash") Base58String stateHash,
+            @JsonProperty("rewardShares") Map<Address, Long> rewardShares,
             @JsonProperty("signature") Base58String signature,
             @JsonProperty("blocksize") int size,
             @JsonProperty("transactionCount") int transactionsCount,
@@ -36,9 +41,13 @@ public class Block extends BlockHeaders {
             @JsonProperty("reward") long reward,
             @JsonProperty("VRF") Base58String vrf,
             @JsonProperty("fee") long fee,
+            @JsonProperty("challengedHeader") ChallengedHeader challengedHeader,
+            @JsonProperty("finalizationVoting") FinalizationVoting finalizationVoting,
             @JsonProperty("transactions") List<TransactionWithStatus> transactions) {
-        super(version, timestamp, reference, transactionsRoot, id, features, desiredReward, generator,
-                signature, size, transactionsCount, height, totalFee, reward, vrf);
+        super(version, timestamp, reference, transactionsRoot, id, features, desiredReward,
+                generator, generatorPublicKey, stateHash, rewardShares, signature,
+                size, transactionsCount, height, totalFee, reward, vrf,
+                challengedHeader, finalizationVoting);
         this.fee = fee;
         this.transactions = Common.notNull(transactions, "Transactions");
     }

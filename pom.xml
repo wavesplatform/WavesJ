@@ -68,7 +68,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -100,8 +100,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.1</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <release>11</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -176,7 +175,7 @@
             <dependency>
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
-                <version>4.32.1</version>
+                <version>4.33.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
@@ -201,14 +200,14 @@
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
-            <version>1.2.6-SNAPSHOT</version>
+            <version>1.2.6</version>
         </dependency>
 
         <!-- Compiler -->
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>lang</artifactId>
-            <version>1.5.12-SNAPSHOT</version>
+            <version>1.6.0</version>
         </dependency>
 
         <!-- http client -->
@@ -222,7 +221,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.18</version>
+            <version>1.5.23</version>
         </dependency>
 
         <!-- util -->

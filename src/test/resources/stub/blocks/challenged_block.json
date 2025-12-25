@@ -1,0 +1,43 @@
+{
+  "version": 5,
+  "timestamp": 1766556383068,
+  "reference": "Cgiw4DxerYuir2Eb1J9Efao7MRv6mqNJhhb9DDFT1nyn",
+  "nxt-consensus": {
+    "base-target": 20313,
+    "generation-signature": "zSgfZWVSvDouvPpqn1x4DCaeozoBz9uxorMqmAk9JhgfqpkHa4KRySVfM8WGMnR3qwiQT2DKr7Yym9SeL9YgtLX5u7sa7VTzCtSFABJfLumrYYvberx7BcNtyCx8nUT86m1"
+  },
+  "transactionsRoot": "HUS3QDVUEFXjrDZbUwNoW6zHXvieUfhCRf5fvaGRN3Ft",
+  "id": "8peDPrKBNC6cXkwXTTXgr18pR9rK8Kr3hmMPuL1M3Y4J",
+  "features": [],
+  "desiredReward": -1,
+  "generator": "3FmGmZaKHxjb2Q1rRc9KXJxirRtPUUQUdPe",
+  "generatorPublicKey": "BMY9f5tzFwtLPS2VeaKu12sunVo3ydMvXNd8cVNa5cE9",
+  "stateHash": "E5p1UQAg77FyoYVdt1NKVvczK6w5QNnZKvhN6fbRbs56",
+  "challengedHeader": {
+    "headerSignature": "52SXMJphW45QdshxfYUxH7w6FhXmGXU2zTmW6mDLvcaWVigKjtufQT7gTJ3gimKFx8mwKyGuTtzoMDf6CYWymjLE",
+    "features": [],
+    "generator": "3Fgtiv5L5q4CXFfwuAfbkjy9ppehkNzjbEG",
+    "generatorPublicKey": "5FUsFwB6b8mE61VMbSB6X7m23NTy4yN8f1fApXo8tZs7",
+    "desiredReward": -1,
+    "stateHash": "11111111111111111111111111111111",
+    "finalizationVoting": {
+      "endorserIndexes": [
+        2,
+        1
+      ],
+      "aggregatedEndorsementSignature": "yEuHinUSJCG8LdNtvtstKp7edVGrwMmGQQ8qf6ghWc8BB9oiJryCMVmsBQrAJQZX7i8cC1d5mqH2jYLJT2QeJ7QSbMGBAWueVcYhUzpoPtwvtG5NxZUcvTsRUjiZEWPT7uD",
+      "finalizedHeight": 40
+    }
+  },
+  "signature": "3MLuE6nDYH4AZEMsNJuNye3TyYn9rK1VLtzaiaxs73TpHTNqfXATwaq2vY8n2w23TnVYR8FMyRU3QYa1ekLKu1ar",
+  "blocksize": 981,
+  "transactionCount": 2,
+  "height": 42,
+  "totalFee": 200000,
+  "reward": 6000000000,
+  "rewardShares": {
+    "3FVGizGxjdi8m4e8WKjbwtzg4rdiiUGkLCu": 2000000000,
+    "3FmGmZaKHxjb2Q1rRc9KXJxirRtPUUQUdPe": 4000000000
+  },
+  "VRF": "8cVE9ye2suvz5Z6citp8WmAQzifrgmXD7WxUSix8Cqvp"
+}

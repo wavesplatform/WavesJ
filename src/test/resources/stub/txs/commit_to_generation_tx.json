@@ -1,18 +1,18 @@
 {
-  "id": "EZk7kMzYMDipnRR8WY8ZF2JzLD1fDRMk73jXGWuyipBx",
+  "id": "2r6kpnJbGqNTmLxi9cPuavgxqumGufnisnN8vhuSCpaX",
   "type": 19,
   "version": 1,
   "chainId": 68,
-  "senderPublicKey": "BCuRAvrPqngYBKvJ3HKERz3nZZQRKEUMY81FJCEQPfNV",
-  "sender": "3FZs7eqZSmG56AqfTdWj2wJ1NWTrUZNgS6Q",
-  "generationPeriodStart": 8370,
-  "endorserPublicKey": "5vMY4PRQF3XoGgRVosKNhrNwFPyNEK5NhU4bVyer2YY3hQZW4wyBNXME9Gfvqmi1Bw",
-  "commitmentSignature": "oE5DQBN8RyJKyKQVwa5mwdC6eMCcvUBG6EcpF6TWKkjLuc2UeVRwwtFp2xYoYivx3APPHdzL2hajXRpdUcJ4xXYqTdNpAmwWKoYWSxxUobysd6UxDBqqnHyrA9n3XyMvwNX",
+  "senderPublicKey": "Bn21Eg8HbwZWZQMHXnTFnb64MhVjgH2HygDekQDbjjMq",
+  "sender": "3FmjX4FAeDXE4ZdDj2JKxzE4QtbxaioXzxM",
+  "generationPeriodStart": 2941,
+  "endorserPublicKey": "5t9zL1oqXW6kL3YUAuF8r4rKUaPwohPVrpMWR8Y1bAJtSMipP3TQJYZvpBFB7GWZwo",
+  "commitmentSignature": "u9CTxLENQWyd5egnHrnbnnDKy7mvtrWJfR1AuCL4e4e7uuRTobzxVy1SQBz7ayoY5mRfiTG3PR8niJPT3fdVfsD97EkagBha8ehrLAzdutWSLbiQF2VDwPfi7uvTcp5csMC",
   "fee": 10000000,
   "feeAssetId": null,
-  "timestamp": 1760440134127,
+  "timestamp": 1766488084192,
   "proofs": [
-    "62ZXWcLRZfad9nPKZkuRJQrtV6hLV7wKh69mWBoTgCEoLAnm1ZS1gfZg2UYwKEAcMCXydUVsHcTrzGhCtxuCD4Uo"
+    "2H7TeCFEBSq6gb325Up2iZPr1jbZk99XugFijYTLbvgH2Ts8NQyCusG5p84FxKySEsVz7RUqsmQQJcCGU3xx75jt"
   ],
   "height": 73
 }

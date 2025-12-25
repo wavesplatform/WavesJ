@@ -3,7 +3,6 @@ package com.wavesplatform.wavesj;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wavesplatform.transactions.account.BlsSignature;
-import com.wavesplatform.transactions.common.Base58String;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,15 +13,18 @@ public class FinalizationVoting {
     private final List<Integer> endorserIndexes;
     private final BlsSignature aggregatedEndorsementSignature;
     private final List<ConflictEndorsement> conflictEndorsements;
+    private final int finalizedHeight;
 
     @JsonCreator
     public FinalizationVoting(
             @JsonProperty("endorserIndexes") List<Integer> endorserIndexes,
             @JsonProperty("aggregatedEndorsementSignature") BlsSignature aggregatedEndorsementSignature,
-            @JsonProperty("conflictEndorsements") List<ConflictEndorsement> conflictEndorsements
+            @JsonProperty("conflictEndorsements") List<ConflictEndorsement> conflictEndorsements,
+            @JsonProperty("finalizedHeight") int finalizedHeight
     ) {
         this.endorserIndexes = endorserIndexes == null ? Collections.emptyList() : endorserIndexes;
         this.aggregatedEndorsementSignature = aggregatedEndorsementSignature;
+        this.finalizedHeight = finalizedHeight;
         this.conflictEndorsements = conflictEndorsements == null ? Collections.emptyList() : conflictEndorsements;
     }
 
@@ -34,6 +36,10 @@ public class FinalizationVoting {
         return aggregatedEndorsementSignature;
     }
 
+    public int getFinalizedHeight() {
+        return finalizedHeight;
+    }
+
     public List<ConflictEndorsement> getConflictEndorsements() {
         return conflictEndorsements;
     }
@@ -43,7 +49,8 @@ public class FinalizationVoting {
         return "FinalizationVoting{" +
                 "endorserIndexes=" + endorserIndexes +
                 ", aggregatedEndorsementSignature=" + aggregatedEndorsementSignature +
-                ", conflictEndorsements=" + conflictEndorsements +
+                ", finalizedHeight=" + finalizedHeight +
+                (!conflictEndorsements.isEmpty() ? ", conflictEndorsements=" + conflictEndorsements : "") +
                 '}';
     }
 
@@ -54,11 +61,12 @@ public class FinalizationVoting {
         FinalizationVoting that = (FinalizationVoting) o;
         return Objects.equals(endorserIndexes, that.endorserIndexes) &&
                 Objects.equals(aggregatedEndorsementSignature, that.aggregatedEndorsementSignature) &&
+                Objects.equals(finalizedHeight, that.finalizedHeight) &&
                 Objects.equals(conflictEndorsements, that.conflictEndorsements);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endorserIndexes, aggregatedEndorsementSignature, conflictEndorsements);
+        return Objects.hash(endorserIndexes, aggregatedEndorsementSignature, finalizedHeight, conflictEndorsements);
     }
 }

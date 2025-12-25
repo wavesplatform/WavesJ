@@ -13,15 +13,18 @@ public class ConflictEndorsement {
     private final int endorserIndex;
     private final Base58String finalizedBlockId;
     private final BlsSignature signature;
+    private final int finalizedHeight;
 
     @JsonCreator
     public ConflictEndorsement(
             @JsonProperty("endorserIndex") int endorserIndex,
             @JsonProperty("finalizedBlockId") Id finalizedBlockId,
+            @JsonProperty("finalizedHeight") int finalizedHeight,
             @JsonProperty("signature") BlsSignature signature
     ) {
         this.endorserIndex = endorserIndex;
         this.finalizedBlockId = finalizedBlockId;
+        this.finalizedHeight = finalizedHeight;
         this.signature = signature;
     }
 
@@ -33,6 +36,10 @@ public class ConflictEndorsement {
         return finalizedBlockId;
     }
 
+    public int getFinalizedHeight() {
+        return finalizedHeight;
+    }
+
     public BlsSignature getSignature() {
         return signature;
     }
@@ -42,6 +49,7 @@ public class ConflictEndorsement {
         return "ConflictEndorsement{" +
                 "endorserIndex=" + endorserIndex +
                 ", finalizedBlockId=" + finalizedBlockId +
+                ", finalizedHeight=" + finalizedHeight +
                 ", signature=" + signature +
                 '}';
     }
@@ -53,11 +61,12 @@ public class ConflictEndorsement {
         ConflictEndorsement that = (ConflictEndorsement) o;
         return endorserIndex == that.endorserIndex &&
                 Objects.equals(finalizedBlockId, that.finalizedBlockId) &&
+                Objects.equals(finalizedHeight, that.finalizedHeight) &&
                 Objects.equals(signature, that.signature);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endorserIndex, finalizedBlockId, signature);
+        return Objects.hash(endorserIndex, finalizedBlockId, finalizedHeight, signature);
     }
 }

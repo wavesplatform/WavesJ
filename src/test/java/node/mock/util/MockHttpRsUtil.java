@@ -1,7 +1,6 @@
 package node.mock.util;
 
 import com.wavesplatform.wavesj.Node;
-import com.wavesplatform.wavesj.Profile;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
@@ -34,6 +33,16 @@ public class MockHttpRsUtil {
                 nodeMock.client().execute(
                         argThat(rq ->
                                 rq != null && rq.getURI().equals(nodeMock.uri().resolve("/blocks/at/" + height))
+                        )
+                )
+        ).thenReturn(createBasicRs(rsFilePath));
+    }
+
+    public static void mockGBlockHeadersRs(Node nodeMock, int height, String rsFilePath) throws IOException {
+        when(
+                nodeMock.client().execute(
+                        argThat(rq ->
+                                rq != null && rq.getURI().equals(nodeMock.uri().resolve("/blocks/headers/at/" + height))
                         )
                 )
         ).thenReturn(createBasicRs(rsFilePath));
