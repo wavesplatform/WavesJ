@@ -6,7 +6,7 @@
 
     <groupId>com.wavesplatform</groupId>
     <artifactId>wavesj</artifactId>
-    <version>1.6.3</version>
+    <version>1.6.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -197,7 +197,7 @@
         <dependency>
             <groupId>com.wavesplatform</groupId>
             <artifactId>waves-transactions</artifactId>
-            <version>1.2.6</version>
+            <version>1.2.7</version>
         </dependency>
 
         <!-- Compiler -->
@@ -218,7 +218,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.23</version>
+            <version>1.5.29</version>
         </dependency>
 
         <!-- util -->
@@ -238,7 +238,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.25.3</version>
+            <version>3.27.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
